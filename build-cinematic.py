@@ -7,6 +7,10 @@ Every version gets the same content: rates, EN/ES, booking quiz, deposit info, e
 """
 from pathlib import Path
 
+
+def wsrc(i):
+    return f"images/{i}.jpg" if i.startswith("studio/") else f"images/tiktok/{i}.jpg"
+
 ROOT = Path(__file__).resolve().parent
 GF = "https://fonts.googleapis.com/css2?family="
 
@@ -44,9 +48,9 @@ THEMES = {
         label="Fuego Wall", fonts="Anton&family=Inter:wght@400;500;600;700;800",
         hero="""<section class="hero hero--wall">
       <div class="wall" aria-hidden="true">
-        <div class="wall__row">""" + "".join(f'<img src="images/tiktok/{i}.jpg" alt="">' for i in ["7690698899966659871","7701768023165734175","7706334317819022622","7698151472164392223","7705145530703203614","7697746982508498207"] * 6) + """</div>
-        <div class="wall__row wall__row--rev">""" + "".join(f'<img src="images/tiktok/{i}.jpg" alt="">' for i in ["7683332505428102430","7700765015468559647","7698509898446818590","7701434503016811807","7704444897218039071","7690698899966659871"] * 6) + """</div>
-        <div class="wall__row">""" + "".join(f'<img src="images/tiktok/{i}.jpg" alt="">' for i in ["7706334317819022622","7697746982508498207","7701768023165734175","7705145530703203614","7698151472164392223","7700765015468559647"] * 6) + f"""</div>
+        <div class="wall__row">""" + "".join(f'<img src="{wsrc(i)}" alt="">' for i in ["7690698899966659871","7701768023165734175","7706334317819022622","studio/recording-drums-purple","7705145530703203614","studio/mixing-room"] * 6) + """</div>
+        <div class="wall__row wall__row--rev">""" + "".join(f'<img src="{wsrc(i)}" alt="">' for i in ["7683332505428102430","studio/recording-booth","7698509898446818590","7701434503016811807","studio/lounge","7690698899966659871"] * 6) + """</div>
+        <div class="wall__row">""" + "".join(f'<img src="{wsrc(i)}" alt="">' for i in ["7706334317819022622","7697746982508498207","7701768023165734175","studio/mixing-screens","studio/recording-room","7700765015468559647"] * 6) + f"""</div>
       </div>
       <div class="hero__shade"></div>
       <div class="hero__content">{HERO_CONTENT}
@@ -242,14 +246,8 @@ TEMPLATE = """<!doctype html>
       </div>
     </section>
 
-    <section class="block rooms" id="rooms">
-      <div class="block__head"><h2 data-es="Adentro del estudio">Inside the studio</h2></div>
-      <div class="rooms__tabs" role="tablist"><button class="rooms__tab" role="tab" aria-selected="true" aria-controls="room-mixing" data-room="mixing" data-es="Cuarto de mezcla">Mixing room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-recording" data-room="recording" data-es="Cuarto de grabación">Recording room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-rehearsal" data-room="rehearsal" data-es="Cuarto de ensayo">Rehearsal room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-podcast" data-room="podcast" data-es="Cuarto de podcast">Podcast room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-pool" data-room="pool" data-es="Sala de billar">Pool room</button></div>
-      <div class="rooms__grid" id="room-mixing" role="tabpanel" data-room="mixing"><button class="rooms__ph" aria-label="The mixing room (open larger)"><img src="images/studio/mixing-room.jpg" alt="The mixing room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Mixing a session (open larger)"><img src="images/studio/mixing-screens.jpg" alt="Mixing a session at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="The mixing desk (open larger)"><img src="images/studio/mixing-apollo.jpg" alt="The mixing desk at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Mixing desk and camera (open larger)"><img src="images/studio/mixing-desk.jpg" alt="Mixing desk and camera at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Back of the mixing room (open larger)"><img src="images/studio/lounge.jpg" alt="Back of the mixing room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-recording" role="tabpanel" data-room="recording" hidden><button class="rooms__ph" aria-label="Drum kit in the recording room (open larger)"><img src="images/studio/recording-room.jpg" alt="Drum kit in the recording room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Behind the kit, looking into the vocal booth (open larger)"><img src="images/studio/recording-drums.jpg" alt="Behind the kit, looking into the vocal booth at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Vocal mic in the booth (open larger)"><img src="images/studio/recording-booth.jpg" alt="Vocal mic in the booth at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Drum kit in the recording room, green lights (open larger)"><img src="images/studio/recording-drums-green.jpg" alt="Drum kit in the recording room, green lights at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Drum kit in the recording room, purple lights (open larger)"><img src="images/studio/recording-drums-purple.jpg" alt="Drum kit in the recording room, purple lights at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-rehearsal" role="tabpanel" data-room="rehearsal" hidden><button class="rooms__ph" aria-label="The rehearsal room (open larger)"><img src="images/studio/rehearsal-room.jpg" alt="The rehearsal room at SYNQ Studios, with a guitar and upright bass" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-podcast" role="tabpanel" data-room="podcast" hidden><button class="rooms__ph" aria-label="The podcast desk (open larger)"><img src="images/studio/podcast-front.jpg" alt="The podcast desk at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="The podcast room (open larger)"><img src="images/studio/podcast-desk.jpg" alt="The podcast room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-pool" role="tabpanel" data-room="pool" hidden><button class="rooms__ph" aria-label="The pool room (open larger)"><img src="images/studio/pool-1.jpg" alt="The pool room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Pool table (open larger)"><img src="images/studio/pool-2.jpg" alt="Pool table at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Pool room and podcast room (open larger)"><img src="images/studio/pool-3.jpg" alt="Pool room and podcast room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div>
-    </section>
-    <div class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo"><button class="lightbox__x" aria-label="Close">✕</button><button class="lightbox__nav lightbox__prev" aria-label="Previous">‹</button><img alt=""><button class="lightbox__nav lightbox__next" aria-label="Next">›</button></div>
 
-    <section class="block" id="how">
+    <section class="block block--photo" id="how">
       <div class="block__head"><h2 data-es="Cómo reservar">How booking works</h2></div>
       <ol class="steps">
         <li><h3 data-es="Escoge un horario">Pick a time</h3><p data-es="Reserva en línea, o mándanos un texto.">Book online, or send us a text.</p></li>
@@ -415,7 +413,6 @@ TEMPLATE = """<!doctype html>
   <script src="funnel.js"></script>
   <script src="motion.js"></script>
   <script src="egg.js"></script>
-  <script src="rooms.js"></script>
   <script>
     // Top bar turns solid after you scroll past the top of the hero
     (function () {{
@@ -563,7 +560,7 @@ print("built index.html  (live site:", t["label"] + ")")
 DIST = ROOT / "dist"
 if DIST.exists():
     shutil.rmtree(DIST)
-needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "rooms.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
+needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
 needed |= set(re.findall(r'(?:src|href|content)="(images/[^"]+)"', live)) | {"images/og-share.jpg"}
 for rel in sorted(needed):
     dest = DIST / rel
