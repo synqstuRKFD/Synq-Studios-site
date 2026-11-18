@@ -76,7 +76,10 @@ TEMPLATE = """<!doctype html>
   <title>Recording Studio in Rockford, IL | SYNQ Studios — Rockford · Chicago</title>
   <meta name="description" content="Recording studio in Rockford, IL. Vocal recording $50/hr, mixing $30, sierreño & norteño grupos $150/song, live music videos, reels and photo sessions. Se habla español. Book online.">
   <meta property="og:title" content="SYNQ Studios 🏆 Rockford · Chicago">
-  <meta property="og:image" content="images/synq-logo.jpg">
+  <meta property="og:image" content="images/og-share.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="images/synq-logo.jpg">
   <link href="{gf}{fonts}&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="layouts/base.css">
@@ -505,8 +508,8 @@ def seo(page):
                 f'  <link rel="alternate" hreflang="es" href="{u}/es.html">\n'
                 f'  <link rel="alternate" hreflang="x-default" href="{u}/">\n'
                 f'  <meta property="og:url" content="{u}/" data-es-content="{u}/es.html">\n')
-        page = page.replace('  <meta property="og:image" content="images/synq-logo.jpg">',
-                            head + f'  <meta property="og:image" content="{u}/images/synq-logo.jpg">')
+        page = page.replace('  <meta property="og:image" content="images/og-share.jpg">',
+                            head + f'  <meta property="og:image" content="{u}/images/og-share.jpg">')
     # Keep markup inside data-es attributes escaped (cleaner HTML for crawlers)
     page = re.sub(r'data-es="([^"]*)"', lambda m: 'data-es="' + m.group(1).replace("<", "&lt;").replace(">", "&gt;") + '"', page)
     # Empty heading filled by JS → plain text
