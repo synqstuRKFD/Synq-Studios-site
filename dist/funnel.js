@@ -2,6 +2,20 @@
 
 // Fire a conversion event to whatever analytics is installed (GA4 / Meta Pixel / TikTok Pixel).
 // Nothing is sent anywhere until you add those tags to the page.
+function goatEvent(e) {
+  if (e.startsWith('square_')) return ['book-square', 'Tapped Book (Square)'];
+  if (e === 'text_open_box') return ['text-open', 'Opened the Text us box'];
+  if (e === 'sms_ready') return ['text-sent', 'Sent a text (gave their name)'];
+  if (e === 'lead') return ['quote-sent', 'Sent a quote request'];
+  if (e === 'quiz_start') return ['quote-started', 'Started the quote form'];
+  if (e === 'directions') return ['directions', 'Tapped Get directions'];
+  if (e === 'text_list_join') return ['text-list', 'Joined the text list'];
+  if (e === 'ep_listen' || e === 'ep_cover') return ['ep-listen', 'Opened the Los Serenos EP'];
+  if (e === 'hero_tour' || e === 'tour_video') return ['tour-video', 'Watched the studio tour'];
+  if (e === 'tour_book') return ['tour-visit', 'Asked to visit the studio'];
+  return null;
+}
+
 function track(event, data = {}) {
   try {
     window.dataLayer = window.dataLayer || [];
@@ -9,6 +23,9 @@ function track(event, data = {}) {
     if (window.gtag) window.gtag('event', event, data);
     if (window.fbq) window.fbq('trackCustom', event, data);
     if (window.ttq) window.ttq.track(event, data);
+    // GoatCounter (synqstudiosrkfd.goatcounter.com): count the actions that matter, grouped by type
+    const gc = goatEvent(event);
+    if (gc && window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: gc[0], title: gc[1], event: true });
   } catch (e) { /* analytics must never break the page */ }
 }
 document.querySelectorAll('[data-track]').forEach(el =>

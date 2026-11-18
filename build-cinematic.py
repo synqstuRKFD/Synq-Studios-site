@@ -408,6 +408,7 @@ TEMPLATE = """<!doctype html>
   </dialog>
   <dialog class="player" aria-label="Video player"><button class="player__close" aria-label="Close video">✕</button><div class="player__frame"></div></dialog>
   {switcher}
+  <script data-goatcounter="https://synqstudiosrkfd.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <script src="i18n.js"></script>
   <script src="script.js"></script>
   <script src="funnel.js"></script>
@@ -608,6 +609,7 @@ NOT_FOUND = """<!doctype html>
     .nf p.muted { max-width: 520px; margin: 0 auto .4rem; }
     .nf .hero__cta { justify-content: center; margin-top: 1.8rem; }
   </style>
+<script data-goatcounter="https://synqstudiosrkfd.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body class="cine cine--fuego">
   <header class="top solid">
