@@ -110,11 +110,11 @@ TEMPLATE = """<!doctype html>
     <section class="block" id="services">
       <h2 class="block__title" data-es="Servicios">Services</h2>
       <ol class="svc">
-        <li><h3 data-es="Grabación de voz">Vocal Recording</h3><p data-es="Para raperos, cantantes y artistas grabando sobre su beat.">For rappers, singers and artists recording over their beat.</p><span class="price" data-es="$50/hora">$50/hr</span></li>
+        <li><h3 data-es="Grabación de voz">Vocal Recording</h3><p data-es="Para raperos, cantantes y artistas grabando sobre su beat. La mezcla y el master van incluidos si sobra tiempo en tu sesión.">For rappers, singers and artists recording over their beat. Mix and master included if time remains in your session.</p><span class="price" data-es="$50/hora">$50/hr</span></li>
         <li><h3 data-es="Mezcla y master">Mix &amp; Master</h3><p data-es="Grabado aquí o en otro lado. Master $20.">Recorded here or anywhere. Mastering $20.</p><span class="price" data-es="$30/canción">$30/song</span></li>
         <li><h3 data-es="Bandas y grupos en estudio">Band &amp; Grupo Recording</h3><p data-es="Toda la banda en el estudio, cualquier género. Hasta 4 horas por canción.">Your whole band in the studio, any genre. Up to 4 hours a song.</p><span class="price" data-es="$150/canción">$150/song</span></li>
-        <li><h3 data-es="Grabación en vivo">Live Recording</h3><p data-es="Tu banda grabada en vivo, en el estudio o donde toquen.">Your band recorded live, in the studio or wherever you play.</p><span class="price" data-es="$120/canción">$120/song</span></li>
-        <li><h3 data-es="Videos musicales en vivo">Live Music Videos</h3><p data-es="Multicámara, como nuestras sesiones En Vivo.">Multi-cam, like our En Vivo sessions.</p><span class="price">$250</span></li>
+        <li><h3 data-es="Grabación en vivo">Live Recording</h3><p data-es="Tu banda grabada en vivo, en el estudio o donde toquen. Hasta 4 horas por canción.">Your band recorded live, in the studio or wherever you play. Up to 4 hours a song.</p><span class="price" data-es="$120/canción">$120/song</span></li>
+        <li><h3 data-es="Videos musicales en vivo">Live Music Videos</h3><p data-es="Multicámara, como nuestras sesiones En Vivo. Sesión de 2 horas.">Multi-cam, like our En Vivo sessions. 2-hour session.</p><span class="price">$250</span></li>
         <li><h3 data-es="Reels y fotos">Reels &amp; Photos</h3><p data-es="Reel $50 · sesión de fotos de 1 hora $100.">Reels $50 · 1-hour photo session $100.</p><span class="price" data-es="desde $50">from $50</span></li>
       </ol>
       <p class="also" data-es="También hacemos sonido en vivo para eventos, grabación de podcast y renta del cuarto de ensayo. Pregunta por precio.">We also do live sound for events, podcast recording and rehearsal room rentals. Ask for pricing.</p>
@@ -129,10 +129,11 @@ TEMPLATE = """<!doctype html>
         <article class="rate">
           <header><h3 data-es="Sesiones de voz">Vocal sessions</h3></header>
           <ul>
-            <li><div><b data-es="Voces · 1 hora">Vocals · 1 hour</b></div><span class="rate__price">$50</span></li>
-            <li><div><b data-es="Voces · 2+ horas">Vocals · 2+ hours</b><small data-es="Cada hora a $40">Every hour at $40</small></div><span class="rate__price" data-es="$40<small>/hora</small>">$40<small>/hr</small></span></li>
-            <li><div><b data-es="Mezcla">Mixing</b></div><span class="rate__price" data-es="$30<small>/canción</small>">$30<small>/song</small></span></li>
+            <li><div><b data-es="Voces · 1 hora">Vocals · 1 hour</b><small data-es="Mezcla y master incluidos si sobra tiempo">Mix and master included if time remains</small></div><span class="rate__price">$50</span></li>
+            <li><div><b data-es="Voces · 2+ horas">Vocals · 2+ hours</b><small data-es="Mínimo 2 horas, cada hora a $40">2-hour minimum, every hour at $40</small></div><span class="rate__price" data-es="$40<small>/hora</small>">$40<small>/hr</small></span></li>
+            <li><div><b data-es="Mezcla">Mixing</b><small data-es="Grabado aquí o en otro lado">Recorded here or anywhere</small></div><span class="rate__price" data-es="$30<small>/canción</small>">$30<small>/song</small></span></li>
             <li><div><b data-es="Master">Mastering</b></div><span class="rate__price" data-es="$20<small>/canción</small>">$20<small>/song</small></span></li>
+            <li><div><b data-es="Mezcla y master después de tu sesión">Mix and master after your session</b><small data-es="Si se acabó el tiempo de tu sesión de voz">If your vocal session ran out of time</small></div><span class="rate__price" data-es="$20<small>/canción</small>">$20<small>/song</small></span></li>
           </ul>
           <a href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" class="btn btn--block" data-track="square_vocals" data-es="Reservar voces">Book vocals</a>
         </article>
@@ -141,7 +142,9 @@ TEMPLATE = """<!doctype html>
           <ul>
             <li><div><b data-es="Canción en estudio">Studio song</b><small data-es="Hasta 4 horas · luego $40/hora">Up to 4 hours · then $40/hr</small></div><span class="rate__price" data-es="$150<small>/canción</small>">$150<small>/song</small></span></li>
             <li><div><b data-es="Canción en vivo">Live song</b><small data-es="Hasta 4 horas · luego $40/hora">Up to 4 hours · then $40/hr</small></div><span class="rate__price" data-es="$120<small>/canción</small>">$120<small>/song</small></span></li>
-            <li><div><b data-es="Viaje y montaje">Travel &amp; setup</b><small data-es="Si montamos en tu lugar o manejamos 45+ min">If we set up on location or drive 45+ min</small></div><span class="rate__price">$100</span></li>
+            <li><div><b data-es="Hora extra">Extra studio hour</b><small data-es="Después del tiempo incluido">After the included time</small></div><span class="rate__price" data-es="$40<small>/hora</small>">$40<small>/hr</small></span></li>
+            <li><div><b data-es="Viaje">Travel</b><small data-es="Si el camino es de más de 45 min">If the drive is over 45 minutes</small></div><span class="rate__price">$50</span></li>
+            <li><div><b data-es="Instalación de equipo">Equipment setup</b><small data-es="Para grabar fuera del estudio">For recording outside the studio</small></div><span class="rate__price">$50</span></li>
           </ul>
           <a href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" class="btn btn--block" data-track="square_grupo" data-es="Reservar banda o grupo">Book a band session</a>
           <button class="rate__quote" data-pick="Grupo studio song" data-track="rate_grupo_quote" data-es="¿Varias canciones o necesitas que viajemos? Pide cotización">Several songs, or need us to travel? Ask for a quote</button>
@@ -156,6 +159,7 @@ TEMPLATE = """<!doctype html>
           <a href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" class="btn btn--block" data-track="square_video" data-es="Reservar video o fotos">Book video or photos</a>
         </article>
       </div>
+      <p class="rates__note" data-es="Fuera del estudio (grabaciones en vivo y videos) puede aplicar un cargo por la locación, o si necesitas que busquemos una. Te avisamos antes de tu sesión.">Recording outside the studio (live songs and videos) may add a location fee, or a fee if you need us to find a spot. We'll let you know before your session.</p>
       <div class="pay"><span class="pay__label" data-es="Depósito por">Deposits by</span><span class="pay__chip">Zelle</span><span class="pay__chip">Cash App</span><span class="pay__chip">Apple Pay</span><span class="pay__chip" data-es="Efectivo">Cash</span></div>
       <p class="rates__note" data-es="¿Necesitas algo que no está aquí? <a href='#book' class='js-text'>Mándanos un texto</a>.">Need something that isn't listed? <a href="#book" class="js-text">Send us a text</a>.</p>
     </section>
@@ -248,10 +252,10 @@ TEMPLATE = """<!doctype html>
       <div class="block__head"><h2 data-es="Preguntas frecuentes">Common questions</h2></div>
       <div class="faq">
         <details><summary data-es="¿Qué tipo de música graban?">What kind of music do you record?</summary><p data-es="Cualquier género. Raperos, cantantes, bandas y grupos graban aquí. Hemos grabado a más de 50 bandas y artistas, incluyendo a Los Serenos, que vinieron desde California a grabar su EP en vivo.">Any genre. Rappers, singers, bands and grupos all record here. We've recorded 50+ bands and artists, including Los Serenos, who came from California to record their live EP.</p></details>
-        <details><summary data-es="¿Cuánto cuesta?">How much does it cost?</summary><p data-es="Voces $50 la hora ($40/hora si son 2+ horas). Mezcla $30 y master $20 por canción. Grupos: $150 por canción en estudio o $120 en vivo, cada una con hasta 4 horas (luego $40/hora). Video musical en vivo $250, reels $50, fotos $100.">Vocals are $50 an hour ($40/hr when you book 2+ hours). Mixing $30 and mastering $20 a song. Grupos: $150 a studio song or $120 a live song, each with up to 4 hours (then $40/hr). Live music videos $250, reels $50, photo sessions $100.</p></details>
+        <details><summary data-es="¿Cuánto cuesta?">How much does it cost?</summary><p data-es="Voces $50 por 1 hora, o $40/hora con mínimo de 2 horas. La mezcla y el master van incluidos si sobra tiempo; si no, $20 por canción después de la sesión. Mezcla sola $30 y master $20 por canción. Bandas y grupos: $150 por canción en estudio o $120 en vivo, hasta 4 horas cada una; la hora extra es $40. Video musical en vivo $250, reel $50, sesión de fotos $100.">Vocals are $50 for 1 hour, or $40/hr with a 2-hour minimum. Mix and master is included if time remains; if not, it's $20 a song after the session. Mixing on its own is $30 and mastering $20 a song. Bands and grupos: $150 a studio song or $120 a live song, up to 4 hours each; extra hours are $40. Live music videos $250, reels $50, photo sessions $100.</p></details>
         <details><summary data-es="¿Necesito dejar depósito?">Do I need a deposit?</summary><p data-es="Sí, el 25% aparta tu fecha. Por ejemplo, una canción de grupo de $150 lleva $37.50 de depósito. Zelle, Cash App, Apple Pay o efectivo.">Yes, 25% locks in your date. For example, a $150 grupo song takes a $37.50 deposit. Zelle, Cash App, Apple Pay or cash.</p></details>
         <details><summary data-es="¿Hablan español?">Do you speak Spanish?</summary><p data-es="Sí. Trabajamos con clientes en español e inglés.">Yes. We work with clients in Spanish and English.</p></details>
-        <details><summary data-es="¿Van a donde estemos?">Do you travel?</summary><p data-es="Sí. Si montamos equipo en tu lugar o manejamos más de 45 minutos, hay un cargo de $100 por viaje y montaje.">Yes. If we set up on location or drive more than 45 minutes, there's a $100 travel &amp; setup fee.</p></details>
+        <details><summary data-es="¿Van a donde estemos?">Do you travel?</summary><p data-es="Sí, para grabaciones en vivo y videos. Viaje $50 si el camino es de más de 45 minutos, e instalación de equipo $50. Puede aplicar un cargo por la locación; te avisamos antes de tu sesión.">Yes, for live recordings and videos. Travel is $50 if the drive is over 45 minutes, and equipment setup is $50. A location fee may apply; we'll let you know before your session.</p></details>
         <details><summary data-es="¿Mezclan canciones grabadas en otro lado?">Can you mix a song recorded somewhere else?</summary><p data-es="Sí. Mezcla $30, master $20.">Yes. Mixing $30, mastering $20.</p></details>
         <details><summary data-es="¿Dónde están?">Where are you located?</summary><p data-es="En el 4040 Charles St, Rockford, IL 61108. También trabajamos con artistas en el área de Chicago.">4040 Charles St, Rockford, IL 61108. We also work with artists across the Chicago area.</p></details>
       </div>
@@ -437,12 +441,12 @@ DESC_EN = ("Recording studio in Rockford, IL for any artist. Vocals $50/hr, mixi
 DESC_ES = ("Estudio de grabación en Rockford, IL para cualquier artista. Voces $50/hora, mezcla $30, "
            "grabación de bandas, videos en vivo y fotos. Reserva en línea.")
 
-SERVICES = [  # (name, price, unit) for the price info Google reads
-    ("Vocal recording (1 hour)", "50", "hour"), ("Vocal recording (2+ hours)", "40", "hour"),
-    ("Mixing", "30", "song"), ("Mastering", "20", "song"),
-    ("Grupo studio song (up to 4 hours)", "150", "song"), ("Grupo live song (up to 4 hours)", "120", "song"),
-    ("Travel & setup", "100", None), ("Live music video", "250", None), ("Reel", "50", None),
-    ("Photo session (1 hour)", "100", None),
+SERVICES = [  # (name, price, unit) for the price info Google reads. Keep in sync with Square.
+    ("Vocal session (1 hour)", "50", "hour"), ("Vocal session (2+ hours, 2-hour minimum)", "40", "hour"),
+    ("Mix and master after a vocal session", "20", "song"), ("Mixing", "30", "song"), ("Mastering", "20", "song"),
+    ("Band / grupo studio song (up to 4 hours)", "150", "song"), ("Band / grupo live song (up to 4 hours)", "120", "song"),
+    ("Extra studio hour", "40", "hour"), ("Travel (drive over 45 minutes)", "50", None), ("Equipment setup", "50", None),
+    ("Live music video", "250", None), ("Reel", "50", None), ("Photo session (1 hour)", "100", None),
 ]
 
 
