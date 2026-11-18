@@ -82,8 +82,10 @@ on run
 	do shell script "/usr/bin/osascript -l JavaScript " & quoted form of (base & "fetch.js") & " >/dev/null 2>&1 &"
 	try
 		my showWindow(base)
-	on error errMsg
-		-- If the app window can't be made, fall back to the browser
+	on error errMsg number errNum
+		-- If the app window can't be made, say why (and save it), then fall back to the browser
+		do shell script "echo " & quoted form of ((current date) as text & " | " & errNum & " | " & errMsg) & " >> " & quoted form of (base & "app-errors.log")
+		display dialog "The dashboard window couldn't open, so it will open in your browser instead." & return & return & "Send this to Claude:" & return & errMsg & " (" & errNum & ")" buttons {"OK"} default button 1 with title "SYNQ Dashboard" with icon caution
 		do shell script "open " & quoted form of (base & "dashboard.html")
 		quit
 	end try
@@ -91,11 +93,11 @@ end run
 
 on showWindow(base)
 	set ca to current application
-	set frame to ca's NSMakeRect(0, 0, 1360, 900)
+	set frame to {{0, 0}, {1360, 900}}
 	set theWindow to ca's NSWindow's alloc()'s initWithContentRect:frame styleMask:15 backing:2 defer:false
 	theWindow's setTitle:"SYNQ Dashboard"
 	theWindow's setReleasedWhenClosed:false
-	theWindow's setMinSize:(ca's NSMakeSize(760, 560))
+	theWindow's setMinSize:{760, 560}
 	theWindow's setTitlebarAppearsTransparent:true
 	theWindow's setBackgroundColor:(ca's NSColor's colorWithRed:0.027 green:0.016 blue:0.016 alpha:1.0)
 	try
@@ -114,7 +116,7 @@ on showWindow(base)
 	set dirURL to ca's NSURL's fileURLWithPath:base
 	theWeb's loadFileURL:pageURL allowingReadAccessToURL:dirURL
 	theWindow's makeKeyAndOrderFront:me
-	ca's NSApp's activateIgnoringOtherApps:true
+	ca's NSApplication's sharedApplication()'s activateIgnoringOtherApps:true
 	set theTimer to ca's NSTimer's scheduledTimerWithTimeInterval:0.4 target:me selector:"tick:" userInfo:(missing value) repeats:true
 end showWindow
 
@@ -123,7 +125,7 @@ on tick:t
 	if theWindow is missing value then return
 	if not ((theWindow's isVisible()) as boolean) and not ((theWindow's isMiniaturized()) as boolean) then
 		theTimer's invalidate()
-		current application's NSApp's terminate:(missing value)
+		current application's NSApplication's sharedApplication()'s terminate:(missing value)
 		return
 	end if
 	set u to theWeb's |URL|()
