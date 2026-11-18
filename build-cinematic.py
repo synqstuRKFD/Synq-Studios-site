@@ -577,6 +577,9 @@ if SITE_URL:
             for path in ("", "es.html"))
         + "</urlset>\n")
 (DIST / "robots.txt").write_text(robots)
+# GitHub Pages: custom domain + serve files as-is (no Jekyll processing)
+(DIST / "CNAME").write_text("synqstudios815.com\n")
+(DIST / ".nojekyll").write_text("")
 # Small marker so you can check which version is live: https://synqstudios815.com/version.txt
 import datetime as _dt
 (DIST / "version.txt").write_text(f"SYNQ Studios website, last updated {_dt.datetime.now(_dt.timezone.utc):%Y-%m-%d %H:%M} UTC\n")
