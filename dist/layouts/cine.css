@@ -325,3 +325,26 @@ img.fade.loaded { opacity: 1; }
 .textdlg__close { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: none; color: var(--text); cursor: pointer; }
 .textdlg__err { color: #ff7a6b; font-size: .88rem; min-height: 1.1em; }
 @media (prefers-reduced-motion: reduce) { .textdlg[open] { animation: none; } }
+
+/* ===== Easter egg: asleep on the studio couch ===== */
+.egg-z { background: none; border: 0; padding: 0 .2em; font: italic 600 .8rem/1 var(--font-body); color: var(--muted); opacity: .28; cursor: pointer; transition: opacity .3s; }
+.egg-z:hover, .egg-z:focus-visible { opacity: .9; }
+.egg { width: min(640px, 94vw); padding: 0; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); }
+.egg::backdrop { background: rgba(0,0,0,.75); backdrop-filter: blur(4px); }
+.egg[open] { animation: dlgIn .35s var(--ease, ease); }
+.egg__card { position: relative; padding: 1.6rem; text-align: center; }
+.egg__card h3 { margin: 0 0 1rem; font-size: clamp(1.2rem, 3.4vw, 1.6rem); }
+.egg__close { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: none; color: var(--text); cursor: pointer; }
+.egg__scene { position: relative; background: #f4f1ec; border-radius: calc(var(--radius) - 2px); padding: 2.4rem 1rem .6rem; overflow: hidden; }
+.egg__sleeper { width: 100%; height: auto; display: block; transform-origin: 50% 90%; }
+.egg__sleeper--nudge { animation: nudge .45s var(--ease, ease); }
+@keyframes nudge { 25% { transform: rotate(-1.2deg) translateY(-2px); } 60% { transform: rotate(.8deg); } }
+.egg__z { position: absolute; left: 33%; top: 12%; z-index: 1; font: italic 700 1.4rem/1 var(--font-body); color: #3a3a3a; opacity: 0; animation: zfloat 3s ease-in infinite; }
+.egg__z--2 { animation-delay: 1s; left: 35%; font-size: 1.7rem; }
+.egg__z--3 { animation-delay: 2s; left: 37%; font-size: 2.1rem; }
+@keyframes zfloat { 0% { opacity: 0; transform: translate(0, 0); } 20% { opacity: .9; } 100% { opacity: 0; transform: translate(40px, -70px) rotate(10deg); } }
+.egg__msg { margin: 1rem 0 .8rem; min-height: 1.5em; font-weight: 600; }
+.egg__actions { display: flex; justify-content: center; gap: .6rem; }
+.egg__actions [hidden] { display: none; }
+.egg__count { margin: .7rem 0 0; min-height: 1.2em; }
+@media (prefers-reduced-motion: reduce) { .egg__z, .egg__sleeper--nudge, .egg[open] { animation: none; } .egg__z { opacity: .7; } }

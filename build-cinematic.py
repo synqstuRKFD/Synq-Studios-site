@@ -361,7 +361,7 @@ TEMPLATE = """<!doctype html>
   </main>
 
   <footer class="foot">
-    <span>© <span id="year"></span> SYNQ Studios · <a href="https://www.google.com/maps/search/?api=1&amp;query=4040+Charles+St%2C+Rockford%2C+IL+61108" target="_blank" rel="noopener">4040 Charles St, Rockford, IL 61108</a></span>
+    <span><button type="button" class="egg-z" aria-label="Shh…" title="">z</button> © <span id="year"></span> SYNQ Studios · <a href="https://www.google.com/maps/search/?api=1&amp;query=4040+Charles+St%2C+Rockford%2C+IL+61108" target="_blank" rel="noopener">4040 Charles St, Rockford, IL 61108</a></span>
     <span><a href="es.html" hreflang="es" data-es="English version" data-es-href="./">Versión en español</a> · <a href="https://www.instagram.com/synq.studios/" target="_blank" rel="noopener">Instagram</a> · <a href="https://www.tiktok.com/@synqstudios" target="_blank" rel="noopener">TikTok</a> · <a href="https://www.youtube.com/@SynqStudios" target="_blank" rel="noopener">YouTube</a></span>
   </footer>
 
@@ -381,12 +381,30 @@ TEMPLATE = """<!doctype html>
       <button type="submit" class="btn btn--block" data-track="sms_open" data-es="Abrir mensaje">Open text message</button>
     </form>
   </dialog>
+  <dialog class="egg" aria-labelledby="egg-title">
+    <div class="egg__card">
+      <button type="button" class="egg__close" aria-label="Close">✕</button>
+      <p class="kicker" data-es="Lo encontraste">You found him</p>
+      <h3 id="egg-title" data-es="Shh… alguien está dormido en el estudio.">Shh… someone's asleep in the studio.</h3>
+      <div class="egg__scene">
+        <span class="egg__z egg__z--1">z</span><span class="egg__z egg__z--2">z</span><span class="egg__z egg__z--3">Z</span>
+        <img class="egg__sleeper" src="images/easter-sleeper.webp" alt="" width="1000" height="439" loading="lazy">
+      </div>
+      <p class="egg__msg" aria-live="polite"></p>
+      <div class="egg__actions">
+        <button type="button" class="btn egg__wake" data-es="Despiértalo">Wake him up</button>
+        <a class="pill egg__book" hidden href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" data-track="egg_book" data-es="Reserva tu propia sesión">Book your own session</a>
+      </div>
+      <p class="egg__count muted small"></p>
+    </div>
+  </dialog>
   <dialog class="player" aria-label="Video player"><button class="player__close" aria-label="Close video">✕</button><div class="player__frame"></div></dialog>
   {switcher}
   <script src="i18n.js"></script>
   <script src="script.js"></script>
   <script src="funnel.js"></script>
   <script src="motion.js"></script>
+  <script src="egg.js"></script>
   <script>
     // Top bar turns solid after you scroll past the top of the hero
     (function () {{
@@ -534,7 +552,7 @@ print("built index.html  (live site:", t["label"] + ")")
 DIST = ROOT / "dist"
 if DIST.exists():
     shutil.rmtree(DIST)
-needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
+needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
 needed |= set(re.findall(r'(?:src|href)="(images/[^"]+)"', live))
 for rel in sorted(needed):
     dest = DIST / rel
