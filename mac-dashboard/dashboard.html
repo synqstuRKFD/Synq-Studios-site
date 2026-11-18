@@ -73,15 +73,33 @@
   .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
   @media (max-width: 900px) { .three { grid-template-columns: 1fr; } }
   footer { margin-top: 40px; color: var(--dim); font-size: .8rem; }
+
+  /* Floating, spinning 3D logo: a stack of layers gives the mark real thickness */
+  .brand { display: flex; align-items: center; gap: 22px; }
+  .logo3d { position: relative; width: 104px; height: 128px; perspective: 700px; flex: 0 0 auto; animation: float 4.5s ease-in-out infinite; }
+  .logo3d__spin { position: absolute; inset: 0 0 14px; transform-style: preserve-3d; animation: spin 9s linear infinite; }
+  .logo3d__spin img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; backface-visibility: visible; }
+  .logo3d__spin img.face { filter: drop-shadow(0 0 10px rgba(255,90,60,.55)); }
+  .logo3d__shadow { position: absolute; left: 18%; right: 18%; bottom: -4px; height: 12px; border-radius: 50%; background: radial-gradient(rgba(255,59,31,.45), transparent 70%); animation: shadow 4.5s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotateY(360deg); } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+  @keyframes shadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(.75); opacity: .55; } }
+  @media (prefers-reduced-motion: reduce) { .logo3d, .logo3d__spin, .logo3d__shadow { animation: none; } .logo3d__spin { transform: rotateY(-20deg); } }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div>
-      <h1>SYNQ <span>Dashboard</span></h1>
-      <div class="updated" id="updated">Loading…</div>
+    <div class="brand">
+      <div class="logo3d" aria-hidden="true">
+        <div class="logo3d__spin" id="logo3d"></div>
+        <div class="logo3d__shadow"></div>
+      </div>
+      <div>
+        <h1>SYNQ <span>Dashboard</span></h1>
+        <div class="updated" id="updated">Loading…</div>
+      </div>
     </div>
     <nav class="links" aria-label="Open your accounts">
       <a href="https://squareup.com/dashboard" target="_blank">Square ↗</a>
@@ -100,9 +118,9 @@
 </div>
 <div class="tip" id="tip"></div>
 
-<script src="data.js"></script>
+<script id="data-src" src="data.js"></script>
 <script>
-(function () {
+function render() {
   const D = window.SYNQ;
   const app = document.getElementById('app');
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -220,9 +238,34 @@
     el.addEventListener('mousemove', e => { tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY - 36) + 'px'; });
     el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
   });
+}
+render();
+
+// Build the 3D logo: thin dark-red layers for the edge, white faces front and back
+(function () {
+  const spin = document.getElementById('logo3d');
+  const depth = 14;
+  for (let i = 0; i < depth; i++) {
+    const z = (i - (depth - 1) / 2) * 1.1;
+    const img = new Image();
+    img.src = (i === 0 || i === depth - 1) ? 'logo.png' : 'logo-edge.png';
+    if (i === 0 || i === depth - 1) img.className = 'face';
+    img.style.transform = 'translateZ(' + z + 'px)';
+    spin.appendChild(img);
+  }
 })();
-// Pick up fresh numbers every 2 minutes (the Mac refreshes them every 15)
-setTimeout(() => location.reload(), 120000);
+
+// Pick up fresh numbers every 2 minutes without reloading the page
+// (the Mac refreshes data.js every 15 minutes in the background)
+setInterval(() => {
+  const old = document.getElementById('data-src');
+  const s = document.createElement('script');
+  s.id = 'data-src';
+  s.src = 'data.js?t=' + Date.now();
+  s.onload = () => { const y = scrollY; render(); scrollTo(0, y); };
+  if (old) old.remove();
+  document.body.appendChild(s);
+}, 120000);
 </script>
 </body>
 </html>

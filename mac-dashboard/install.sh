@@ -39,7 +39,7 @@ fi
 
 say "Installing SYNQ Dashboard…"
 mkdir -p "$DIR" "$APPS" "$HOME/Library/LaunchAgents"
-for f in fetch.js dashboard.html icon.png .env.example; do
+for f in fetch.js dashboard.html icon.png logo.png logo-edge.png .env.example; do
   curl -fsSL "$RAW/$f?$(date +%s)" -o "$DIR/$f"
 done
 # Private keys file: created once from the template, only you can read it
@@ -56,7 +56,36 @@ on run
 end run
 APPLESCRIPT
 
-# ---- "SYNQ Dashboard" app: asks for keys the first time, refreshes the numbers, opens the page
+# ---- "SYNQ Dashboard" app: asks for keys the first time, refreshes the numbers, then shows the
+# dashboard in its own window (a Chrome app window with no tabs or address bar). If that window is
+# already open, it's brought to the front and refreshed instead of opening a second one.
+PAGE_URL="file://$(printf '%s' "$DIR/dashboard.html" | sed 's/ /%20/g')"
+if open -Ra "Google Chrome" >/dev/null 2>&1; then
+  SHOW_WINDOW=$(cat <<SHOW
+	set pageURL to "$PAGE_URL"
+	set found to false
+	if application "Google Chrome" is running then
+		try
+			tell application "Google Chrome"
+				repeat with w in windows
+					if (URL of active tab of w) starts with pageURL then
+						tell active tab of w to reload
+						set index of w to 1
+						activate
+						set found to true
+						exit repeat
+					end if
+				end repeat
+			end tell
+		end try
+	end if
+	if not found then do shell script "open -na 'Google Chrome' --args --app=" & quoted form of pageURL & " --window-size=1320,900"
+SHOW
+)
+else
+  SHOW_WINDOW='	do shell script "open " & quoted form of (base & "dashboard.html")'
+fi
+
 cat > "$DIR/main.applescript" <<APPLESCRIPT
 on run
 	set base to POSIX path of (path to home folder) & "Library/Application Support/SYNQ Dashboard/"
@@ -70,7 +99,7 @@ on run
 	try
 		do shell script "/usr/bin/osascript -l JavaScript " & quoted form of (base & "fetch.js")
 	end try
-	do shell script "open " & quoted form of (base & "dashboard.html")
+$SHOW_WINDOW
 end run
 APPLESCRIPT
 
