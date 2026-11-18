@@ -556,7 +556,7 @@ DIST = ROOT / "dist"
 if DIST.exists():
     shutil.rmtree(DIST)
 needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
-needed |= set(re.findall(r'(?:src|href)="(images/[^"]+)"', live))
+needed |= set(re.findall(r'(?:src|href|content)="(images/[^"]+)"', live)) | {"images/og-share.jpg"}
 for rel in sorted(needed):
     dest = DIST / rel
     dest.parent.mkdir(parents=True, exist_ok=True)
