@@ -348,3 +348,9 @@ img.fade.loaded { opacity: 1; }
 .egg__actions [hidden] { display: none; }
 .egg__count { margin: .7rem 0 0; min-height: 1.2em; }
 @media (prefers-reduced-motion: reduce) { .egg__z, .egg__sleeper--nudge, .egg[open] { animation: none; } .egg__z { opacity: .7; } }
+
+.egg button, .egg a, .brand { touch-action: manipulation; }
+.egg__card { user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.egg__wake:disabled { opacity: .55; cursor: default; filter: none; transform: none; }
+.egg__after { margin: 1rem 0 0; min-height: 3rem; }
+.egg__after [hidden] { display: none; }

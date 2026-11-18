@@ -22,10 +22,13 @@
     taps = 0;
     msg.textContent = t('Think you can wake him up?', '¿Crees que lo puedes despertar?');
     count.textContent = '';
-    wake.hidden = false; book.hidden = true;
+    wake.hidden = false; wake.disabled = false; book.hidden = true;
+    wake.textContent = t('Wake him up', 'Despiértalo');
   }
+  let openedAt = 0;
   function open(from) {
-    if (dlg.open) return;
+    if (dlg.open || Date.now() - openedAt < 1200) return;
+    openedAt = Date.now();
     reset();
     dlg.showModal();
     if (window.dataLayer) window.dataLayer.push({ event: 'easter_egg', from });
@@ -41,11 +44,14 @@
       msg.textContent = t('He wins. He\'s off the clock. Book your own session while he rests.',
                           'Él gana. Ya salió de turno. Reserva tu propia sesión mientras descansa.');
       count.textContent = '';
-      wake.hidden = true; book.hidden = false;
+      // The wake button stays where it is (disabled), so leftover fast taps hit nothing.
+      wake.disabled = true;
+      wake.textContent = t('He wins', 'Él gana');
+      setTimeout(() => { book.hidden = false; }, 500);
     }
   });
   dlg.querySelector('.egg__close').addEventListener('click', () => dlg.close());
-  dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+  // No tap-outside-to-close: people tap a lot in this game, so only the ✕ (or Esc) closes it.
 
   // Trigger 1: the faint "z" in the footer
   const z = document.querySelector('.egg-z');
@@ -54,7 +60,8 @@
   // Trigger 2: tap the logo 5 times within 2 seconds
   const logo = document.querySelector('.brand');
   let hits = [];
-  if (logo) logo.addEventListener('click', () => {
+  if (logo) logo.addEventListener('click', e => {
+    if (dlg.open) return;
     const now = Date.now();
     hits = hits.filter(h => now - h < 2000).concat(now);
     if (hits.length >= 5) { hits = []; open('logo'); }

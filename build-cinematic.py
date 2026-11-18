@@ -392,10 +392,10 @@ TEMPLATE = """<!doctype html>
       </div>
       <p class="egg__msg" aria-live="polite"></p>
       <div class="egg__actions">
-        <button type="button" class="btn egg__wake" data-es="Despiértalo">Wake him up</button>
-        <a class="pill egg__book" hidden href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" data-track="egg_book" data-es="Reserva tu propia sesión">Book your own session</a>
+        <button type="button" class="btn egg__wake">Wake him up</button>
       </div>
       <p class="egg__count muted small"></p>
+      <p class="egg__after"><a class="pill egg__book" hidden href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" data-track="egg_book" data-es="Reserva tu propia sesión">Book your own session</a></p>
     </div>
   </dialog>
   <dialog class="player" aria-label="Video player"><button class="player__close" aria-label="Close video">✕</button><div class="player__frame"></div></dialog>
