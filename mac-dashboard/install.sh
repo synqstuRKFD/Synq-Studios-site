@@ -93,6 +93,10 @@ end run
 
 on showWindow(base)
 	set ca to current application
+	try
+		set dockIcon to ca's NSImage's alloc()'s initWithContentsOfFile:(base & "icon.png")
+		if dockIcon is not missing value then ca's NSApplication's sharedApplication()'s setApplicationIconImage:dockIcon
+	end try
 	set frame to {{0, 0}, {1360, 900}}
 	set theWindow to ca's NSWindow's alloc()'s initWithContentRect:frame styleMask:15 backing:2 defer:false
 	theWindow's setTitle:"SYNQ Dashboard"
@@ -153,16 +157,34 @@ rm -rf "$MAIN_APP" "$KEYS_APP"
 osacompile -o "$KEYS_APP" "$DIR/keys.applescript"
 osacompile -s -o "$MAIN_APP" "$DIR/main.applescript"
 
-# App icons
-if sips -s format icns "$DIR/icon.png" --out "$DIR/applet.icns" >/dev/null 2>&1; then
+# App icons: build a proper multi-size .icns with iconutil, put it in each app, and also attach it
+# to the app file itself (what Finder, Launchpad and the Dock show). Then tell macOS to re-read it.
+ICONSET="$DIR/SYNQ.iconset"
+rm -rf "$ICONSET" && mkdir -p "$ICONSET"
+for sz in 16 32 128 256 512; do
+  sips -z $sz $sz "$DIR/icon.png" --out "$ICONSET/icon_${sz}x${sz}.png" >/dev/null 2>&1 || true
+  sips -z $((sz*2)) $((sz*2)) "$DIR/icon.png" --out "$ICONSET/icon_${sz}x${sz}@2x.png" >/dev/null 2>&1 || true
+done
+if iconutil -c icns "$ICONSET" -o "$DIR/applet.icns" 2>/dev/null || sips -s format icns "$DIR/icon.png" --out "$DIR/applet.icns" >/dev/null 2>&1; then
   for app in "$MAIN_APP" "$KEYS_APP"; do
     cp "$DIR/applet.icns" "$app/Contents/Resources/applet.icns"
     rm -f "$app/Contents/Resources/Assets.car"
     /usr/libexec/PlistBuddy -c "Delete :CFBundleIconName" "$app/Contents/Info.plist" >/dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Set :CFBundleIconFile applet" "$app/Contents/Info.plist" >/dev/null 2>&1 || \
+      /usr/libexec/PlistBuddy -c "Add :CFBundleIconFile string applet" "$app/Contents/Info.plist" >/dev/null 2>&1 || true
     codesign --force --deep -s - "$app" >/dev/null 2>&1 || true
-    touch "$app"
   done
 fi
+rm -rf "$ICONSET"
+for app in "$MAIN_APP" "$KEYS_APP"; do
+  osascript -l JavaScript -e 'ObjC.import("AppKit");' \
+    -e 'function run(a){ const img = $.NSImage.alloc.initWithContentsOfFile(a[0]); return $.NSWorkspace.sharedWorkspace.setIconForFileOptions(img, a[1], 0); }' \
+    "$DIR/icon.png" "$app" >/dev/null 2>&1 || true
+  touch "$app"
+  /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$app" >/dev/null 2>&1 || true
+done
+# Refresh the Dock so it drops any old cached icon (it reappears in a second)
+killall Dock >/dev/null 2>&1 || true
 
 # ---- refresh every 15 minutes in the background
 cat > "$AGENT" <<PLIST
