@@ -96,7 +96,7 @@
 
   <main id="app"></main>
 
-  <footer>Numbers refresh on their own every 15 minutes while your Mac is on. To refresh right now, open the SYNQ Dashboard app again. To change a key, open SYNQ Dashboard Keys.</footer>
+  <footer>Numbers refresh on their own every 15 minutes while your Mac is on. To refresh right now, open the SYNQ Dashboard app again. To add or change a key, open SYNQ Dashboard Keys (it opens your .env file).</footer>
 </div>
 <div class="tip" id="tip"></div>
 
@@ -170,7 +170,7 @@
       html += '<div class="card" style="margin-top:10px"><h3>Latest payments</h3><ul class="list">' + m.recent.map(p => '<li><div class="main"><b>' + esc(p.note || p.kind) + '</b><small>' + dfmt(p.at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + (p.note ? ' · ' + esc(p.kind) : '') + '</small></div><span class="val">' + money(p.amount) + '</span></li>').join('') + '</ul></div>';
     }
     html += '<p class="empty" style="margin-top:10px;font-size:.8rem">Only money that goes through Square shows here. Zelle, Cash App or cash deposits only count if you record them in Square.</p>';
-  } else html += notice(S, 'Square', 'Open <b>SYNQ Dashboard Keys</b> and paste your Square access token.');
+  } else html += notice(S, 'Square', 'Add <b>SQUARE_ACCESS_TOKEN</b> to your .env file (open <b>SYNQ Dashboard Keys</b>).');
   html += '</section>';
 
   // ----- Website (GoatCounter)
@@ -191,7 +191,7 @@
     html += '<div class="three"><div class="card"><h3>Where they came from</h3>' + ranked(W.refs, n, 'Nothing yet.') + '</div>' +
       '<div class="card"><h3>Pages they looked at</h3>' + ranked(W.pages.map(p => ({ name: p.path === '/' ? 'Home (English)' : p.path === '/es.html' ? 'Home (Spanish)' : p.name, count: p.count })), n, 'Nothing yet.') + '</div>' +
       '<div class="card"><h3>Where they are</h3>' + ranked(W.places, n, 'Nothing yet.') + '</div></div>';
-  } else html += notice(W, 'Website stats', 'Open <b>SYNQ Dashboard Keys</b> and paste your GoatCounter API key.');
+  } else html += notice(W, 'Website stats', 'Add <b>GOATCOUNTER_API_KEY</b> to your .env file (open <b>SYNQ Dashboard Keys</b>).');
   html += '</section>';
 
   // ----- YouTube
@@ -206,7 +206,7 @@
       tile('Videos', n(Y.videoCount)) +
       '</div>';
     if (Y.videos.length) html += '<div class="card" style="margin-top:10px"><h3>Latest videos</h3><ul class="list">' + Y.videos.map(v => '<li><div class="main"><b><a href="' + esc(v.url) + '" target="_blank" style="text-decoration:none">' + esc(v.title) + '</a></b><small>' + dfmt(v.at, { month: 'short', day: 'numeric', year: 'numeric' }) + '</small></div><span class="val">' + n(v.views) + ' views</span></li>').join('') + '</ul></div>';
-  } else html += notice(Y, 'YouTube', 'Open <b>SYNQ Dashboard Keys</b> and paste your YouTube API key.');
+  } else html += notice(Y, 'YouTube', 'Add <b>YOUTUBE_API_KEY</b> to your .env file (open <b>SYNQ Dashboard Keys</b>).');
   html += '</section>';
 
   html += '<section class="section"><h2>TikTok</h2><div class="notice">TikTok doesn’t share numbers with outside apps. <a href="https://www.tiktok.com/tiktokstudio" target="_blank"><b>Open TikTok Studio ↗</b></a> for views and followers.</div></section>';

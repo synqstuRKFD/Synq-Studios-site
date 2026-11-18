@@ -9,9 +9,10 @@
 # What it sets up:
 #   ~/Library/Application Support/SYNQ Dashboard/   the dashboard page, the data fetcher, and your numbers
 #   /Applications/SYNQ Dashboard.app                 opens the dashboard (refreshes the numbers first)
-#   /Applications/SYNQ Dashboard Keys.app            paste or change your Square / GoatCounter / YouTube keys
+#   /Applications/SYNQ Dashboard Keys.app            opens your private .env file to add or change keys
 #   ~/Library/LaunchAgents/com.synqstudios.dashboard.plist   refreshes the numbers every 15 minutes
-# Keys are stored in your macOS Keychain (service "synq-dashboard"), never in a file.
+# Keys live only in ~/Library/Application Support/SYNQ Dashboard/.env (readable by you only).
+# Re-running the installer never overwrites a .env you've already filled in.
 
 set -euo pipefail
 
@@ -32,42 +33,26 @@ if [ "${1:-}" = "--uninstall" ]; then
   rm -f "$AGENT"
   rm -rf "/Applications/SYNQ Dashboard.app" "/Applications/SYNQ Dashboard Keys.app" \
          "$HOME/Applications/SYNQ Dashboard.app" "$HOME/Applications/SYNQ Dashboard Keys.app" "$DIR"
-  for a in square goatcounter youtube; do security delete-generic-password -s synq-dashboard -a "$a" >/dev/null 2>&1 || true; done
-  say "SYNQ Dashboard removed (apps, numbers and saved keys)."
+  say "SYNQ Dashboard removed (apps, numbers and your .env keys file)."
   exit 0
 fi
 
 say "Installing SYNQ Dashboard…"
 mkdir -p "$DIR" "$APPS" "$HOME/Library/LaunchAgents"
-for f in fetch.js dashboard.html icon.png; do
+for f in fetch.js dashboard.html icon.png .env.example; do
   curl -fsSL "$RAW/$f?$(date +%s)" -o "$DIR/$f"
 done
+# Private keys file: created once from the template, only you can read it
+if [ ! -f "$DIR/.env" ]; then cp "$DIR/.env.example" "$DIR/.env"; fi
+chmod 600 "$DIR/.env"
 
-# ---- "SYNQ Dashboard Keys" app: asks for each key and saves it in the Keychain
+# ---- "SYNQ Dashboard Keys" app: opens the .env file in TextEdit
 cat > "$DIR/keys.applescript" <<'APPLESCRIPT'
-on askKey(acct, title, help)
-	set current to ""
-	try
-		set current to do shell script "security find-generic-password -s synq-dashboard -a " & acct & " -w"
-	end try
-	if current is "" then
-		set stateLine to "Not connected yet."
-	else
-		set stateLine to "Already connected. Leave the box empty to keep the key you have."
-	end if
-	set r to display dialog title & return & return & help & return & return & stateLine default answer "" with hidden answer buttons {"Skip", "Save"} default button "Save" with title "SYNQ Dashboard Keys"
-	set v to text returned of r
-	if button returned of r is "Save" and v is not "" then
-		do shell script "security add-generic-password -U -s synq-dashboard -a " & acct & " -w " & quoted form of v
-	end if
-end askKey
-
 on run
-	askKey("square", "1 of 3 · Square (money and bookings)", "Paste your Square PRODUCTION access token. Get it at developer.squareup.com → your app → Credentials (switch to Production).")
-	askKey("goatcounter", "2 of 3 · Website stats (GoatCounter)", "Paste your GoatCounter API key. Get it at synqstudiosrkfd.goatcounter.com → Settings → API → New API key (tick “Read statistics”).")
-	askKey("youtube", "3 of 3 · YouTube", "Paste your YouTube Data API key. Get it at console.cloud.google.com → APIs & Services → Credentials → Create credentials → API key.")
-	do shell script "touch " & quoted form of (POSIX path of (path to home folder) & "Library/Application Support/SYNQ Dashboard/.keys-asked")
-	display notification "Keys saved. Open SYNQ Dashboard to see your numbers." with title "SYNQ Dashboard"
+	set envFile to POSIX path of (path to home folder) & "Library/Application Support/SYNQ Dashboard/.env"
+	display dialog "Your keys file will open in TextEdit." & return & return & "Paste each key right after its = sign (no spaces or quotes), then press ⌘S to save and close the window." & return & return & "Then open SYNQ Dashboard to see your numbers." buttons {"Open .env"} default button 1 with title "SYNQ Dashboard Keys"
+	do shell script "open -W -e " & quoted form of envFile
+	do shell script "chmod 600 " & quoted form of envFile
 end run
 APPLESCRIPT
 
@@ -75,8 +60,9 @@ APPLESCRIPT
 cat > "$DIR/main.applescript" <<APPLESCRIPT
 on run
 	set base to POSIX path of (path to home folder) & "Library/Application Support/SYNQ Dashboard/"
+	-- First time (no keys filled in yet): open the keys file
 	try
-		do shell script "test -e " & quoted form of (base & ".keys-asked")
+		do shell script "grep -Eq '^(GOATCOUNTER_API_KEY|SQUARE_ACCESS_TOKEN|YOUTUBE_API_KEY)=[^[:space:]]' " & quoted form of (base & ".env")
 	on error
 		do shell script "open -W " & quoted form of "$KEYS_APP"
 	end try
@@ -123,4 +109,6 @@ launchctl bootstrap "gui/$(id -u)" "$AGENT"
 
 say "Done. Opening SYNQ Dashboard…"
 echo "It's in $APPS. Drag it to your Dock to keep it handy."
+echo "Check your keys any time with:"
+echo "  osascript -l JavaScript \"$DIR/fetch.js\" --test"
 open "$MAIN_APP"

@@ -1,15 +1,15 @@
 // SYNQ Dashboard data fetcher.
-// Runs on a Mac with:  osascript -l JavaScript fetch.js
-// Reads your keys from the macOS Keychain (service "synq-dashboard"), pulls numbers from
-// Square, GoatCounter and YouTube, and writes data.js next to dashboard.html.
-// Keys never leave your Mac except to the service they belong to.
+// On a Mac:   osascript -l JavaScript fetch.js          (refresh data.js)
+//             osascript -l JavaScript fetch.js --test   (check each connection)
+// Anywhere with Node:  node fetch.js [--test]
+//
+// Keys come from environment variables only. If a variable isn't already set in the
+// environment, it's loaded from the .env file next to this script (same as dotenv).
+// Keys are never written to data.js, never printed and never put on a command line.
+// Square is read-only here: every Square request is a GET.
 
 const IS_JXA = typeof Application !== 'undefined';
-const ENV = IS_JXA ? {} : process.env; // node is only used for testing
-
-const SQUARE = ENV.SYNQ_SQUARE_BASE || 'https://connect.squareup.com';
-const GOAT = ENV.SYNQ_GOAT_BASE || 'https://synqstudiosrkfd.goatcounter.com';
-const YT = ENV.SYNQ_YT_BASE || 'https://www.googleapis.com/youtube/v3';
+const YT = 'https://www.googleapis.com/youtube/v3';
 const YT_HANDLE = 'SynqStudios';
 
 // ---------- platform helpers ----------
@@ -37,41 +37,61 @@ function writeFile(p, text) {
   } else require('fs').writeFileSync(p, text);
 }
 function here() {
-  if (!IS_JXA) return ENV.SYNQ_DIR || __dirname;
+  if (!IS_JXA) return process.env.SYNQ_DIR || __dirname;
   const p = $.NSProcessInfo.processInfo.arguments.js.map(a => a.js).find(a => a.endsWith('fetch.js'));
   return p ? p.replace(/\/[^/]*$/, '') : sh('echo "$HOME/Library/Application Support/SYNQ Dashboard"').trim();
 }
-function key(name) {
-  if (!IS_JXA) return ENV['SYNQ_KEY_' + name.toUpperCase()] || '';
-  try { return sh('security find-generic-password -s synq-dashboard -a ' + q(name) + ' -w').trim(); }
-  catch (e) { return ''; }
+// ---------- configuration (environment variables, filled from .env) ----------
+let ENV = null;
+function loadEnv() {
+  if (ENV) return ENV;
+  const fromFile = {};
+  const text = readFile(here() + '/.env') || '';
+  text.split(/\r?\n/).forEach(line => {
+    const m = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);
+    if (!m || line.trim().startsWith('#')) return;
+    let v = m[2];
+    if (/^(["']).*\1$/.test(v)) v = v.slice(1, -1);
+    fromFile[m[1]] = v;
+  });
+  const real = IS_JXA ? {} : process.env;
+  ENV = new Proxy({}, { get: (_, k) => (real[k] !== undefined && real[k] !== '' ? real[k] : fromFile[k]) || '' });
+  return ENV;
+}
+const cfg = name => String(loadEnv()[name] || '').trim();
+const SECRET_NAMES = ['GOATCOUNTER_API_KEY', 'SQUARE_ACCESS_TOKEN', 'YOUTUBE_API_KEY'];
+// Strip any key value out of a message before it can be shown or saved
+function scrub(msg) {
+  let out = String(msg);
+  SECRET_NAMES.forEach(n => { const v = cfg(n); if (v && v.length > 3) out = out.split(v).join('[hidden]'); });
+  return out.replace(/([?&]key=)[^&\s"']+/g, '$1[hidden]').replace(/(Bearer\s+)\S+/g, '$1[hidden]');
 }
 
-// HTTP through curl. Secret headers go in a private temp file, not on the command line.
-function http(method, url, headers, body) {
+// HTTP through curl. The URL and headers (which carry keys) go in a private temp config
+// file read with -K, so they never appear on a command line or in the process list.
+function http(method, url, headers) {
+  if (!IS_JXA && process.env.SYNQ_TEST_BASE) url = url.replace(/^https:\/\/[^/]+/, process.env.SYNQ_TEST_BASE); // local tests only
   const tmp = sh('mktemp -d').trim();
+  const cq = v => '"' + String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
   try {
-    const hfile = tmp + '/h';
-    writeFile(hfile, Object.entries(headers || {}).map(([k, v]) => k + ': ' + v).join('\n') + '\n');
-    sh('chmod 600 ' + q(hfile));
-    let cmd = 'curl -sS --max-time 25 -X ' + method + ' -H @' + q(hfile) + ' -w ' + q('\n%{http_code}');
-    if (body !== undefined) {
-      const bfile = tmp + '/b';
-      writeFile(bfile, JSON.stringify(body));
-      cmd += ' -H ' + q('Content-Type: application/json') + ' --data-binary @' + q(bfile);
-    }
-    const out = sh(cmd + ' ' + q(url));
+    const conf = tmp + '/curl.conf';
+    const lines = ['url = ' + cq(url), 'request = ' + cq(method)]
+      .concat(Object.entries(headers || {}).map(([k, v]) => 'header = ' + cq(k + ': ' + v)));
+    sh('umask 077; : > ' + q(conf));
+    writeFile(conf, lines.join('\n') + '\n');
+    let out;
+    try { out = sh('curl -sS --max-time 25 -K ' + q(conf) + ' -w ' + q('\n%{http_code}') + ' 2>&1'); }
+    catch (e) { throw new Error('Could not reach ' + url.split('/')[2]); }
     const cut = out.lastIndexOf('\n');
     const code = +out.slice(cut + 1).trim();
     const text = out.slice(0, cut);
     let json = null;
     try { json = text ? JSON.parse(text) : {}; } catch (e) { /* not json */ }
-    if (code >= 400 || code === 0) {
-      let msg = 'HTTP ' + code;
-      if (json && json.errors) msg += ': ' + (json.errors.map ? json.errors.map(e => e.detail || e.message || e.code || JSON.stringify(e)).join('; ') : JSON.stringify(json.errors));
+    if (!code || code >= 400) {
+      let msg = code ? 'HTTP ' + code : 'Could not reach ' + url.split('/')[2];
+      if (json && json.errors) msg += ': ' + (json.errors.map ? json.errors.map(e => e.detail || e.message || e.code || '').join('; ') : JSON.stringify(json.errors));
       else if (json && json.error) msg += ': ' + (json.error.message || json.error);
-      if (code === 401 || code === 403) msg = 'The key was rejected (' + msg + '). Re-enter it with "SYNQ Dashboard Keys".';
-      throw new Error(msg);
+      throw new Error(scrub(msg));
     }
     if (json === null) throw new Error('Unexpected reply from ' + url.split('/')[2]);
     return json;
@@ -92,17 +112,17 @@ const hourIso = d => { const x = new Date(d); x.setUTCMinutes(0, 0, 0); return x
 
 function safe(name, fn) {
   try { return Object.assign({ ok: true }, fn()); }
-  catch (e) { return { ok: false, error: String(e.message || e) }; }
+  catch (e) { return { ok: false, error: scrub(e.message || e) }; }
 }
 
 // ---------- Square: money + bookings ----------
 function square() {
-  const token = key('square');
+  const token = cfg('SQUARE_ACCESS_TOKEN');
   if (!token) return { ok: false, missing: true };
   return safe('square', () => {
+    const SQUARE = /^sandbox$/i.test(cfg('SQUARE_ENVIRONMENT')) ? 'https://connect.squareupsandbox.com' : 'https://connect.squareup.com';
     const H = { Authorization: 'Bearer ' + token, 'Square-Version': '2025-01-23', Accept: 'application/json' };
-    const get = path => http('GET', SQUARE + path, H);
-    const post = (path, body) => http('POST', SQUARE + path, H, body);
+    const get = path => http('GET', SQUARE + path, H); // read-only: GET requests only
 
     const locs = (get('/v2/locations').locations || []).filter(l => l.status !== 'INACTIVE');
     const loc = locs[0] || {};
@@ -151,32 +171,23 @@ function square() {
     const upcoming = listBookings(now, new Date(now.getTime() + 30 * DAY)).filter(live).sort((a, b) => a.start_at < b.start_at ? -1 : 1);
     const thisMonth = month0 < now ? listBookings(month0, now).filter(live) : [];
 
-    // Names for customers and services
-    const custIds = [...new Set(upcoming.map(b => b.customer_id).filter(Boolean))];
-    const names = {};
-    if (custIds.length) {
+    // Names for customers and services (GET lookups, one per id; at most 12 bookings are listed)
+    const shown = upcoming.slice(0, 12);
+    const names = {}, services = {};
+    [...new Set(shown.map(b => b.customer_id).filter(Boolean))].forEach(id => {
       try {
-        const r = post('/v2/customers/bulk-retrieve', { customer_ids: custIds.slice(0, 100) });
-        Object.entries(r.responses || {}).forEach(([id, v]) => {
-          const c = v.customer || {};
-          names[id] = [c.given_name, c.family_name].filter(Boolean).join(' ') || c.company_name || c.nickname || '';
-        });
+        const c = get('/v2/customers/' + encodeURIComponent(id)).customer || {};
+        names[id] = [c.given_name, c.family_name].filter(Boolean).join(' ') || c.company_name || c.nickname || '';
       } catch (e) { /* names are a nice-to-have */ }
-    }
-    const varIds = [...new Set([].concat(...upcoming.map(b => (b.appointment_segments || []).map(s => s.service_variation_id))).filter(Boolean))];
-    const services = {};
-    if (varIds.length) {
+    });
+    [...new Set([].concat(...shown.map(b => (b.appointment_segments || []).map(x => x.service_variation_id))).filter(Boolean))].forEach(id => {
       try {
-        const r = post('/v2/catalog/batch-retrieve', { object_ids: varIds.slice(0, 1000), include_related_objects: true });
-        const items = {};
-        (r.related_objects || []).forEach(o => { if (o.type === 'ITEM') items[o.id] = (o.item_data || {}).name; });
-        (r.objects || []).forEach(o => {
-          const v = o.item_variation_data || {};
-          const item = items[v.item_id] || '';
-          services[o.id] = item && v.name && !/^regular$/i.test(v.name) ? item + ' · ' + v.name : item || v.name || '';
-        });
+        const r = get('/v2/catalog/object/' + encodeURIComponent(id) + '?include_related_objects=true');
+        const v = (r.object || {}).item_variation_data || {};
+        const item = ((r.related_objects || []).find(o => o.type === 'ITEM') || {}).item_data || {};
+        services[id] = item.name && v.name && !/^regular$/i.test(v.name) ? item.name + ' · ' + v.name : item.name || v.name || '';
       } catch (e) { /* names are a nice-to-have */ }
-    }
+    });
     const week7 = new Date(today0.getTime() + 7 * DAY);
     const bookings = {
       next7: upcoming.filter(b => new Date(b.start_at) < week7).length,
@@ -197,9 +208,10 @@ function square() {
 
 // ---------- GoatCounter: website ----------
 function goat() {
-  const token = key('goatcounter');
+  const token = cfg('GOATCOUNTER_API_KEY');
   if (!token) return { ok: false, missing: true };
   return safe('goat', () => {
+    const GOAT = (cfg('GOATCOUNTER_SITE') || 'https://synqstudiosrkfd.goatcounter.com').replace(/\/+$/, '');
     const H = { Authorization: 'Bearer ' + token, Accept: 'application/json', 'Content-Type': 'application/json' };
     const get = path => http('GET', GOAT + '/api/v0' + path, H);
     const range = (a, b) => 'start=' + encodeURIComponent(hourIso(a)) + '&end=' + encodeURIComponent(hourIso(new Date(b.getTime() + 3600e3)));
@@ -221,7 +233,7 @@ function goat() {
 
 // ---------- YouTube ----------
 function youtube(histPath) {
-  const k = key('youtube');
+  const k = cfg('YOUTUBE_API_KEY');
   if (!k) return { ok: false, missing: true };
   return safe('yt', () => {
     const get = path => http('GET', YT + path + (path.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(k), {});
@@ -254,8 +266,37 @@ function youtube(histPath) {
   });
 }
 
+// ---------- test each connection (prints only OK / problem, never key values) ----------
+function test() {
+  const line = (name, varName, fn) => {
+    if (!cfg(varName)) return '- ' + name + ': not set (' + varName + ' is empty in .env)';
+    try { return '✓ ' + name + ': ' + fn(); } catch (e) { return '✗ ' + name + ': ' + scrub(e.message || e); }
+  };
+  const out = [
+    line('GoatCounter', 'GOATCOUNTER_API_KEY', () => {
+      const site = (cfg('GOATCOUNTER_SITE') || 'https://synqstudiosrkfd.goatcounter.com').replace(/\/+$/, '');
+      const r = http('GET', site + '/api/v0/stats/total?start=' + encodeURIComponent(hourIso(new Date(now - 7 * DAY))), { Authorization: 'Bearer ' + cfg('GOATCOUNTER_API_KEY'), 'Content-Type': 'application/json' });
+      return 'connected to ' + site.replace(/^https?:\/\//, '') + ' (' + (r.total || 0) + ' visits in the last 7 days)';
+    }),
+    line('Square', 'SQUARE_ACCESS_TOKEN', () => {
+      const sb = /^sandbox$/i.test(cfg('SQUARE_ENVIRONMENT'));
+      const r = http('GET', (sb ? 'https://connect.squareupsandbox.com' : 'https://connect.squareup.com') + '/v2/locations', { Authorization: 'Bearer ' + cfg('SQUARE_ACCESS_TOKEN'), 'Square-Version': '2025-01-23' });
+      const l = (r.locations || [])[0] || {};
+      return 'connected (' + (sb ? 'sandbox' : 'production') + ', location: ' + (l.name || 'none found') + ')';
+    }),
+    line('YouTube', 'YOUTUBE_API_KEY', () => {
+      const r = http('GET', YT + '/channels?part=statistics&forHandle=' + YT_HANDLE + '&key=' + encodeURIComponent(cfg('YOUTUBE_API_KEY')), {});
+      const c = (r.items || [])[0];
+      if (!c) throw new Error('key works, but the @' + YT_HANDLE + ' channel was not found');
+      return 'connected (@' + YT_HANDLE + ', ' + Number(c.statistics.viewCount).toLocaleString('en-US') + ' total views)';
+    }),
+  ];
+  return out.join('\n');
+}
+
 // ---------- main ----------
-function run() {
+function run(argv) {
+  if ((argv || []).indexOf('--test') !== -1) return test();
   const dir = here();
   const data = {
     updatedAt: new Date().toISOString(),
@@ -264,6 +305,6 @@ function run() {
     youtube: youtube(dir + '/youtube-history.json'),
   };
   writeFile(dir + '/data.js', 'window.SYNQ = ' + JSON.stringify(data) + ';\n');
-  return 'ok';
+  return 'Dashboard numbers updated.';
 }
-if (!IS_JXA) { run(); }
+if (!IS_JXA) console.log(run(process.argv.slice(2)));
