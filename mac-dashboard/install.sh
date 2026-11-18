@@ -2,9 +2,9 @@
 # SYNQ Dashboard installer for macOS.
 #
 # Install or update:
-#   curl -fsSL https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/main/mac-dashboard/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/refs/heads/main/mac-dashboard/install.sh | bash
 # Remove:
-#   curl -fsSL https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/main/mac-dashboard/install.sh | bash -s -- --uninstall
+#   curl -fsSL https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/refs/heads/main/mac-dashboard/install.sh | bash -s -- --uninstall
 #
 # What it sets up:
 #   ~/Library/Application Support/SYNQ Dashboard/   the dashboard page, the data fetcher, and your numbers
@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-RAW="https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/main/mac-dashboard"
+RAW="https://raw.githubusercontent.com/synqstuRKFD/Synq-Studios-site/refs/heads/main/mac-dashboard"
 DIR="$HOME/Library/Application Support/SYNQ Dashboard"
 AGENT_ID="com.synqstudios.dashboard"
 AGENT="$HOME/Library/LaunchAgents/$AGENT_ID.plist"
