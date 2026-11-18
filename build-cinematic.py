@@ -231,16 +231,23 @@ TEMPLATE = """<!doctype html>
     </section>
 
     <section class="studio" id="studio">
-      <div class="studio__img"><img src="images/tiktok/7683332505428102430.jpg" alt="The SYNQ Studios lounge in Rockford, Illinois" width="540" height="960" loading="lazy"><img src="images/tiktok/7701434503016811807.jpg" alt="Mixing a song on the console at SYNQ Studios" width="540" height="960" loading="lazy"></div>
+      <div class="studio__img"><img src="images/studio/mixing-room.jpg" alt="The mixing room at SYNQ Studios in Rockford, Illinois" width="1000" height="1250" loading="lazy"><img src="images/studio/recording-room.jpg" alt="Drum kit in the recording room at SYNQ Studios" width="1000" height="1250" loading="lazy"></div>
       <div class="studio__text">
         <h2 data-es="El estudio">The studio</h2>
-        <p class="muted" data-es="Cuartos de grabación, un cuarto de ensayo, una sala con mesa de billar y equipo para fotos y video, en el 4040 Charles St. Si quieres conocerlo antes de reservar, pasa a verlo.">Recording rooms, a rehearsal room, a lounge with a pool table, and a setup for photos and video, at 4040 Charles St. If you want to see it before you book, come by.</p>
+        <p class="muted" data-es="Un cuarto de mezcla, un cuarto de grabación con cabina de voz, un cuarto de ensayo, un cuarto de podcast y una sala con mesa de billar, en el 4040 Charles St. Si quieres conocerlo antes de reservar, pasa a verlo.">A mixing room, a recording room with a vocal booth, a rehearsal room, a podcast room and a pool room, at 4040 Charles St. If you want to see it before you book, come by.</p>
         <div class="hero__cta">
           <button class="pill pill--solid" data-tt="7683332505428102430" data-track="tour_video" data-es="▶ Ver el tour">▶ Watch the tour</button>
           <a href="#book" class="pill" data-pick="Free studio tour" data-track="tour_book" data-es="Agendar una visita">Schedule a visit</a>
         </div>
       </div>
     </section>
+
+    <section class="block rooms" id="rooms">
+      <div class="block__head"><h2 data-es="Adentro del estudio">Inside the studio</h2></div>
+      <div class="rooms__tabs" role="tablist"><button class="rooms__tab" role="tab" aria-selected="true" aria-controls="room-mixing" data-room="mixing" data-es="Cuarto de mezcla">Mixing room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-recording" data-room="recording" data-es="Cuarto de grabación">Recording room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-rehearsal" data-room="rehearsal" data-es="Cuarto de ensayo">Rehearsal room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-podcast" data-room="podcast" data-es="Cuarto de podcast">Podcast room</button><button class="rooms__tab" role="tab" aria-selected="false" aria-controls="room-pool" data-room="pool" data-es="Sala de billar">Pool room</button></div>
+      <div class="rooms__grid" id="room-mixing" role="tabpanel" data-room="mixing"><button class="rooms__ph" aria-label="The mixing room (open larger)"><img src="images/studio/mixing-room.jpg" alt="The mixing room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Mixing a session (open larger)"><img src="images/studio/mixing-screens.jpg" alt="Mixing a session at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="The mixing desk (open larger)"><img src="images/studio/mixing-apollo.jpg" alt="The mixing desk at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Mixing desk and camera (open larger)"><img src="images/studio/mixing-desk.jpg" alt="Mixing desk and camera at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Lounge side of the mixing room (open larger)"><img src="images/studio/lounge.jpg" alt="Lounge side of the mixing room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-recording" role="tabpanel" data-room="recording" hidden><button class="rooms__ph" aria-label="Drum kit in the recording room (open larger)"><img src="images/studio/recording-room.jpg" alt="Drum kit in the recording room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Behind the kit, looking into the vocal booth (open larger)"><img src="images/studio/recording-drums.jpg" alt="Behind the kit, looking into the vocal booth at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Vocal mic in the booth (open larger)"><img src="images/studio/recording-booth.jpg" alt="Vocal mic in the booth at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-rehearsal" role="tabpanel" data-room="rehearsal" hidden><button class="rooms__ph" aria-label="The rehearsal room (open larger)"><img src="images/studio/rehearsal-green.jpg" alt="The rehearsal room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="The rehearsal room at night (open larger)"><img src="images/studio/rehearsal-purple.jpg" alt="The rehearsal room at night at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-podcast" role="tabpanel" data-room="podcast" hidden><button class="rooms__ph" aria-label="The podcast desk (open larger)"><img src="images/studio/podcast-front.jpg" alt="The podcast desk at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="The podcast room (open larger)"><img src="images/studio/podcast-desk.jpg" alt="The podcast room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div><div class="rooms__grid" id="room-pool" role="tabpanel" data-room="pool" hidden><button class="rooms__ph" aria-label="The pool room (open larger)"><img src="images/studio/pool-1.jpg" alt="The pool room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Pool table (open larger)"><img src="images/studio/pool-2.jpg" alt="Pool table at SYNQ Studios" width="1000" height="1250" loading="lazy"></button><button class="rooms__ph" aria-label="Pool room and podcast room (open larger)"><img src="images/studio/pool-3.jpg" alt="Pool room and podcast room at SYNQ Studios" width="1000" height="1250" loading="lazy"></button></div>
+    </section>
+    <div class="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo"><button class="lightbox__x" aria-label="Close">✕</button><button class="lightbox__nav lightbox__prev" aria-label="Previous">‹</button><img alt=""><button class="lightbox__nav lightbox__next" aria-label="Next">›</button></div>
 
     <section class="block" id="how">
       <div class="block__head"><h2 data-es="Cómo reservar">How booking works</h2></div>
@@ -408,6 +415,7 @@ TEMPLATE = """<!doctype html>
   <script src="funnel.js"></script>
   <script src="motion.js"></script>
   <script src="egg.js"></script>
+  <script src="rooms.js"></script>
   <script>
     // Top bar turns solid after you scroll past the top of the hero
     (function () {{
@@ -555,7 +563,7 @@ print("built index.html  (live site:", t["label"] + ")")
 DIST = ROOT / "dist"
 if DIST.exists():
     shutil.rmtree(DIST)
-needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
+needed = {"index.html", "i18n.js", "script.js", "funnel.js", "motion.js", "egg.js", "rooms.js", "layouts/base.css", "layouts/cine.css", f"layouts/cine-{SITE}.css"}
 needed |= set(re.findall(r'(?:src|href|content)="(images/[^"]+)"', live)) | {"images/og-share.jpg"}
 for rel in sorted(needed):
     dest = DIST / rel
