@@ -1,0 +1,7 @@
+# Preview pages and copies the build script also writes to the project root
+/index.html
+/es.html
+/cine-*.html
+__pycache__/
+*.zip
+.DS_Store

@@ -1,0 +1,4 @@
+# Netlify publishes the ready-made site in dist/ (no build step needed).
+[build]
+  publish = "dist"
+  command = ""

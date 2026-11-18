@@ -1,0 +1,13 @@
+/* NEON — full-screen photo hero, purple → pink → cyan glow */
+:root {
+  --bg: #07061a; --surface: #100e2b; --border: #2a2560; --text: #f1efff; --muted: #a19dd0; --dim: #5d5797;
+  --accent: #a855f7; --accent2: #22d3ee; --kicker: #c4b5fd; --lead: #d6d3f5;
+  --grad: linear-gradient(90deg, #a855f7, #ec4899 50%, #22d3ee);
+  --glow: 0 0 30px -6px rgba(168,85,247,.8); --row-hover: linear-gradient(90deg, rgba(168,85,247,.15), transparent);
+  --opt-on: rgba(168,85,247,.15); --bar: rgba(7,6,26,.9); --mark-filter: drop-shadow(0 0 6px #a855f7);
+  --font-display: "Unbounded", sans-serif; --font-body: "Space Grotesk", system-ui, sans-serif;
+}
+.hero--photo .hero__bg { object-position: center 35%; animation: drift 24s ease-in-out infinite alternate; }
+@keyframes drift { from { transform: scale(1.05); } to { transform: scale(1.15) translateX(-2%); } }
+.hero--photo .hero__shade { background: linear-gradient(90deg, rgba(7,6,26,.95), rgba(7,6,26,.55) 55%, rgba(7,6,26,.15)), linear-gradient(transparent 55%, var(--bg)); }
+@media (max-width: 700px) { .hero--photo .hero__shade { background: linear-gradient(rgba(7,6,26,.5), rgba(7,6,26,.85) 45%, var(--bg)); } }

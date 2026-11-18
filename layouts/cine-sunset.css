@@ -1,0 +1,23 @@
+/* SUNSET — warm rancho gradient, text + a phone frame playing the studio tour */
+:root {
+  --bg: #120a06; --surface: #1b100a; --border: #3d2716; --text: #fff3e6; --muted: #c8ab92; --dim: #6b4a32;
+  --accent: #ff8a3d; --accent2: #ffc46b; --kicker: #ffc46b; --lead: #f1dcc8;
+  --grad: linear-gradient(90deg, #ff5e3a, #ff9a3d 50%, #ffc46b); --on-grad: #1a0d05;
+  --glow: 0 12px 40px -12px rgba(255,138,61,.7); --row-hover: linear-gradient(90deg, rgba(255,138,61,.14), transparent);
+  --opt-on: rgba(255,138,61,.14); --bar: rgba(18,10,6,.92); --radius: 18px;
+  --font-display: "DM Serif Display", Georgia, serif; --display-weight: 400; --display-tracking: -.01em;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+.hero--phone { flex-direction: row; align-items: center; justify-content: space-between; gap: clamp(2rem, 6vw, 6rem); padding-bottom: 80px; }
+.hero--phone .hero__bg { filter: blur(28px) saturate(1.4); transform: scale(1.2); opacity: .55; }
+.hero--phone .hero__shade { background: radial-gradient(ellipse 80% 70% at 70% 30%, rgba(255,120,50,.35), transparent 70%), linear-gradient(180deg, rgba(18,10,6,.4), rgba(18,10,6,.75) 60%, var(--bg)); }
+.hero--phone .big { font-size: clamp(2.6rem, 6.4vw, 5.6rem); }
+.phone { position: relative; flex: 0 0 auto; width: clamp(220px, 24vw, 300px); aspect-ratio: 9 / 18.5; border-radius: 38px; padding: 10px; background: #0b0603; border: 1px solid #4a3020; box-shadow: 0 40px 80px -30px rgba(0,0,0,.9), 0 0 60px -10px rgba(255,138,61,.45); cursor: pointer; transform: rotate(3deg); transition: transform .3s; }
+.phone:hover { transform: rotate(0deg) translateY(-6px); }
+.phone img { width: 100%; height: 100%; object-fit: cover; border-radius: 30px; }
+.phone .play { width: 64px; height: 64px; margin: -32px 0 0 -32px; }
+.phone .play::after { left: 25px; top: 20px; border-left-width: 18px; border-top-width: 12px; border-bottom-width: 12px; }
+.phone__tag { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); white-space: nowrap; background: var(--grad); color: var(--on-grad); font-weight: 800; font-size: .75rem; padding: .45em 1em; border-radius: 999px; }
+.phone__notch { position: absolute; top: 18px; left: 50%; width: 70px; height: 18px; margin-left: -35px; background: #0b0603; border-radius: 10px; z-index: 2; }
+@media (max-width: 860px) { .hero--phone { flex-direction: column; align-items: flex-start; padding-top: 110px; } .phone { width: 200px; align-self: center; } }
+.artists__list { font-style: italic; }

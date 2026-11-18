@@ -1,0 +1,30 @@
+/* GOLD FILM — letterboxed movie-screen hero with film grain, black & trophy gold */
+:root {
+  --bg: #070707; --surface: #0f0e0c; --border: #2a251b; --text: #f5efe2; --muted: #a59c89; --dim: #4d4535;
+  --accent: #d4af37; --accent2: #e9c46a; --kicker: #d4af37; --lead: #d8d0bf;
+  --grad: linear-gradient(90deg, #b8902c, #f3d27a 50%, #b8902c); --on-grad: #0b0904;
+  --glow: 0 14px 40px -14px rgba(212,175,55,.65); --row-hover: linear-gradient(90deg, rgba(212,175,55,.1), transparent);
+  --opt-on: rgba(212,175,55,.12); --bar: rgba(7,7,7,.92); --btn-radius: 2px; --radius: 6px;
+  --font-display: "Cinzel", Georgia, serif; --display-weight: 700; --display-tracking: .03em;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+.hero--film { justify-content: center; align-items: center; text-align: center; padding-top: 14vh; padding-bottom: 14vh; }
+.hero--film .hero__content { max-width: 900px; margin: 0 auto; }
+.hero--film .hero__lead { margin-left: auto; margin-right: auto; }
+.hero--film .hero__cta, .hero--film .trust { justify-content: center; }
+.hero--film .hero__bg { filter: grayscale(.35) sepia(.25) contrast(1.05); animation: push 30s ease-in-out infinite alternate; }
+@keyframes push { from { transform: scale(1.02); } to { transform: scale(1.14); } }
+.hero--film .hero__shade { background: radial-gradient(ellipse at center, rgba(7,7,7,.55), rgba(7,7,7,.9) 75%); }
+/* cinema bars + grain */
+.hero--film::before, .hero--film::after { content: ""; position: absolute; left: 0; right: 0; height: 9vh; background: #000; z-index: 1; }
+.hero--film::before { top: 0; } .hero--film::after { bottom: 0; }
+.grain { position: absolute; inset: -50%; z-index: 0; pointer-events: none; opacity: .13; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1s steps(6) infinite; }
+@keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)} 75%{transform:translate(-2%,-1%)} 100%{transform:translate(1%,3%)} }
+.hero--film .big { font-size: clamp(2.2rem, 6.2vw, 5rem); }
+.hero--film .big .grad { display: inline-block; }
+.hero--film .hero__now { position: relative; z-index: 2; margin-top: 2rem; font-size: .8rem; color: var(--muted); letter-spacing: .2em; text-transform: uppercase; }
+.top { background: linear-gradient(rgba(0,0,0,.85), transparent); }
+.brand { font-family: var(--font-display); font-size: .95rem; }
+.svc .n, .steps li::before { font-family: var(--font-display); }

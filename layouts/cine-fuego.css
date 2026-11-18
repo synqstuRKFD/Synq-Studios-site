@@ -1,0 +1,20 @@
+/* FUEGO WALL — moving wall of video thumbnails behind huge condensed type, fire red */
+:root {
+  --bg: #0a0606; --surface: #140a0a; --border: #3a1717; --text: #fff4ec; --muted: #c9a89a; --dim: #5e2c2c;
+  --accent: #ff3b1f; --accent2: #ffb21f; --kicker: #ffb21f; --lead: #f0d6cc;
+  --grad: linear-gradient(90deg, #ff3b1f, #ff7a1f); --on-grad: #fff;
+  --glow: 0 18px 40px -22px rgba(0,0,0,.9); --row-hover: linear-gradient(90deg, rgba(255,59,31,.14), transparent);
+  --opt-on: rgba(255,59,31,.14); --bar: rgba(10,6,6,.94); --btn-radius: 4px; --radius: 6px;
+  --font-display: "Anton", Impact, sans-serif; --display-weight: 400; --display-tracking: .01em; --display-case: uppercase;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+.hero--wall .wall { position: absolute; inset: -14% -10%; z-index: -2; display: flex; flex-direction: column; justify-content: center; gap: 12px; transform: rotate(-6deg); }
+.wall__row { display: flex; gap: 10px; width: max-content; animation: slide 60s linear infinite; }
+.wall__row--rev { animation-direction: reverse; animation-duration: 70s; }
+.wall__row img { height: clamp(200px, 38vh, 340px); width: auto; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 6px; filter: saturate(1.2) contrast(1.05); flex: 0 0 auto; }
+@keyframes slide { to { transform: translateX(-50%); } }
+.hero--wall .hero__shade { background: linear-gradient(90deg, rgba(10,6,6,.96) 0%, rgba(10,6,6,.78) 40%, rgba(60,8,4,.25) 75%, rgba(60,8,4,.1)), linear-gradient(transparent 65%, var(--bg)); }
+@media (max-width: 700px) { .hero--wall .hero__shade { background: linear-gradient(rgba(10,6,6,.6), rgba(10,6,6,.92) 50%, var(--bg)); } }
+.hero--wall .big { font-size: clamp(3.2rem, 8.6vw, 7rem); line-height: .92; }
+.svc .n { color: transparent; -webkit-text-stroke: 1px var(--accent); font-size: 1.4rem; }
+.svc li:hover .n { color: var(--accent); }
