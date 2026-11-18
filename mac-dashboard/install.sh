@@ -56,37 +56,20 @@ on run
 end run
 APPLESCRIPT
 
-# ---- "SYNQ Dashboard" app: asks for keys the first time, refreshes the numbers, then shows the
-# dashboard in its own window (a Chrome app window with no tabs or address bar). If that window is
-# already open, it's brought to the front and refreshed instead of opening a second one.
-PAGE_URL="file://$(printf '%s' "$DIR/dashboard.html" | sed 's/ /%20/g')"
-if open -Ra "Google Chrome" >/dev/null 2>&1; then
-  SHOW_WINDOW=$(cat <<SHOW
-	set pageURL to "$PAGE_URL"
-	set found to false
-	if application "Google Chrome" is running then
-		try
-			tell application "Google Chrome"
-				repeat with w in windows
-					if (URL of active tab of w) starts with pageURL then
-						tell active tab of w to reload
-						set index of w to 1
-						activate
-						set found to true
-						exit repeat
-					end if
-				end repeat
-			end tell
-		end try
-	end if
-	if not found then do shell script "open -na 'Google Chrome' --args --app=" & quoted form of pageURL & " --window-size=1320,900"
-SHOW
-)
-else
-  SHOW_WINDOW='	do shell script "open " & quoted form of (base & "dashboard.html")'
-fi
-
+# ---- "SYNQ Dashboard" app: a real Mac window (built-in WebKit) that stays open with the SYNQ
+# icon in the Dock. It asks for keys the first time, refreshes the numbers in the background, and
+# opens links in your normal browser. Closing the window quits the app.
 cat > "$DIR/main.applescript" <<APPLESCRIPT
+use AppleScript version "2.4"
+use framework "Foundation"
+use framework "AppKit"
+use framework "WebKit"
+use scripting additions
+
+property theWindow : missing value
+property theWeb : missing value
+property theTimer : missing value
+
 on run
 	set base to POSIX path of (path to home folder) & "Library/Application Support/SYNQ Dashboard/"
 	-- First time (no keys filled in yet): open the keys file
@@ -95,17 +78,78 @@ on run
 	on error
 		do shell script "open -W " & quoted form of "$KEYS_APP"
 	end try
-	display notification "Pulling your latest numbers…" with title "SYNQ Dashboard"
+	-- Refresh the numbers in the background; the page picks them up on its own
+	do shell script "/usr/bin/osascript -l JavaScript " & quoted form of (base & "fetch.js") & " >/dev/null 2>&1 &"
 	try
-		do shell script "/usr/bin/osascript -l JavaScript " & quoted form of (base & "fetch.js")
+		my showWindow(base)
+	on error errMsg
+		-- If the app window can't be made, fall back to the browser
+		do shell script "open " & quoted form of (base & "dashboard.html")
+		quit
 	end try
-$SHOW_WINDOW
 end run
+
+on showWindow(base)
+	set ca to current application
+	set frame to ca's NSMakeRect(0, 0, 1360, 900)
+	set theWindow to ca's NSWindow's alloc()'s initWithContentRect:frame styleMask:15 backing:2 defer:false
+	theWindow's setTitle:"SYNQ Dashboard"
+	theWindow's setReleasedWhenClosed:false
+	theWindow's setMinSize:(ca's NSMakeSize(760, 560))
+	theWindow's setTitlebarAppearsTransparent:true
+	theWindow's setBackgroundColor:(ca's NSColor's colorWithRed:0.027 green:0.016 blue:0.016 alpha:1.0)
+	try
+		theWindow's setAppearance:(ca's NSAppearance's appearanceNamed:"NSAppearanceNameDarkAqua")
+	end try
+	theWindow's |center|()
+	theWindow's setFrameAutosaveName:"SYNQDashboardWindow"
+	set conf to ca's WKWebViewConfiguration's alloc()'s init()
+	set theWeb to ca's WKWebView's alloc()'s initWithFrame:frame configuration:conf
+	theWeb's setAutoresizingMask:18
+	try
+		theWeb's setValue:false forKey:"drawsBackground"
+	end try
+	theWindow's setContentView:theWeb
+	set pageURL to ca's NSURL's fileURLWithPath:(base & "dashboard.html")
+	set dirURL to ca's NSURL's fileURLWithPath:base
+	theWeb's loadFileURL:pageURL allowingReadAccessToURL:dirURL
+	theWindow's makeKeyAndOrderFront:me
+	ca's NSApp's activateIgnoringOtherApps:true
+	set theTimer to ca's NSTimer's scheduledTimerWithTimeInterval:0.4 target:me selector:"tick:" userInfo:(missing value) repeats:true
+end showWindow
+
+-- Twice a second: quit when the window is closed, and open links the page asks for
+on tick:t
+	if theWindow is missing value then return
+	if not ((theWindow's isVisible()) as boolean) and not ((theWindow's isMiniaturized()) as boolean) then
+		theTimer's invalidate()
+		current application's NSApp's terminate:(missing value)
+		return
+	end if
+	set u to theWeb's |URL|()
+	if u is missing value then return
+	set frag to u's fragment()
+	if frag is missing value then return
+	set frag to frag as text
+	if frag starts with "open=" then
+		theWeb's evaluateJavaScript:"history.replaceState(null, '', location.pathname)" completionHandler:(missing value)
+		set target to (current application's NSString's stringWithString:(text 6 thru -1 of frag))'s stringByRemovingPercentEncoding()
+		if target is not missing value then
+			set link to current application's NSURL's URLWithString:target
+			if link is not missing value then current application's NSWorkspace's sharedWorkspace()'s openURL:link
+		end if
+	end if
+end tick:
+
+-- Clicking the Dock icon brings the window back to the front
+on reopen
+	if theWindow is not missing value then theWindow's makeKeyAndOrderFront:me
+end reopen
 APPLESCRIPT
 
 rm -rf "$MAIN_APP" "$KEYS_APP"
 osacompile -o "$KEYS_APP" "$DIR/keys.applescript"
-osacompile -o "$MAIN_APP" "$DIR/main.applescript"
+osacompile -s -o "$MAIN_APP" "$DIR/main.applescript"
 
 # App icons
 if sips -s format icns "$DIR/icon.png" --out "$DIR/applet.icns" >/dev/null 2>&1; then

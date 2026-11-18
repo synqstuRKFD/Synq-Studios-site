@@ -69,7 +69,7 @@ function scrub(msg) {
 
 // HTTP through curl. The URL and headers (which carry keys) go in a private temp config
 // file read with -K, so they never appear on a command line or in the process list.
-function http(method, url, headers) {
+function http(method, url, headers, raw) {
   if (!IS_JXA && process.env.SYNQ_TEST_BASE) url = url.replace(/^https:\/\/[^/]+/, process.env.SYNQ_TEST_BASE); // local tests only
   const tmp = sh('mktemp -d').trim();
   const cq = v => '"' + String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
@@ -93,6 +93,7 @@ function http(method, url, headers) {
       else if (json && json.error) msg += ': ' + (json.error.message || json.error);
       throw new Error(scrub(msg));
     }
+    if (raw) return text;
     if (json === null) throw new Error('Unexpected reply from ' + url.split('/')[2]);
     return json;
   } finally { sh('rm -rf ' + q(tmp)); }
@@ -202,7 +203,45 @@ function square() {
         };
       }),
     };
-    return { location: loc.name || '', money, bookings };
+    // Studio details from Square: hours, address, services with prices, number of clients
+    const DAYS = { MON: 'Mon', TUE: 'Tue', WED: 'Wed', THU: 'Thu', FRI: 'Fri', SAT: 'Sat', SUN: 'Sun' };
+    const t12 = t => { const [h, m] = String(t || '').split(':').map(Number); if (isNaN(h)) return ''; return ((h % 12) || 12) + (m ? ':' + String(m).padStart(2, '0') : '') + (h < 12 ? 'am' : 'pm'); };
+    const hours = (((loc.business_hours || {}).periods) || []).map(p => ({ day: DAYS[p.day_of_week] || p.day_of_week, open: t12(p.start_local_time), close: t12(p.end_local_time) }));
+    const addr = loc.address || {};
+    let serviceList = [];
+    try {
+      let c = '', n = 0, items = [];
+      do {
+        const r = get('/v2/catalog/list?types=ITEM' + (c ? '&cursor=' + encodeURIComponent(c) : ''));
+        items = items.concat(r.objects || []); c = r.cursor || '';
+      } while (c && ++n < 10);
+      items.filter(o => !o.is_deleted && (o.item_data || {}).product_type === 'APPOINTMENTS_SERVICE').forEach(o => {
+        ((o.item_data || {}).variations || []).forEach(v => {
+          const d = v.item_variation_data || {};
+          const price = d.price_money ? d.price_money.amount / 100 : null;
+          serviceList.push({
+            name: o.item_data.name + (d.name && !/^regular$/i.test(d.name) && (o.item_data.variations || []).length > 1 ? ' · ' + d.name : ''),
+            price, variable: d.pricing_type === 'VARIABLE_PRICING' || price == null,
+            minutes: d.service_duration ? Math.round(d.service_duration / 60000) : null,
+          });
+        });
+      });
+      serviceList.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } catch (e) { /* optional */ }
+    let clients = null;
+    try {
+      let c = '', n = 0; clients = 0;
+      do {
+        const r = get('/v2/customers?limit=100' + (c ? '&cursor=' + encodeURIComponent(c) : ''));
+        clients += (r.customers || []).length; c = r.cursor || '';
+      } while (c && ++n < 30);
+    } catch (e) { clients = null; }
+    const studio = {
+      name: loc.business_name || loc.name || '', phone: loc.phone_number || '',
+      address: [addr.address_line_1, [addr.locality, addr.administrative_district_level_1].filter(Boolean).join(', '), addr.postal_code].filter(Boolean).join(' · '),
+      hours, services: serviceList, clients,
+    };
+    return { location: loc.name || '', money, bookings, studio };
   });
 }
 
@@ -266,6 +305,30 @@ function youtube(histPath) {
   });
 }
 
+// ---------- TikTok (public profile numbers; no key needed) ----------
+const TT_HANDLE = 'synqstudios';
+function tiktok(histPath) {
+  return safe('tiktok', () => {
+    const html = http('GET', 'https://www.tiktok.com/@' + TT_HANDLE, {
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36',
+      'Accept-Language': 'en-US,en;q=0.9',
+    }, true);
+    const m = html.match(/"statsV2":\{([^}]*)\}/) || html.match(/"stats":\{("followerCount"[^}]*)\}/);
+    if (!m) throw new Error('TikTok didn\u2019t share the numbers this time; it will try again later');
+    const st = JSON.parse('{' + m[1] + '}');
+    const followers = +st.followerCount || 0, likes = +(st.heartCount || st.heart) || 0, videos = +st.videoCount || 0;
+    let hist = {};
+    try { hist = JSON.parse(readFile(histPath) || '{}'); } catch (e) { hist = {}; }
+    hist[ymd(now)] = { followers, likes };
+    Object.keys(hist).sort().slice(0, -400).forEach(d => delete hist[d]);
+    writeFile(histPath, JSON.stringify(hist));
+    const days = Object.keys(hist).sort();
+    const back = d => { const target = ymd(new Date(today0.getTime() - d * DAY)); const k = days.filter(x => x <= target).pop(); return k ? hist[k] : null; };
+    const w = back(7);
+    return { followers, likes, videos, followersWeek: w ? followers - w.followers : null, since: days[0] };
+  });
+}
+
 // ---------- test each connection (prints only OK / problem, never key values) ----------
 function test() {
   const line = (name, varName, fn) => {
@@ -303,6 +366,7 @@ function run(argv) {
     square: square(),
     site: goat(),
     youtube: youtube(dir + '/youtube-history.json'),
+    tiktok: tiktok(dir + '/tiktok-history.json'),
   };
   writeFile(dir + '/data.js', 'window.SYNQ = ' + JSON.stringify(data) + ';\n');
   return 'Dashboard numbers updated.';
