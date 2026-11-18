@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SYNQ Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0606; --surface: #140a0a; --surface2: #1c0f0e; --border: #3a1717;
+    --text: #fff4ec; --muted: #c9a89a; --dim: #8a6a5f; --accent: #ff3b1f; --bar: #ff5a3c; --gold: #ffb21f; --good: #5fd08a;
+    --display: "Anton", Impact, sans-serif; --body: "Inter", system-ui, -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--body); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 28px 60px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 26px; }
+  h1 { font: 400 2.1rem/1 var(--display); letter-spacing: .01em; text-transform: uppercase; margin: 0; }
+  h1 span { color: var(--accent); }
+  .updated { color: var(--muted); font-size: .85rem; }
+  .updated b { color: var(--text); font-weight: 600; }
+  .stale { color: var(--gold); }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .links a { text-decoration: none; font-size: .82rem; font-weight: 600; color: var(--muted); border: 1px solid var(--border); border-radius: 4px; padding: .45em .8em; }
+  .links a:hover { color: var(--text); border-color: var(--dim); }
+
+  h2 { font: 400 1.05rem/1 var(--display); letter-spacing: .04em; text-transform: uppercase; margin: 0 0 14px; color: var(--text); }
+  h2 small { font: 500 .78rem var(--body); letter-spacing: 0; text-transform: none; color: var(--dim); margin-left: 8px; }
+  .section { margin-top: 34px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
+  .tile .label { color: var(--muted); font-size: .78rem; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; }
+  .tile .num { font: 400 2.2rem/1.1 var(--display); margin-top: 6px; letter-spacing: .01em; }
+  .tile .sub { color: var(--dim); font-size: .8rem; margin-top: 2px; }
+  .tile--hero { background: linear-gradient(135deg, #2a0d08, var(--surface)); border-color: #5a1d12; }
+  .tile--hero .num { color: #fff; }
+
+  .grid2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; margin-top: 10px; align-items: start; }
+  .grid2 > div, .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 18px; min-width: 0; }
+  @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+  .card h3 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 600; }
+
+  /* bar chart */
+  .chart { position: relative; height: 170px; display: flex; align-items: flex-end; gap: 2px; padding-top: 18px; border-bottom: 1px solid var(--border); }
+  .chart .b { flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end; cursor: default; }
+  .chart .b i { display: block; width: 100%; background: var(--bar); border-radius: 4px 4px 0 0; min-height: 0; }
+  .chart .b.zero i { background: var(--border); height: 2px !important; border-radius: 1px; }
+  .chart .b:hover i { background: #ff8a6a; }
+  .chart .max { position: absolute; top: 0; left: 0; font-size: .72rem; color: var(--dim); }
+  .axis { display: flex; justify-content: space-between; font-size: .72rem; color: var(--dim); margin-top: 6px; }
+  .tip { position: fixed; pointer-events: none; background: #fff4ec; color: #1a0d0a; font-size: .8rem; font-weight: 600; padding: 6px 9px; border-radius: 4px; white-space: nowrap; z-index: 10; display: none; box-shadow: 0 6px 20px rgba(0,0,0,.5); }
+
+  /* lists */
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); align-items: baseline; }
+  .list li:first-child { border-top: 0; padding-top: 0; }
+  .list .main { min-width: 0; }
+  .list .main b { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list .main small { color: var(--dim); font-size: .8rem; }
+  .list .val { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .list .meter { height: 4px; background: var(--surface2); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+  .list .meter i { display: block; height: 100%; background: var(--bar); border-radius: 2px; }
+  .flag { color: var(--gold); font-size: .75rem; font-weight: 700; margin-left: 6px; }
+  .day { color: var(--gold); font-weight: 700; font-size: .78rem; text-transform: uppercase; letter-spacing: .06em; }
+  .empty { color: var(--dim); font-size: .9rem; }
+
+  .notice { background: var(--surface); border: 1px dashed var(--dim); border-radius: 6px; padding: 16px 18px; color: var(--muted); }
+  .notice b { color: var(--text); }
+  .err { border-color: var(--gold); }
+  .err b { color: var(--gold); }
+  .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  @media (max-width: 900px) { .three { grid-template-columns: 1fr; } }
+  footer { margin-top: 40px; color: var(--dim); font-size: .8rem; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>SYNQ <span>Dashboard</span></h1>
+      <div class="updated" id="updated">Loading…</div>
+    </div>
+    <nav class="links" aria-label="Open your accounts">
+      <a href="https://squareup.com/dashboard" target="_blank">Square ↗</a>
+      <a href="https://squareup.com/appointments/calendar" target="_blank">Calendar ↗</a>
+      <a href="https://synqstudiosrkfd.goatcounter.com" target="_blank">Website stats ↗</a>
+      <a href="https://studio.youtube.com" target="_blank">YouTube Studio ↗</a>
+      <a href="https://www.tiktok.com/tiktokstudio" target="_blank">TikTok Studio ↗</a>
+      <a href="https://www.instagram.com/synq.studios/" target="_blank">Instagram ↗</a>
+      <a href="https://synqstudios815.com" target="_blank">Your site ↗</a>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <footer>Numbers refresh on their own every 15 minutes while your Mac is on. To refresh right now, open the SYNQ Dashboard app again. To change a key, open SYNQ Dashboard Keys.</footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const D = window.SYNQ;
+  const app = document.getElementById('app');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const n = x => (x == null ? '—' : Number(x).toLocaleString('en-US'));
+  const cur = (D && D.square && D.square.money && D.square.money.currency) || 'USD';
+  const money = x => (x == null ? '—' : Number(x).toLocaleString('en-US', { style: 'currency', currency: cur, maximumFractionDigits: Number(x) % 1 ? 2 : 0 }));
+  const dfmt = (iso, opt) => new Date(iso).toLocaleString('en-US', opt);
+  const shortDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+
+  if (!D) {
+    app.innerHTML = '<div class="notice"><b>No numbers yet.</b> Open the SYNQ Dashboard app to pull them in.</div>';
+    document.getElementById('updated').textContent = '';
+    return;
+  }
+
+  const up = new Date(D.updatedAt), mins = Math.round((Date.now() - up) / 6e4);
+  document.getElementById('updated').innerHTML = 'Updated <b>' + up.toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }) + '</b>' +
+    (mins > 60 ? ' <span class="stale">(' + Math.round(mins / 60) + ' hours ago)</span>' : '');
+
+  const tile = (label, num, sub, hero) => '<div class="tile' + (hero ? ' tile--hero' : '') + '"><div class="label">' + label + '</div><div class="num">' + num + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  const notice = (src, what, help) => {
+    if (src && src.missing) return '<div class="notice"><b>' + what + ' isn’t connected.</b> ' + help + '</div>';
+    return '<div class="notice err"><b>Couldn’t load ' + (what === 'Website stats' ? 'website stats' : what) + '.</b> ' + esc(src && src.error) + '</div>';
+  };
+  // Single-series bar chart with hover tooltips and a hidden table for screen readers
+  const bars = (rows, val, fmt, title) => {
+    const max = Math.max(1, ...rows.map(val));
+    return '<div class="chart" role="img" aria-label="' + esc(title) + '"><span class="max">' + fmt(max) + '</span>' +
+      rows.map(r => { const v = val(r); return '<div class="b' + (v ? '' : ' zero') + '" data-tip="' + esc(shortDay(r.day) + ': ' + fmt(v)) + '"><i style="height:' + (v / max * 100).toFixed(1) + '%"></i></div>'; }).join('') +
+      '</div><div class="axis"><span>' + (rows[0] ? shortDay(rows[0].day) : '') + '</span><span>Today</span></div>' +
+      '<table class="sr"><caption>' + esc(title) + '</caption>' + rows.map(r => '<tr><td>' + r.day + '</td><td>' + fmt(val(r)) + '</td></tr>').join('') + '</table>';
+  };
+  const ranked = (rows, fmt, empty) => {
+    if (!rows || !rows.length) return '<p class="empty">' + empty + '</p>';
+    const max = Math.max(1, ...rows.map(r => r.count));
+    return '<ul class="list">' + rows.map(r => '<li><div class="main" style="flex:1"><b>' + esc(r.name) + '</b><div class="meter"><i style="width:' + (r.count / max * 100) + '%"></i></div></div><span class="val">' + fmt(r.count) + '</span></li>').join('') + '</ul>';
+  };
+
+  let html = '';
+
+  // ----- Money & bookings (Square)
+  const S = D.square;
+  html += '<section class="section"><h2>Money & bookings <small>from Square</small></h2>';
+  if (S && S.ok) {
+    const m = S.money, b = S.bookings;
+    html += '<div class="tiles">' +
+      tile('Today', money(m.today), '', true) +
+      tile('This week', money(m.week), 'since Monday') +
+      tile('This month', money(m.month), n(m.countMonth) + ' payments · last month ' + money(m.lastMonth)) +
+      tile('This year', money(m.year)) +
+      tile('Bookings next 7 days', n(b.next7), n(b.next30) + ' in the next 30 days') +
+      tile('Booked this month', n(b.thisMonth), 'sessions so far') +
+      '</div>';
+    html += '<div class="grid2"><div><h3>Money per day · last 30 days</h3>' + bars(m.daily, r => r.amount, money, 'Money per day, last 30 days') + '</div><div><h3>Coming up</h3>';
+    if (b.list.length) {
+      let last = '';
+      html += '<ul class="list">' + b.list.map(x => {
+        const day = dfmt(x.at, { weekday: 'long', month: 'short', day: 'numeric' });
+        const head = day !== last ? (last = day, '<li style="border:0;padding-bottom:0"><span class="day">' + esc(day) + '</span></li>') : '';
+        return head + '<li><div class="main"><b>' + esc(x.who) + (x.status ? '<span class="flag">' + esc(x.status) + '</span>' : '') + '</b><small>' + esc(x.service) + (x.minutes ? ' · ' + (x.minutes >= 60 ? (x.minutes / 60) + ' hr' : x.minutes + ' min') : '') + '</small></div><span class="val">' + dfmt(x.at, { hour: 'numeric', minute: '2-digit' }) + '</span></li>';
+      }).join('') + '</ul>';
+    } else html += '<p class="empty">No bookings in the next 30 days.</p>';
+    html += '</div></div>';
+    if (m.recent.length) {
+      html += '<div class="card" style="margin-top:10px"><h3>Latest payments</h3><ul class="list">' + m.recent.map(p => '<li><div class="main"><b>' + esc(p.note || p.kind) + '</b><small>' + dfmt(p.at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + (p.note ? ' · ' + esc(p.kind) : '') + '</small></div><span class="val">' + money(p.amount) + '</span></li>').join('') + '</ul></div>';
+    }
+    html += '<p class="empty" style="margin-top:10px;font-size:.8rem">Only money that goes through Square shows here. Zelle, Cash App or cash deposits only count if you record them in Square.</p>';
+  } else html += notice(S, 'Square', 'Open <b>SYNQ Dashboard Keys</b> and paste your Square access token.');
+  html += '</section>';
+
+  // ----- Website (GoatCounter)
+  const W = D.site;
+  html += '<section class="section"><h2>Website <small>synqstudios815.com</small></h2>';
+  if (W && W.ok) {
+    const tap = name => (W.taps.find(t => t.name.indexOf(name) === 0) || {}).count || 0;
+    html += '<div class="tiles">' +
+      tile('Visitors today', n(W.today), '', true) +
+      tile('Last 7 days', n(W.week), 'visitors') +
+      tile('Last 30 days', n(W.month), 'visitors') +
+      tile('Tapped Book', n(tap('Tapped Book')), 'last 30 days') +
+      tile('Texts started', n(tap('Sent a text')), 'gave their name · 30 days') +
+      tile('Quote requests', n(tap('Sent a quote')), 'last 30 days') +
+      '</div>';
+    html += '<div class="grid2"><div><h3>Visitors per day · last 30 days</h3>' + bars(W.daily, r => r.visitors, n, 'Website visitors per day, last 30 days') + '</div>' +
+      '<div><h3>What people tapped · 30 days</h3>' + ranked(W.taps, n, 'No taps yet. They’ll show up as people use the site.') + '</div></div>';
+    html += '<div class="three"><div class="card"><h3>Where they came from</h3>' + ranked(W.refs, n, 'Nothing yet.') + '</div>' +
+      '<div class="card"><h3>Pages they looked at</h3>' + ranked(W.pages.map(p => ({ name: p.path === '/' ? 'Home (English)' : p.path === '/es.html' ? 'Home (Spanish)' : p.name, count: p.count })), n, 'Nothing yet.') + '</div>' +
+      '<div class="card"><h3>Where they are</h3>' + ranked(W.places, n, 'Nothing yet.') + '</div></div>';
+  } else html += notice(W, 'Website stats', 'Open <b>SYNQ Dashboard Keys</b> and paste your GoatCounter API key.');
+  html += '</section>';
+
+  // ----- YouTube
+  const Y = D.youtube;
+  html += '<section class="section"><h2>YouTube <small>@SynqStudios</small></h2>';
+  if (Y && Y.ok) {
+    const gain = (v, label) => v == null ? 'counting starts ' + shortDay(Y.since) : '+' + n(v) + ' ' + label;
+    html += '<div class="tiles">' +
+      tile('Total views', n(Y.views), gain(Y.viewsWeek, 'this week'), true) +
+      tile('Views last 30 days', Y.viewsMonth == null ? '—' : '+' + n(Y.viewsMonth), Y.viewsMonth == null ? 'needs 30 days of history' : '') +
+      tile('Subscribers', n(Y.subs)) +
+      tile('Videos', n(Y.videoCount)) +
+      '</div>';
+    if (Y.videos.length) html += '<div class="card" style="margin-top:10px"><h3>Latest videos</h3><ul class="list">' + Y.videos.map(v => '<li><div class="main"><b><a href="' + esc(v.url) + '" target="_blank" style="text-decoration:none">' + esc(v.title) + '</a></b><small>' + dfmt(v.at, { month: 'short', day: 'numeric', year: 'numeric' }) + '</small></div><span class="val">' + n(v.views) + ' views</span></li>').join('') + '</ul></div>';
+  } else html += notice(Y, 'YouTube', 'Open <b>SYNQ Dashboard Keys</b> and paste your YouTube API key.');
+  html += '</section>';
+
+  html += '<section class="section"><h2>TikTok</h2><div class="notice">TikTok doesn’t share numbers with outside apps. <a href="https://www.tiktok.com/tiktokstudio" target="_blank"><b>Open TikTok Studio ↗</b></a> for views and followers.</div></section>';
+
+  app.innerHTML = html;
+
+  // Hover tooltips for bars
+  const tip = document.getElementById('tip');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', () => { tip.textContent = el.dataset.tip; tip.style.display = 'block'; });
+    el.addEventListener('mousemove', e => { tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY - 36) + 'px'; });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+})();
+// Pick up fresh numbers every 2 minutes (the Mac refreshes them every 15)
+setTimeout(() => location.reload(), 120000);
+</script>
+</body>
+</html>
