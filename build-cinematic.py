@@ -552,6 +552,9 @@ if SITE_URL:
             for path in ("", "es.html"))
         + "</urlset>\n")
 (DIST / "robots.txt").write_text(robots)
+# Small marker so you can check which version is live: https://synqstudios815.com/version.txt
+import datetime as _dt
+(DIST / "version.txt").write_text(f"SYNQ Studios website, last updated {_dt.date.today().isoformat()}\n")
 
 # Spanish page Google can read: render index.html in Spanish and save it as es.html
 r = subprocess.run(["node", str(ROOT / "prerender-es.js"), str(DIST / "index.html"), str(DIST / "es.html")],
