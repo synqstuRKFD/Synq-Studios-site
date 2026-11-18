@@ -239,7 +239,7 @@
             <div><dt data-es="Idiomas" data-en="Languages">Idiomas</dt><dd>English · Español</dd></div>
           </dl>
         </div>
-        <!-- Booking quiz. Netlify collects submissions (Site → Forms → "booking") and emails them to you. -->
+        <!-- Booking quiz. Submissions post to Web3Forms (https://api.web3forms.com/submit), which emails them to you. -->
         <form class="quiz" name="booking" method="POST" action="https://api.web3forms.com/submit" novalidate="">
           <input type="hidden" name="form-name" value="booking">
           <input type="hidden" name="access_key" value="27ca1c93-1469-46f4-a1f9-621038316430">
@@ -312,7 +312,7 @@
 
     <section class="block textclub">
       <div class=""><h2 data-es="Lista de textos" data-en="Text list">Lista de textos</h2><p class="muted" data-es="Te avisamos cuando se abre un espacio de último minuto o sale un nuevo En Vivo." data-en="Get a text when a last-minute spot opens up or a new En Vivo comes out.">Te avisamos cuando se abre un espacio de último minuto o sale un nuevo En Vivo.</p></div>
-      <!-- Netlify collects these too (Site → Forms → "text-list") -->
+      <!-- Text list signups also post to Web3Forms (https://api.web3forms.com/submit), which emails them to you. -->
       <form class="textclub__form" name="text-list" method="POST" action="https://api.web3forms.com/submit">
         <input type="hidden" name="form-name" value="text-list">
           <input type="hidden" name="access_key" value="27ca1c93-1469-46f4-a1f9-621038316430">

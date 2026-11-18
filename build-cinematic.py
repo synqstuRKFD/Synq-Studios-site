@@ -282,7 +282,7 @@ TEMPLATE = """<!doctype html>
             <div><dt data-es="Idiomas">Languages</dt><dd>English · Español</dd></div>
           </dl>
         </div>
-        <!-- Booking quiz. Netlify collects submissions (Site → Forms → "booking") and emails them to you. -->
+        <!-- Booking quiz. Submissions post to Web3Forms (https://api.web3forms.com/submit), which emails them to you. -->
         <form class="quiz" name="booking" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field" novalidate>
           <input type="hidden" name="form-name" value="booking">
           <p hidden><label>Leave this empty <input name="bot-field"></label></p>
@@ -351,7 +351,7 @@ TEMPLATE = """<!doctype html>
 
     <section class="block textclub">
       <div><h2 data-es="Lista de textos">Text list</h2><p class="muted" data-es="Te avisamos cuando se abre un espacio de último minuto o sale un nuevo En Vivo.">Get a text when a last-minute spot opens up or a new En Vivo comes out.</p></div>
-      <!-- Netlify collects these too (Site → Forms → "text-list") -->
+      <!-- Text list signups also post to Web3Forms (https://api.web3forms.com/submit), which emails them to you. -->
       <form class="textclub__form" name="text-list" method="POST" action="/" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="text-list">
         <p hidden><label>Leave this empty <input name="bot-field"></label></p>
@@ -580,6 +580,53 @@ if SITE_URL:
 # GitHub Pages: custom domain + serve files as-is (no Jekyll processing)
 (DIST / "CNAME").write_text("synqstudios815.com\n")
 (DIST / ".nojekyll").write_text("")
+
+# Custom 404 page for GitHub Pages. Absolute paths so it works at any URL depth.
+NOT_FOUND = """<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Page not found | SYNQ Studios</title>
+  <link rel="icon" href="/images/synq-logo.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/layouts/base.css">
+  <link rel="stylesheet" href="/layouts/cine.css">
+  <link rel="stylesheet" href="/layouts/cine-fuego.css">
+  <style>
+    .nf { min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 120px var(--pad) 60px;
+          background: radial-gradient(ellipse 60% 50% at 50% 40%, rgba(255,59,31,.14), transparent 70%); }
+    .nf__code { font-family: var(--font-display); font-size: clamp(6rem, 22vw, 12rem); line-height: .9; color: var(--accent); margin: 0; }
+    .nf h1 { font-size: clamp(1.8rem, 5vw, 3rem); margin: .4em 0 .1em; }
+    .nf__es { font-family: var(--font-display); text-transform: uppercase; font-size: clamp(1.2rem, 3.4vw, 1.9rem); color: var(--muted); margin: 0 0 1.2rem; }
+    .nf p.muted { max-width: 520px; margin: 0 auto .4rem; }
+    .nf .hero__cta { justify-content: center; margin-top: 1.8rem; }
+  </style>
+</head>
+<body class="cine cine--fuego">
+  <header class="top solid">
+    <a href="/" class="brand"><img src="/images/synq-mark.png" alt="" width="22" height="26"><span>SYNQ STUDIOS</span></a>
+    <a href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" class="pill pill--solid">Book</a>
+  </header>
+  <main class="nf">
+    <div>
+      <p class="nf__code">404</p>
+      <h1>Page not found</h1>
+      <p class="nf__es" lang="es">Página no encontrada</p>
+      <p class="muted">This page doesn't exist or has moved.</p>
+      <p class="muted" lang="es">Esta página no existe o se movió.</p>
+      <div class="hero__cta">
+        <a href="/" class="pill pill--solid">Home</a>
+        <a href="/es.html" class="pill" lang="es">Página en español</a>
+        <a href="https://squareup.com/appointments/book/L6PTGPVMKXW8A" target="_blank" rel="noopener" class="pill">Book a session / Reservar</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
+"""
+(DIST / "404.html").write_text(NOT_FOUND)
 # Small marker so you can check which version is live: https://synqstudios815.com/version.txt
 import datetime as _dt
 (DIST / "version.txt").write_text(f"SYNQ Studios website, last updated {_dt.datetime.now(_dt.timezone.utc):%Y-%m-%d %H:%M} UTC\n")
