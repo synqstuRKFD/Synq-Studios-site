@@ -587,7 +587,9 @@ if SITE_URL:
 # Suit designer at /trajes/
 TRAJES = DIST / "trajes"
 TRAJES.mkdir(parents=True, exist_ok=True)
-for f in ["index.html", "trajes.css", "suit.js", "app.js"]:
+for f in ["index.html", "trajes.css", "app.js", "studio.js", "vendor/three.module.min.js", "vendor/OrbitControls.js",
+          "vendor/DecalGeometry.js", "vendor/RoomEnvironment.js", "vendor/three-LICENSE.txt"]:
+    (TRAJES / f).parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / "trajes" / f, TRAJES / f)
 (DIST / "images").mkdir(exist_ok=True)
 shutil.copy2(ROOT / "images" / "synq-mark.png", DIST / "images" / "synq-mark.png")

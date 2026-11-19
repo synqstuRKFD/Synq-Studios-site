@@ -4,17 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Diseña tu traje | SYNQ Studios</title>
-<meta name="description" content="Diseña el traje de tu grupo: gamuza, terciopelo, glitter, bordado y pedrería. Mira exactamente cómo va a quedar y mándale la hoja a tu sastre.">
+<meta name="description" content="Diseña el traje de tu grupo en 3D: satín, terciopelo, gamuza, lentejuela, tu logo bordado o en pedrería. Gíralo, compártelo y mándale la hoja a tu sastre.">
 <meta name="theme-color" content="#0a0606">
-<meta property="og:title" content="Diseña tu traje | SYNQ Studios">
-<meta property="og:description" content="Diseña el traje de tu grupo y mira exactamente cómo va a quedar antes de mandarlo al sastre.">
+<meta property="og:title" content="Diseña tu traje en 3D | SYNQ Studios">
+<meta property="og:description" content="Diseña el traje de tu grupo en 3D y mira exactamente cómo va a quedar antes de mandarlo al sastre.">
 <meta property="og:image" content="https://synqstudios815.com/images/og-share.jpg">
 <link rel="canonical" href="https://synqstudios815.com/trajes/">
 <link rel="icon" href="/images/synq-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Rye&family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Rye&family=Great+Vibes&family=UnifrakturMaguntia&family=Pirata+One&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="trajes.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
 </head>
 <body>
 <header class="bar">
@@ -30,15 +31,18 @@
 </header>
 
 <main class="app">
-  <section class="stage" aria-label="Vista del traje">
-    <div class="stage__views" role="tablist">
-      <button type="button" data-view="front" class="on" data-t="front">Frente</button>
-      <button type="button" data-view="back" data-t="back">Espalda</button>
-      <button type="button" data-view="both" data-t="both">Ambos</button>
-    </div>
-    <div class="stage__paper" id="paper" title="Toca para ver en grande">
-      <svg id="svgFront" class="suit" role="img" aria-label="Frente del traje"></svg>
-      <svg id="svgBack" class="suit" role="img" aria-label="Espalda del traje"></svg>
+  <section class="stage" aria-label="Vista del traje en 3D">
+    <div class="viewport" id="viewport">
+      <div class="loading" id="loading"><span></span><b data-t="loading">Preparando el maniquí…</b></div>
+      <div class="placing" id="placing" hidden><b data-t="tapToPlace">Toca el traje donde lo quieres</b><button type="button" id="cancelPlace" data-t="cancel">Cancelar</button></div>
+      <div class="views">
+        <button type="button" data-view="front" data-t="front">Frente</button>
+        <button type="button" data-view="back" data-t="back">Espalda</button>
+        <button type="button" data-view="left" data-t="sideL">Lado</button>
+        <button type="button" data-view="right" data-t="sideR">Otro lado</button>
+        <button type="button" id="btnSpin" aria-pressed="false" data-t="spin">Girar</button>
+      </div>
+      <p class="hint3d" data-t="dragHint">Arrastra para girar · pellizca para acercar</p>
     </div>
     <div class="stage__foot">
       <input class="name" id="designName" maxlength="40" aria-label="Nombre del diseño">
@@ -59,12 +63,6 @@
   <button type="button" data-act="btnMine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z M4 9h16 M9 9v10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-t="mineShort">Mis trajes</span></button>
 </nav>
 
-<dialog class="dlg dlg--zoom" id="dlgZoom">
-  <form method="dialog"><button class="zoom__close" value="close" aria-label="Cerrar">✕</button></form>
-  <div class="zoom__wrap" id="zoomWrap"></div>
-  <p class="zoom__hint" data-t="zoomHint">Pellizca para acercar.</p>
-</dialog>
-
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <dialog class="dlg" id="dlgMine">
@@ -76,7 +74,7 @@
   </form>
 </dialog>
 
-<!-- Printable sheet for the tailor -->
+<input type="file" id="fileInput" accept="image/*" multiple hidden>
 <section class="sheet" id="sheet" aria-hidden="true"></section>
 
 <footer class="foot">
@@ -84,8 +82,7 @@
   <a href="/" data-t="visit">Visita el estudio</a>
 </footer>
 
-<script src="suit.js"></script>
-<script src="app.js"></script>
+<script type="module" src="app.js"></script>
 <script data-goatcounter="https://synqstudiosrkfd.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>
