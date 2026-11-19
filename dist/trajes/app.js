@@ -13,6 +13,7 @@ const T = {
     piping: 'Vivos (cordón en las costuras)', pipOn: 'Ponerle vivos', pipSides: 'Costuras de los lados', pipRacing: 'Líneas curvas (estilo carrera)', pipLapels: 'Orilla de las solapas', pipFront: 'Orilla del cierre', pipPants: 'Pantalón', pipSleeves: 'Mangas', pipCuffs: 'Puños', pipSize: 'Grosor',
     fMetallic: 'Piel metálica', fCrushed: 'Terciopelo arrugado', fFoil: 'Foil espejo', fSnake: 'Piel de víbora', fQuilted: 'Acolchado',
     bright: 'Brillo', recent: 'Recientes', quick: 'Colores rápidos', pickScreen: 'Tomar color de la pantalla',
+    secMannequin: 'Maniquí', mqWhite: 'Blanco sin cara', mqBlack: 'Negro sin cara', mqCarved: 'Gris con cara', mqHeadless: 'Sin cabeza', mqGhost: 'Invisible', mqHuman: 'Persona',
     tPieces: 'Piezas', secJacket: 'Saco', secPants: 'Pantalón', secShirt: 'Camisa y cuello', secShoes: 'Calzado y tejana', secPanels: 'Paneles', secPiping: 'Vivos', secHardware: 'Metales',
     startFrom: 'Empezar desde', length: 'Largo', fit: 'Ajuste', fitSlim: 'Entallado', fitLoose: 'Holgado', collar: 'Cuello', cNotch: 'Solapa muesca', cPeak: 'Solapa pico', cShawl: 'Solapa chal', cStand: 'Cuello parado', cRib: 'Cuello de resorte', cShirt: 'Cuello camisero', cNone: 'Sin cuello',
     closure: 'Cierre', clButtons: 'Botones', clZipper: 'Cierre (zipper)', clSnaps: 'Broches', clOpen: 'Abierto', count: 'Cuántos', pockets: 'Bolsas', pkNone: 'Sin bolsas', pkFlap: 'Con cartera', pkWelt: 'De ribete', pkZip: 'Con zipper', pkPatch: 'De parche',
@@ -57,6 +58,7 @@ const T = {
     piping: 'Piping (cord along the seams)', pipOn: 'Add piping', pipSides: 'Side seams', pipRacing: 'Curved lines (racing style)', pipLapels: 'Lapel edges', pipFront: 'Zipper edges', pipPants: 'Pants', pipSleeves: 'Sleeves', pipCuffs: 'Cuffs', pipSize: 'Thickness',
     fMetallic: 'Metallic leather', fCrushed: 'Crushed velvet', fFoil: 'Mirror foil', fSnake: 'Snakeskin', fQuilted: 'Quilted',
     bright: 'Brightness', recent: 'Recent', quick: 'Quick colors', pickScreen: 'Pick a color from the screen',
+    secMannequin: 'Mannequin', mqWhite: 'White faceless', mqBlack: 'Black faceless', mqCarved: 'Gray with face', mqHeadless: 'Headless', mqGhost: 'Invisible', mqHuman: 'Person',
     tPieces: 'Pieces', secJacket: 'Jacket', secPants: 'Pants', secShirt: 'Shirt & neck', secShoes: 'Shoes & hat', secPanels: 'Panels', secPiping: 'Piping', secHardware: 'Hardware',
     startFrom: 'Start from', length: 'Length', fit: 'Fit', fitSlim: 'Slim', fitLoose: 'Loose', collar: 'Collar', cNotch: 'Notch lapel', cPeak: 'Peak lapel', cShawl: 'Shawl lapel', cStand: 'Stand collar', cRib: 'Rib collar', cShirt: 'Shirt collar', cNone: 'No collar',
     closure: 'Closure', clButtons: 'Buttons', clZipper: 'Zipper', clSnaps: 'Snaps', clOpen: 'Open', count: 'How many', pockets: 'Pockets', pkNone: 'No pockets', pkFlap: 'Flap', pkWelt: 'Welt', pkZip: 'Zipper', pkPatch: 'Patch',
@@ -517,10 +519,11 @@ const PANES = {
     const piping = sec(t('secPiping'), [toggle(t('pipOn'), pp.on, v => shape(d => { d.piping.on = v; }))].concat(pp.on ? pipOpts.map(([key, l]) => toggle(t(l), pp[key], v => shape(d => { d.piping[key] = v; })))
       .concat([slider(t('pipSize'), 2, 8, 0.5, +(pp.size * 2000).toFixed(1), v => v.toFixed(1) + ' mm', (v, live) => { if (!live) shape(d => { d.piping.size = v / 2000; }); }),
         h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'piping'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('color') + ' →'])]) : []));
+    const mq = sec(t('secMannequin'), [opts([['faceless-white', t('mqWhite')], ['faceless-black', t('mqBlack')], ['carved', t('mqCarved')], ['headless', t('mqHeadless')], ['ghost', t('mqGhost')], ['human', t('mqHuman')]], D.mannequin || 'faceless-white', v => shape(d => { d.mannequin = v; }))]);
     const hw = sec(t('secHardware'), [opts([['gold', t('gold')], ['silver', t('silver')], ['black', t('black')]], D.hardware, v => color(d => { d.hardware = v; }))]);
     // remember which sections are open while editing
     const keep = store.get('synq-acc') || { 0: true };
-    const all = [jacket, pants, shirt, shoes, panels, piping, hw];
+    const all = [jacket, pants, shirt, shoes, mq, panels, piping, hw];
     all.forEach((el, i) => { el.open = !!keep[i]; el.addEventListener('toggle', () => { keep[i] = el.open; store.set('synq-acc', keep); }); });
     return all;
   },

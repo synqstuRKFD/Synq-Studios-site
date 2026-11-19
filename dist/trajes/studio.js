@@ -414,35 +414,80 @@ export function createStudio(host) {
   composer.addPass(new OutputPass());
 
   // the mannequin (stays the same)
-  const skin = fabric('skin', '#cfc8bd');
+  // ---------- mannequin choices ----------
+  // carved: gray store mannequin with a face · faceless-white / faceless-black: smooth high-end display head
+  // headless: store form cut at the neck · ghost: no body, the suit holds its own shape · human: skin, face and hair
   const mannequin = new THREE.Group(); scene.add(mannequin);
-  const add = (g, m, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; (parent || mannequin).add(mesh); return mesh; };
-  // only the head, neck and hands ever show; the suit covers the rest
-  add(rings(TORSO, 1.36, 1.5, full, -0.004, 64, 12), skin);
-  add(new THREE.CylinderGeometry(0.046, 0.054, 0.15, 40), skin).position.set(0, 1.56, -0.01);
-  const hg = new THREE.SphereGeometry(1, 96, 64), hp = hg.attributes.position;
   const G = (x, y, cx, cy, sx, sy) => Math.exp(-(((x - cx) / sx) ** 2) - (((y - cy) / sy) ** 2));
-  for (let i = 0; i < hp.count; i++) {
-    let x = hp.getX(i), y = hp.getY(i), z = hp.getZ(i);
-    if (y < -0.1) { const k = 1 - 0.22 * Math.min(1, (-0.1 - y) / 0.8); x *= k; if (z < 0) z *= 1 - 0.25 * Math.min(1, (-0.1 - y) / 0.8); } // narrower jaw
-    if (z < 0 && y > -0.1) z *= 1.08; // fuller back of the skull
-    if (z > 0) {
-      z += 0.16 * G(x, y, 0, -0.08, 0.1, 0.22) * z;          // nose
-      z += 0.07 * G(x, y, 0, 0.22, 0.55, 0.08) * z;          // brow
-      z -= 0.07 * (G(x, y, -0.33, 0.1, 0.17, 0.11) + G(x, y, 0.33, 0.1, 0.17, 0.11)) * z; // eye sockets
-      z += 0.08 * G(x, y, 0, -0.72, 0.3, 0.14) * z;          // chin
-      z -= 0.03 * G(x, y, 0, -0.42, 0.25, 0.06) * z;         // under the lip
+  function headGeo(features) {
+    const hg = new THREE.SphereGeometry(1, 96, 64), hp = hg.attributes.position;
+    for (let i = 0; i < hp.count; i++) {
+      let x = hp.getX(i), y = hp.getY(i), z = hp.getZ(i);
+      if (y < -0.1) { const k = 1 - 0.22 * Math.min(1, (-0.1 - y) / 0.8); x *= k; if (z < 0) z *= 1 - 0.25 * Math.min(1, (-0.1 - y) / 0.8); }
+      if (z < 0 && y > -0.1) z *= 1.08;
+      if (features && z > 0) {
+        z += 0.16 * G(x, y, 0, -0.08, 0.1, 0.22) * z;
+        z += 0.07 * G(x, y, 0, 0.22, 0.55, 0.08) * z;
+        z -= 0.07 * (G(x, y, -0.33, 0.1, 0.17, 0.11) + G(x, y, 0.33, 0.1, 0.17, 0.11)) * z;
+        z += 0.08 * G(x, y, 0, -0.72, 0.3, 0.14) * z;
+        z -= 0.03 * G(x, y, 0, -0.42, 0.25, 0.06) * z;
+        z += 0.025 * G(x, y, 0, -0.5, 0.18, 0.05) * z; // lips
+      }
+      if (features) x *= 1 + 0.06 * (G(x, y, -0.95, 0.05, 0.15, 0.2) + G(x, y, 0.95, 0.05, 0.15, 0.2));
+      hp.setXYZ(i, x, y, z);
     }
-    x *= 1 + 0.06 * (G(x, y, -0.95, 0.05, 0.15, 0.2) + G(x, y, 0.95, 0.05, 0.15, 0.2)); // ears
-    hp.setXYZ(i, x, y, z);
+    hg.computeVertexNormals(); return hg;
   }
-  hg.computeVertexNormals();
-  const head = add(hg, skin); head.scale.set(0.078, 0.105, 0.095); head.position.set(0, 1.69, 0.004);
-  [-1, 1].forEach(s => {
-    const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
-    add(rings(ARM, -0.62, -0.52, full, 0, 40, 10), skin, arm);
-    const hand = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); hand.scale.set(0.02, 0.074, 0.032); hand.position.set(0, -0.67, 0.01); hand.rotation.x = -0.12;
-  });
+  const MANNEQUINS = {
+    carved: { color: '#cfc8bd', rough: 0.78, head: 'features' },
+    'faceless-white': { color: '#ecebe8', rough: 0.55, head: 'smooth' },
+    'faceless-black': { color: '#161616', rough: 0.45, head: 'smooth' },
+    headless: { color: '#e9e6e0', rough: 0.7, head: 'none' },
+    ghost: { color: '#1b1716', rough: 1, head: 'ghost' },
+    human: { color: '#a8714d', rough: 0.62, head: 'human' },
+  };
+  let mannequinKind = null;
+  function buildMannequin(kind) {
+    if (kind === mannequinKind) return; mannequinKind = kind;
+    while (mannequin.children.length) { const c = mannequin.children.pop(); c.traverse(o => { if (o.geometry) o.geometry.dispose(); }); }
+    const M = MANNEQUINS[kind] || MANNEQUINS.carved;
+    const skin = new THREE.MeshPhysicalMaterial({ color: M.color, roughness: M.rough, metalness: 0, envMapIntensity: 0.5 });
+    if (kind === 'human') { skin.sheen = 0.3; skin.sheenColor = new THREE.Color('#ffd6c0'); skin.sheenRoughness = 0.5; }
+    const add = (g, m, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; (parent || mannequin).add(mesh); return mesh; };
+    if (M.head === 'ghost') {
+      // hollow look: dark inside at the neck and the sleeve openings
+      const inside = new THREE.MeshBasicMaterial({ color: 0x0d0b0a, side: THREE.DoubleSide });
+      const nk = add(new THREE.CircleGeometry(1, 40), inside); nk.scale.set(0.066, 0.06, 1); nk.rotation.x = -Math.PI / 2; nk.position.set(0, 1.497, -0.006);
+      [-1, 1].forEach(s => { const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
+        const c = add(new THREE.CircleGeometry(1, 32), inside, arm); c.scale.set(0.046, 0.044, 1); c.rotation.x = Math.PI / 2; c.position.set(0, -0.598, 0); });
+      return;
+    }
+    add(rings(TORSO, 1.36, 1.5, full, -0.004, 64, 12), skin);
+    if (M.head === 'none') {
+      add(new THREE.CylinderGeometry(0.046, 0.054, 0.1, 40), skin).position.set(0, 1.54, -0.01);
+      const cap = add(new THREE.CylinderGeometry(0.047, 0.047, 0.008, 40), fabric('metal', '#b9bcc2')); cap.position.set(0, 1.594, -0.01);
+    } else {
+      add(new THREE.CylinderGeometry(0.046, 0.054, 0.15, 40), skin).position.set(0, 1.56, -0.01);
+      const head = add(headGeo(M.head === 'features' || M.head === 'human'), skin);
+      if (M.head === 'smooth') { head.scale.set(0.074, 0.1, 0.088); head.position.set(0, 1.69, 0.0); }
+      else { head.scale.set(0.078, 0.105, 0.095); head.position.set(0, 1.69, 0.004); }
+      if (M.head === 'human') {
+        // short dark hair, eyebrows and eyes
+        const hairM = new THREE.MeshStandardMaterial({ color: 0x17110d, roughness: 0.9 });
+        const hair = add(new THREE.SphereGeometry(1, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.5), hairM); hair.scale.set(0.082, 0.07, 0.1); hair.position.set(0, 1.715, -0.006); hair.rotation.x = -0.25;
+        [-1, 1].forEach(sd => {
+          const eye = add(new THREE.SphereGeometry(0.0085, 16, 12), new THREE.MeshStandardMaterial({ color: 0x1a120e, roughness: 0.3 })); eye.position.set(sd * 0.026, 1.7, 0.083);
+          const brow = add(new THREE.BoxGeometry(0.026, 0.005, 0.006), hairM); brow.position.set(sd * 0.027, 1.718, 0.088); brow.rotation.z = -sd * 0.12;
+        });
+      }
+    }
+    [-1, 1].forEach(s => {
+      const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
+      add(rings(ARM, -0.62, -0.52, full, 0, 40, 10), skin, arm);
+      const hand = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); hand.scale.set(0.02, 0.074, 0.032); hand.position.set(0, -0.67, 0.01); hand.rotation.x = -0.12;
+    });
+  }
+  buildMannequin('carved');
 
   const suit = new THREE.Group(); scene.add(suit);
   const decals = new THREE.Group(); scene.add(decals);
@@ -474,6 +519,7 @@ export function createStudio(host) {
 
   function build(d) {
     clear(suit); pickables.length = 0;
+    buildMannequin(d.mannequin || 'faceless-white');
     makeMats(d);
     const put = (g, m, part, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; mesh.userData.part = part; mesh.userData.matKey = Object.keys(mats).find(k => mats[k] === m); (parent || suit).add(mesh); if (part) pickables.push(mesh); return mesh; };
     const J = jacketCfg(d), PN = Object.assign({ fit: 0.3, belt: true, turnups: false }, d.pantsCfg || {});
