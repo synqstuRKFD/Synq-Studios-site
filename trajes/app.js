@@ -392,10 +392,11 @@ function thumb(id, pressed, onClick, onRemove) {
 let selectedImage = null, selectedDecal = null, placing = false;
 function startPlacing(imageId) {
   selectedImage = imageId; placing = true;
+  if (matchMedia('(max-width: 900px)').matches) document.documentElement.style.setProperty('--sheet', '96px');
   $('#placing').hidden = false; viewport.classList.add('is-placing');
   if (matchMedia('(max-width: 900px)').matches) viewport.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 }
-function stopPlacing() { placing = false; $('#placing').hidden = true; viewport.classList.remove('is-placing'); }
+function stopPlacing() { window.__sheetRestore && window.__sheetRestore(); placing = false; $('#placing').hidden = true; viewport.classList.remove('is-placing'); }
 $('#cancelPlace').addEventListener('click', stopPlacing);
 
 let drag = null;
@@ -450,7 +451,7 @@ let current = store.get('synq-traje3d-tab') || 'styles', zone = 'body';
 const tabsEl = $('#tabs'), panes = $('#panes');
 function buildTabs() {
   tabsEl.innerHTML = '';
-  TABS.forEach(([k, label]) => tabsEl.appendChild(h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === current), on: { click: () => { current = k; store.set('synq-traje3d-tab', k); buildTabs(); buildPane(k); } } }, [t(label)])));
+  TABS.forEach(([k, label]) => tabsEl.appendChild(h('button', { type: 'button', role: 'tab', 'aria-selected': String(k === current), on: { click: () => { current = k; store.set('synq-traje3d-tab', k); buildTabs(); buildPane(k); window.__sheetOpen && window.__sheetOpen(); } } }, [t(label)])));
 }
 const fileInput = $('#fileInput');
 fileInput.addEventListener('change', async () => { await addFiles([...fileInput.files]); fileInput.value = ''; });
@@ -760,6 +761,31 @@ $('#btnSheet').addEventListener('click', () => {
   count('trajes-sheet', 'Printed a tailor sheet');
   setTimeout(() => window.print(), 80);
 });
+
+// ---------- phone: bottom sheet you can slide up and down ----------
+(function sheet() {
+  const mq = matchMedia('(max-width: 900px)'), panel = document.querySelector('.panel'), handle = document.getElementById('sheetHandle'), root = document.documentElement;
+  const SIZES = () => { const vh = innerHeight, bar = 54, mb = 64; return { peek: 96, half: Math.round(vh * 0.46), full: Math.round(vh - bar - mb - 110) }; };
+  let state = store.get('synq-sheet') || 'half';
+  const apply = (px) => root.style.setProperty('--sheet', px + 'px');
+  const set = st => { state = st; store.set('synq-sheet', st); root.dataset.sheet = st; apply(SIZES()[st]); };
+  window.__sheetOpen = () => { if (mq.matches && state === 'peek') set('half'); };
+  window.__sheetRestore = () => { if (mq.matches) set(state); };
+  if (mq.matches) set(state);
+  mq.addEventListener('change', () => { if (mq.matches) set(state); else root.style.removeProperty('--sheet'); });
+  addEventListener('resize', () => { if (mq.matches) set(state); });
+  let start = null;
+  handle.addEventListener('pointerdown', e => { start = { y: e.clientY, h: panel.getBoundingClientRect().height, moved: false }; handle.setPointerCapture(e.pointerId); panel.classList.add('dragging'); document.body.classList.add('sheet-drag'); });
+  handle.addEventListener('pointermove', e => { if (!start) return; const dy = start.y - e.clientY; if (Math.abs(dy) > 4) start.moved = true; const S = SIZES(); apply(Math.max(S.peek, Math.min(S.full, start.h + dy))); });
+  const end = e => {
+    if (!start) return; panel.classList.remove('dragging'); document.body.classList.remove('sheet-drag');
+    const S = SIZES(), h = panel.getBoundingClientRect().height;
+    if (!start.moved) set(state === 'peek' ? 'half' : state === 'half' ? 'full' : 'peek');
+    else set(['peek', 'half', 'full'].reduce((a, b) => Math.abs(S[b] - h) < Math.abs(S[a] - h) ? b : a));
+    start = null;
+  };
+  handle.addEventListener('pointerup', end); handle.addEventListener('pointercancel', end);
+})();
 
 // ---------- phone action bar ----------
 document.querySelectorAll('.mobilebar [data-act]').forEach(b => b.addEventListener('click', () => document.getElementById(b.dataset.act).click()));
