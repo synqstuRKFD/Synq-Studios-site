@@ -39,11 +39,16 @@ fi
 
 say "Installing SYNQ Dashboard…"
 mkdir -p "$DIR" "$APPS" "$HOME/Library/LaunchAgents"
-for f in fetch.js dashboard.html icon.png logo.png logo-edge.png .env.example; do
+mkdir -p "$DIR/vendor"
+for f in fetch.js dashboard.html icon.png logo.png logo-edge.png .env.example vendor/nacl-fast.min.js vendor/scrypt.js vendor/qrcode.js; do
   curl -fsSL "$RAW/$f?$(date +%s)" -o "$DIR/$f"
 done
 # Private keys file: created once from the template, only you can read it
 if [ ! -f "$DIR/.env" ]; then cp "$DIR/.env.example" "$DIR/.env"; fi
+# Add the phone-version lines to an existing .env without touching your keys
+if ! grep -q '^PHONE_PASSCODE=' "$DIR/.env"; then
+  printf '\n# Phone version (optional). Passcode: at least 12 characters, e.g. 4 words.\nPHONE_PASSCODE=\nGITHUB_GIST_TOKEN=\n' >> "$DIR/.env"
+fi
 chmod 600 "$DIR/.env"
 
 # ---- "SYNQ Dashboard Keys" app: opens the .env file in TextEdit

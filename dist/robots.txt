@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /dash/
 
 Sitemap: https://synqstudios815.com/sitemap.xml

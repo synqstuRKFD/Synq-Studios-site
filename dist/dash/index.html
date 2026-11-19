@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SYNQ Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070404">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SYNQ">
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070404; --panel: rgba(28, 14, 12, .62); --panel-solid: #140a09; --line: rgba(255, 120, 90, .14); --line-strong: rgba(255, 120, 90, .28);
+    --text: #fff4ec; --muted: #c9a89a; --dim: #8a6a5f; --accent: #ff3b1f; --bar: #ff5a3c; --gold: #ffb21f; --good: #5fd08a;
+    --display: "Anton", Impact, sans-serif; --body: "Inter", system-ui, -apple-system, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+    --r: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 var(--body); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+  /* ambient light behind everything */
+  body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(900px 520px at 8% -6%, rgba(255, 59, 31, .22), transparent 60%),
+                radial-gradient(700px 500px at 100% 10%, rgba(255, 140, 40, .10), transparent 60%),
+                radial-gradient(800px 600px at 50% 120%, rgba(255, 59, 31, .10), transparent 60%); }
+  a { color: inherit; }
+
+  /* ---------- top bar ---------- */
+  .top { position: sticky; top: 0; z-index: 20; backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); background: rgba(7, 4, 4, .72); border-bottom: 1px solid var(--line); }
+  .top__in { max-width: 1320px; margin: 0 auto; padding: 12px 28px; display: flex; align-items: center; gap: 18px; }
+  .top__mark { font: 400 1.1rem var(--display); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+  .top__mark span { color: var(--accent); }
+  .tabs { display: flex; gap: 4px; margin-left: 8px; overflow-x: auto; scrollbar-width: none; }
+  .tabs a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: .84rem; padding: .45em .9em; border-radius: 999px; white-space: nowrap; transition: color .2s, background .2s; }
+  .tabs a:hover { color: var(--text); background: rgba(255, 255, 255, .05); }
+  .tabs a.on { color: var(--text); background: rgba(255, 59, 31, .16); box-shadow: inset 0 0 0 1px rgba(255, 59, 31, .35); }
+  .status { margin-left: auto; display: flex; align-items: center; gap: 14px; font-size: .78rem; color: var(--muted); white-space: nowrap; }
+  .dot { display: inline-flex; align-items: center; gap: 6px; }
+  .dot i { width: 7px; height: 7px; border-radius: 50%; background: var(--dim); }
+  .dot.ok i { background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .dot.bad i { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+  .clock { font: 500 .85rem var(--mono); color: var(--text); }
+  @media (max-width: 1000px) { .dot span { display: none; } }
+
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 0 28px 70px; }
+
+  /* ---------- hero ---------- */
+  .hero { display: flex; align-items: center; gap: 34px; padding: 40px 0 18px; }
+  .logo3d { position: relative; width: 150px; height: 184px; perspective: 800px; flex: 0 0 auto; animation: float 4.5s ease-in-out infinite; }
+  .logo3d__spin { position: absolute; inset: 0 0 18px; transform-style: preserve-3d; animation: spin 9s linear infinite; }
+  .logo3d__spin img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+  .logo3d__spin img.face { filter: drop-shadow(0 0 14px rgba(255, 90, 60, .6)); }
+  .logo3d__shadow { position: absolute; left: 16%; right: 16%; bottom: -6px; height: 16px; border-radius: 50%; background: radial-gradient(rgba(255, 59, 31, .5), transparent 70%); animation: shadow 4.5s ease-in-out infinite; }
+  @keyframes spin { to { transform: rotateY(360deg); } }
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-11px); } }
+  @keyframes shadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(.72); opacity: .5; } }
+  .hello { color: var(--gold); font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .14em; }
+  .hero h1 { font: 400 clamp(2.4rem, 5vw, 3.6rem)/.95 var(--display); text-transform: uppercase; margin: 8px 0 12px; letter-spacing: .01em; }
+  .hero h1 span { color: var(--accent); }
+  .summary { color: var(--muted); font-size: 1.02rem; max-width: 720px; margin: 0; }
+  .summary b { color: var(--text); font-weight: 700; }
+  .stale { color: var(--gold); }
+
+  /* ---------- panels ---------- */
+  .panel { position: relative; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; min-width: 0;
+           box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), 0 20px 50px -30px rgba(0, 0, 0, .9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .panel h3 { margin: 0 0 14px; font-size: .74rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); font-weight: 700; display: flex; justify-content: space-between; gap: 10px; }
+  .panel h3 a { text-decoration: none; color: var(--dim); letter-spacing: .04em; text-transform: none; font-weight: 600; }
+  .panel h3 a:hover { color: var(--text); }
+
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 22px; }
+  @media (max-width: 1050px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+  .kpi { overflow: hidden; padding: 20px 20px 0; display: flex; flex-direction: column; min-height: 178px; }
+  .kpi::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(140deg, rgba(255, 90, 60, .14), transparent 45%); }
+  .kpi .label { color: var(--muted); font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; }
+  .kpi .num { font: 400 2.7rem/1.05 var(--display); margin-top: 8px; letter-spacing: .01em; }
+  .kpi .sub { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+  .kpi .spark { margin: auto -20px 0; height: 52px; display: block; width: calc(100% + 40px); }
+  .chip { display: inline-block; font-size: .74rem; font-weight: 700; padding: .15em .55em; border-radius: 999px; margin-left: 6px; vertical-align: middle; }
+  .chip.up { color: var(--good); background: rgba(95, 208, 138, .12); }
+  .chip.down { color: var(--gold); background: rgba(255, 178, 31, .12); }
+
+  .section { margin-top: 46px; }
+  .section__head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .section__head h2 { font: 400 1.5rem/1 var(--display); letter-spacing: .03em; text-transform: uppercase; margin: 0; }
+  .section__head small { color: var(--dim); font-size: .82rem; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 12px; }
+  .tile { padding: 16px 18px; }
+  .tile .label { color: var(--muted); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
+  .tile .num { font: 400 2rem/1.1 var(--display); margin-top: 6px; }
+  .tile .sub { color: var(--dim); font-size: .78rem; margin-top: 2px; }
+
+  .g2 { display: grid; grid-template-columns: 1.45fr 1fr; gap: 12px; align-items: start; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; align-items: start; }
+  .g2 + .panel, .g2 + .g3 { margin-top: 12px; }
+  @media (max-width: 950px) { .g2, .g3 { grid-template-columns: 1fr; } }
+
+  /* bar chart */
+  .chart { position: relative; height: 190px; display: flex; align-items: flex-end; gap: 3px; padding-top: 22px; border-bottom: 1px solid var(--line); }
+  .chart .b { flex: 1; position: relative; height: 100%; display: flex; align-items: flex-end; }
+  .chart .b i { display: block; width: 100%; background: linear-gradient(180deg, #ff7a5c, var(--bar)); border-radius: 4px 4px 0 0; transform-origin: bottom; animation: grow .7s cubic-bezier(.2, .8, .2, 1) both; }
+  .chart .b.zero i { background: var(--line-strong); height: 2px !important; border-radius: 1px; animation: none; }
+  .chart .b:hover i { background: #ffb09a; }
+  .chart .gl { position: absolute; left: 0; right: 0; border-top: 1px dashed rgba(255, 255, 255, .06); pointer-events: none; }
+  .chart .max { position: absolute; top: 0; left: 0; font: 500 .7rem var(--mono); color: var(--dim); }
+  @keyframes grow { from { transform: scaleY(0); } }
+  .axis { display: flex; justify-content: space-between; font: 500 .7rem var(--mono); color: var(--dim); margin-top: 7px; }
+  .tip { position: fixed; pointer-events: none; background: #fff4ec; color: #1a0d0a; font-size: .8rem; font-weight: 700; padding: 6px 10px; border-radius: 6px; white-space: nowrap; z-index: 50; display: none; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); }
+
+  /* lists */
+  .list { list-style: none; margin: 0; padding: 0; }
+  .list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); align-items: center; }
+  .list li:first-child { border-top: 0; padding-top: 0; }
+  .list .main { min-width: 0; flex: 1; }
+  .list .main b { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .list .main small { color: var(--dim); font-size: .8rem; }
+  .list .val { font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .meter { height: 4px; background: rgba(255, 255, 255, .05); border-radius: 2px; margin-top: 7px; overflow: hidden; }
+  .meter i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), #ff9a5c); border-radius: 2px; }
+  .when { flex: 0 0 64px; text-align: center; border: 1px solid var(--line-strong); border-radius: 10px; padding: 6px 0; line-height: 1.1; }
+  .when b { display: block; font: 400 1.35rem var(--display); }
+  .when small { font-size: .66rem; color: var(--gold); font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+  .flag { color: var(--gold); font-size: .72rem; font-weight: 800; margin-left: 6px; text-transform: uppercase; letter-spacing: .05em; }
+  .empty { color: var(--dim); font-size: .9rem; margin: 0; }
+  .note { color: var(--dim); font-size: .78rem; margin: 10px 2px 0; }
+
+  .notice { padding: 16px 18px; color: var(--muted); border-style: dashed; }
+  .notice b { color: var(--text); }
+  .notice.err { border-color: rgba(255, 178, 31, .5); }
+  .notice.err b { color: var(--gold); }
+
+  /* socials */
+  .social { display: flex; flex-direction: column; gap: 14px; }
+  .social__head { display: flex; align-items: center; gap: 12px; }
+  .social__icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: .8rem; color: #fff; flex: 0 0 auto; }
+  .social__head b { display: block; font-size: 1rem; }
+  .social__head small { color: var(--dim); }
+  .social__nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .social__nums div { background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .social__nums b { display: block; font: 400 1.5rem/1.1 var(--display); }
+  .social__nums small { color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; font-weight: 700; font-size: .84rem; padding: .7em 1em; border-radius: 10px; border: 1px solid var(--line-strong); color: var(--text); background: rgba(255, 255, 255, .03); transition: background .2s, border-color .2s; }
+  .btn:hover { background: rgba(255, 59, 31, .14); border-color: rgba(255, 59, 31, .5); }
+  .ep { display: flex; gap: 14px; align-items: center; }
+  .ep img { width: 84px; height: 84px; border-radius: 10px; object-fit: cover; box-shadow: 0 10px 30px -10px rgba(0, 0, 0, .8); }
+
+  /* studio */
+  .hours { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; font-size: .9rem; margin: 0; }
+  .hours dt { color: var(--muted); font-weight: 600; }
+  .hours dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .hours .today { color: var(--gold); }
+  .quick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+
+  footer { margin-top: 46px; color: var(--dim); font-size: .8rem; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+  /* unlock screen (phone) */
+  .lock { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px; background: radial-gradient(600px 400px at 50% 20%, rgba(255, 59, 31, .22), transparent 70%), var(--bg); }
+  .lock[hidden] { display: none; }
+  .lock__box { width: 100%; max-width: 360px; text-align: center; }
+  .lock__box .logo3d { margin: 0 auto 18px; width: 110px; height: 136px; }
+  .lock__box h2 { font: 400 1.9rem/1 var(--display); text-transform: uppercase; margin: 0 0 6px; }
+  .lock__box h2 span { color: var(--accent); }
+  .lock__box p { color: var(--muted); margin: 0 0 18px; font-size: .92rem; }
+  .lock__box input[type=password] { width: 100%; font: 600 16px var(--body); color: var(--text); background: rgba(255, 255, 255, .05); border: 1px solid var(--line-strong); border-radius: 12px; padding: 14px 16px; outline: none; }
+  .lock__box input[type=password]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 59, 31, .25); }
+  .lock__box label { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-size: .85rem; margin: 12px 0 16px; }
+  .lock__box button { width: 100%; font: 800 1rem var(--body); color: #fff; background: var(--accent); border: 0; border-radius: 12px; padding: 14px; cursor: pointer; }
+  .lock__box button:disabled { opacity: .6; }
+  .lock__msg { min-height: 1.4em; margin-top: 12px; font-size: .88rem; color: var(--gold); }
+  .lockbtn { font: 700 .78rem var(--body); color: var(--muted); background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; padding: .4em .9em; cursor: pointer; }
+  .phone { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .phone__qr { background: #fff; padding: 10px; border-radius: 12px; line-height: 0; }
+  .phone__qr img, .phone__qr svg { width: 150px; height: 150px; display: block; }
+  .phone code { font: 500 .78rem var(--mono); color: var(--muted); word-break: break-all; }
+
+  /* phones */
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+    .top__in { padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); gap: 10px; }
+    .top__mark, .clock, .dot span { display: none; }
+    .tabs { margin-left: 0; }
+    .status { gap: 8px; }
+    .wrap { padding: 0 14px calc(40px + env(safe-area-inset-bottom)); }
+    .hero { gap: 16px; padding: 22px 0 6px; align-items: flex-start; }
+    .hero .logo3d { width: 70px; height: 88px; }
+    .hero h1 { font-size: 2.1rem; margin: 6px 0 8px; }
+    .summary { font-size: .92rem; }
+    .kpis { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .kpi { padding: 14px 14px 0; min-height: 140px; }
+    .kpi .num { font-size: 1.9rem; }
+    .kpi .label { font-size: .64rem; letter-spacing: .08em; }
+    .kpi .sub { font-size: .74rem; }
+    .kpi .spark { margin: auto -14px 0; width: calc(100% + 28px); height: 40px; }
+    .tiles { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tile .num { font-size: 1.6rem; }
+    .panel { padding: 16px; }
+    .chart { height: 150px; gap: 2px; }
+    .section { margin-top: 34px; }
+    .social__nums b { font-size: 1.25rem; }
+    footer { font-size: .74rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .logo3d, .logo3d__spin, .logo3d__shadow, .chart .b i { animation: none; }
+    .logo3d__spin { transform: rotateY(-20deg); }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top__in">
+    <div class="top__mark">SYNQ <span>Studios</span></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#overview" class="on">Overview</a><a href="#money">Money</a><a href="#website">Website</a><a href="#socials">Socials</a><a href="#studio">Studio</a><a href="#phone">Phone</a>
+    </nav>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="hero" id="overview">
+    <div class="logo3d" aria-hidden="true"><div class="logo3d__spin" id="logo3d"></div><div class="logo3d__shadow"></div></div>
+    <div>
+      <div class="hello" id="hello">Welcome back</div>
+      <h1>SYNQ <span>Dashboard</span></h1>
+      <p class="summary" id="summary">Loading your numbers…</p>
+    </div>
+  </section>
+  <main id="app"></main>
+  <footer>
+    <span>Numbers refresh every 15 minutes in the background. Open the SYNQ Dashboard app again to refresh right now.</span>
+    <span>Add or change keys: open SYNQ Dashboard Keys.</span>
+  </footer>
+</div>
+<div class="tip" id="tip"></div>
+<div class="lock" id="lock" hidden>
+  <form class="lock__box" id="lockForm" autocomplete="off">
+    <div class="logo3d" aria-hidden="true"><div class="logo3d__spin" id="logo3dLock"></div><div class="logo3d__shadow"></div></div>
+    <h2>SYNQ <span>Dashboard</span></h2>
+    <p id="lockText">Enter your passcode to see your numbers.</p>
+    <input type="password" id="pass" placeholder="Passcode" aria-label="Passcode" autocomplete="current-password" required>
+    <label><input type="checkbox" id="remember" checked> Remember on this phone</label>
+    <button type="submit" id="unlockBtn">Unlock</button>
+    <div class="lock__msg" id="lockMsg" role="status"></div>
+  </form>
+</div>
+
+<script>if (location.protocol === 'file:') document.write('<script id="data-src" src="data.js"><\/script><script src="vendor/qrcode.js"><\/script>');</script>
+<script>
+// Inside the SYNQ Dashboard app window, links open in your normal browser
+const IN_APP = location.protocol === 'file:' && !/Safari\/|Chrome\/|Firefox\//.test(navigator.userAgent);
+const ON_PHONE_PAGE = /^https?:$/.test(location.protocol);
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[href^="http"]');
+  if (!a || !IN_APP) return;
+  e.preventDefault();
+  location.hash = 'open=' + encodeURIComponent(a.href);
+});
+document.querySelectorAll('a[href^="http"]').forEach(a => { a.target = '_blank'; a.rel = 'noopener'; });
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const n = x => (x == null ? '—' : Number(x).toLocaleString('en-US'));
+const compact = x => (x == null ? '—' : Number(x).toLocaleString('en-US', { notation: x >= 10000 ? 'compact' : 'standard', maximumFractionDigits: 1 }));
+let firstRender = true, lastStamp = '';
+
+function render() {
+  const D = window.SYNQ;
+  const app = document.getElementById('app');
+  const cur = (D && D.square && D.square.money && D.square.money.currency) || 'USD';
+  const money = x => (x == null ? '—' : Number(x).toLocaleString('en-US', { style: 'currency', currency: cur, maximumFractionDigits: Number(x) % 1 ? 2 : 0 }));
+  const dfmt = (iso, opt) => new Date(iso).toLocaleString('en-US', opt);
+  const shortDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+  const ext = (href, label, cls) => '<a class="' + (cls || 'btn') + '" href="' + esc(href) + '" target="_blank" rel="noopener">' + label + '</a>';
+
+  const h = new Date().getHours();
+  document.getElementById('hello').textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ' · ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  if (!D) {
+    document.getElementById('summary').textContent = ON_PHONE_PAGE ? 'Unlock to see your numbers.' : 'No numbers yet. Open the SYNQ Dashboard app to pull them in.';
+    return;
+  }
+  lastStamp = D.updatedAt;
+  const S = D.square, W = D.site, Y = D.youtube, T = D.tiktok;
+
+  // status dots
+  const dot = (label, src) => '<span class="dot ' + (src && src.ok ? 'ok' : 'bad') + '" title="' + esc(src && src.ok ? label + ': connected' : label + ': ' + ((src && src.error) || 'not connected')) + '"><i></i><span>' + label + '</span></span>';
+  const up = new Date(D.updatedAt), mins = Math.round((Date.now() - up) / 6e4);
+  document.getElementById('status').innerHTML = dot('Square', S) + dot('Website', W) + dot('YouTube', Y) + dot('TikTok', T) + '<span class="clock" id="clock"></span>';
+
+  // summary sentence
+  const bits = [];
+  if (S && S.ok) {
+    bits.push('You’ve made <b>' + money(S.money.month) + '</b> this month' + (S.money.today ? ', <b>' + money(S.money.today) + '</b> of it today' : '') + '.');
+    const nx = S.bookings.list[0];
+    bits.push(S.bookings.next7 ? '<b>' + S.bookings.next7 + '</b> session' + (S.bookings.next7 === 1 ? '' : 's') + ' coming up this week' + (nx ? ', next is <b>' + esc(nx.who) + '</b> ' + dfmt(nx.at, { weekday: 'long', hour: 'numeric', minute: '2-digit' }) : '') + '.' : 'No sessions booked in the next 7 days.');
+  }
+  if (W && W.ok) bits.push('<b>' + n(W.month) + '</b> people visited your site in the last 30 days.');
+  bits.push('<span class="' + (mins > 60 ? 'stale' : '') + '">Updated ' + (mins < 1 ? 'just now' : mins < 60 ? mins + ' min ago' : Math.round(mins / 60) + ' hr ago') + '.</span>');
+  document.getElementById('summary').innerHTML = bits.join(' ');
+
+  // helpers
+  const notice = (src, what, varName) => src && src.missing
+    ? '<div class="panel notice"><b>' + what + ' isn’t connected.</b> Add <b>' + varName + '</b> to your .env file (open SYNQ Dashboard Keys).</div>'
+    : '<div class="panel notice err"><b>Couldn’t load ' + what.toLowerCase() + '.</b> ' + esc(src && src.error) + '</div>';
+  const spark = (vals, id) => {
+    if (!vals || vals.length < 2) return '';
+    const max = Math.max(1, ...vals), W2 = 300, H2 = 52;
+    const pts = vals.map((v, i) => [(i / (vals.length - 1)) * W2, H2 - 4 - (v / max) * (H2 - 10)]);
+    const line = pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+    return '<svg class="spark" viewBox="0 0 ' + W2 + ' ' + H2 + '" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="g' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff5a3c" stop-opacity=".45"/><stop offset="1" stop-color="#ff5a3c" stop-opacity="0"/></linearGradient></defs>' +
+      '<polygon points="0,' + H2 + ' ' + line + ' ' + W2 + ',' + H2 + '" fill="url(#g' + id + ')"/><polyline points="' + line + '" fill="none" stroke="#ff5a3c" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>';
+  };
+  const kpi = (label, num, sub, sp, raw) => '<div class="panel kpi"><div class="label">' + label + '</div><div class="num"' + (raw != null ? ' data-count="' + raw + '"' : '') + '>' + num + '</div><div class="sub">' + (sub || '') + '</div>' + (sp || '<div style="height:20px"></div>') + '</div>';
+  const tile = (label, num, sub) => '<div class="panel tile"><div class="label">' + label + '</div><div class="num">' + num + '</div>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+  const bars = (rows, val, fmt, title) => {
+    const max = Math.max(1, ...rows.map(val));
+    return '<div class="chart" role="img" aria-label="' + esc(title) + '"><span class="max">' + fmt(max) + '</span><span class="gl" style="top:22px"></span><span class="gl" style="top:calc(22px + (100% - 22px) / 2)"></span>' +
+      rows.map((r, i) => { const v = val(r); return '<div class="b' + (v ? '' : ' zero') + '" data-tip="' + esc(shortDay(r.day) + ': ' + fmt(v)) + '"><i style="height:' + (v / max * 100).toFixed(1) + '%;animation-delay:' + (firstRender ? i * 12 : 0) + 'ms' + (firstRender ? '' : ';animation:none') + '"></i></div>'; }).join('') +
+      '</div><div class="axis"><span>' + (rows[0] ? shortDay(rows[0].day) : '') + '</span><span>Today</span></div>' +
+      '<table class="sr"><caption>' + esc(title) + '</caption>' + rows.map(r => '<tr><td>' + r.day + '</td><td>' + fmt(val(r)) + '</td></tr>').join('') + '</table>';
+  };
+  const ranked = (rows, fmt, empty) => {
+    if (!rows || !rows.length) return '<p class="empty">' + empty + '</p>';
+    const max = Math.max(1, ...rows.map(r => r.count));
+    return '<ul class="list">' + rows.map(r => '<li><div class="main"><b>' + esc(r.name) + '</b><div class="meter"><i style="width:' + (r.count / max * 100) + '%"></i></div></div><span class="val">' + fmt(r.count) + '</span></li>').join('') + '</ul>';
+  };
+
+  let html = '';
+
+  // ---------- Overview KPIs
+  const mChange = S && S.ok && S.money.lastMonth ? Math.round((S.money.month / S.money.lastMonth - 1) * 100) : null;
+  const followers = (T && T.ok ? T.followers : 0) + (Y && Y.ok ? Y.subs : 0);
+  html += '<div class="kpis">' +
+    kpi('Money this month', S && S.ok ? money(S.money.month) : '—',
+      S && S.ok ? 'last month ' + money(S.money.lastMonth) + (mChange != null ? '<span class="chip ' + (mChange >= 0 ? 'up' : 'down') + '">' + (mChange >= 0 ? '▲ ' : '▼ ') + Math.abs(mChange) + '%</span>' : '') : 'Square not connected',
+      S && S.ok ? spark(S.money.daily.map(d => d.amount), 'm') : '', S && S.ok ? S.money.month : null) +
+    kpi('Sessions next 7 days', S && S.ok ? n(S.bookings.next7) : '—',
+      S && S.ok ? (S.bookings.list[0] ? 'next: ' + esc(S.bookings.list[0].who) + ' · ' + dfmt(S.bookings.list[0].at, { weekday: 'short', hour: 'numeric', minute: '2-digit' }) : 'nothing booked yet') : 'Square not connected', '', S && S.ok ? S.bookings.next7 : null) +
+    kpi('Website visitors · 30 days', W && W.ok ? n(W.month) : '—', W && W.ok ? n(W.today) + ' today · ' + n(W.week) + ' this week' : 'GoatCounter not connected',
+      W && W.ok ? spark(W.daily.map(d => d.visitors), 'w') : '', W && W.ok ? W.month : null) +
+    kpi('Followers', (T && T.ok) || (Y && Y.ok) ? n(followers) : '—',
+      [T && T.ok ? n(T.followers) + ' TikTok' : '', Y && Y.ok ? n(Y.subs) + ' YouTube' : ''].filter(Boolean).join(' · ') || 'socials not connected', '', (T && T.ok) || (Y && Y.ok) ? followers : null) +
+    '</div>';
+
+  // ---------- Money & bookings
+  html += '<section class="section" id="money"><div class="section__head"><h2>Money & bookings</h2><small>from Square' + (S && S.ok && S.location ? ' · ' + esc(S.location) : '') + '</small></div>';
+  if (S && S.ok) {
+    const m = S.money, b = S.bookings;
+    html += '<div class="tiles">' + tile('Today', money(m.today)) + tile('This week', money(m.week), 'since Monday') + tile('This year', money(m.year)) +
+      tile('Payments this month', n(m.countMonth)) + tile('Booked this month', n(b.thisMonth), 'sessions so far') + tile('Next 30 days', n(b.next30), 'sessions booked') + '</div>';
+    html += '<div class="g2"><div class="panel"><h3>Money per day · last 30 days ' + ext('https://squareup.com/dashboard/sales/reports', 'Square reports ↗', 'plain') + '</h3>' + bars(m.daily, r => r.amount, money, 'Money per day, last 30 days') + '</div>';
+    html += '<div class="panel"><h3>Coming up ' + ext('https://squareup.com/appointments/calendar', 'Calendar ↗', 'plain') + '</h3>';
+    html += b.list.length ? '<ul class="list">' + b.list.slice(0, 7).map(x => '<li><div class="when"><small>' + dfmt(x.at, { weekday: 'short' }) + '</small><b>' + dfmt(x.at, { day: 'numeric' }) + '</b></div><div class="main"><b>' + esc(x.who) + (x.status ? '<span class="flag">' + esc(x.status) + '</span>' : '') + '</b><small>' + esc(x.service) + (x.minutes ? ' · ' + (x.minutes >= 60 ? +(x.minutes / 60).toFixed(1) + ' hr' : x.minutes + ' min') : '') + '</small></div><span class="val">' + dfmt(x.at, { hour: 'numeric', minute: '2-digit' }) + '</span></li>').join('') + '</ul>'
+      : '<p class="empty">No bookings in the next 30 days.</p>';
+    html += '</div></div>';
+    if (m.recent.length) html += '<div class="panel"><h3>Latest payments</h3><ul class="list">' + m.recent.map(p => '<li><div class="main"><b>' + esc(p.note || p.kind) + '</b><small>' + dfmt(p.at, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + (p.note ? ' · ' + esc(p.kind) : '') + '</small></div><span class="val">' + money(p.amount) + '</span></li>').join('') + '</ul></div>';
+    html += '<p class="note">Only money that goes through Square shows here. Zelle, Cash App or cash deposits count if you record them in Square.</p>';
+  } else html += notice(S, 'Square', 'SQUARE_ACCESS_TOKEN');
+  html += '</section>';
+
+  // ---------- Website
+  html += '<section class="section" id="website"><div class="section__head"><h2>Website</h2><small>synqstudios815.com</small></div>';
+  if (W && W.ok) {
+    const tap = name => (W.taps.find(t => t.name.indexOf(name) === 0) || {}).count || 0;
+    html += '<div class="tiles">' + tile('Visitors today', n(W.today)) + tile('Last 7 days', n(W.week)) + tile('Tapped Book', n(tap('Tapped Book')), '30 days') +
+      tile('Texts started', n(tap('Sent a text')), 'gave their name · 30 days') + tile('Quote requests', n(tap('Sent a quote')), '30 days') + tile('Got directions', n(tap('Tapped Get directions')), '30 days') + '</div>';
+    html += '<div class="g2"><div class="panel"><h3>Visitors per day · last 30 days ' + ext('https://synqstudiosrkfd.goatcounter.com', 'Full stats ↗', 'plain') + '</h3>' + bars(W.daily, r => r.visitors, n, 'Website visitors per day, last 30 days') + '</div>' +
+      '<div class="panel"><h3>What people tapped · 30 days</h3>' + ranked(W.taps, n, 'No taps yet. They’ll show up as people use the site.') + '</div></div>';
+    html += '<div class="g3"><div class="panel"><h3>Where they came from</h3>' + ranked(W.refs, n, 'Nothing yet.') + '</div>' +
+      '<div class="panel"><h3>Pages they looked at</h3>' + ranked(W.pages.map(p => ({ name: p.path === '/' ? 'Home (English)' : p.path === '/es.html' ? 'Home (Spanish)' : p.name, count: p.count })), n, 'Nothing yet.') + '</div>' +
+      '<div class="panel"><h3>Where they are</h3>' + ranked(W.places, n, 'Nothing yet.') + '</div></div>';
+  } else html += notice(W, 'Website stats', 'GOATCOUNTER_API_KEY');
+  html += '</section>';
+
+  // ---------- Socials
+  html += '<section class="section" id="socials"><div class="section__head"><h2>Socials</h2><small>TikTok · YouTube · Instagram · Apple Music</small></div><div class="g2">';
+  // TikTok + YouTube side by side
+  html += '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:#111;box-shadow:inset 0 0 0 1px #333">TT</div><div><b>@synqstudios</b><small>TikTok</small></div></div>';
+  html += T && T.ok
+    ? '<div class="social__nums"><div><b>' + compact(T.followers) + '</b><small>Followers</small></div><div><b>' + compact(T.likes) + '</b><small>Likes</small></div><div><b>' + n(T.videos) + '</b><small>Videos</small></div></div>' +
+      '<p class="empty">' + (T.followersWeek == null ? 'Weekly growth starts counting ' + shortDay(T.since) + '.' : (T.followersWeek >= 0 ? '+' : '') + n(T.followersWeek) + ' followers this week.') + '</p>'
+    : '<p class="empty">' + esc((T && T.error) || 'TikTok numbers will show after the next refresh.') + '</p>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' + ext('https://www.tiktok.com/tiktokstudio', 'TikTok Studio ↗') + ext('https://www.tiktok.com/@synqstudios', 'Profile ↗') + '</div></div>';
+
+  html += '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:#e3241b">▶</div><div><b>@SynqStudios</b><small>YouTube</small></div></div>';
+  if (Y && Y.ok) {
+    html += '<div class="social__nums"><div><b>' + compact(Y.views) + '</b><small>Views</small></div><div><b>' + n(Y.subs) + '</b><small>Subscribers</small></div><div><b>' + n(Y.videoCount) + '</b><small>Videos</small></div></div>' +
+      '<p class="empty">' + (Y.viewsWeek == null ? 'Weekly growth starts counting ' + shortDay(Y.since) + '.' : '+' + n(Y.viewsWeek) + ' views this week' + (Y.viewsMonth != null ? ' · +' + n(Y.viewsMonth) + ' in 30 days' : '') + '.') + '</p>';
+    if (Y.videos.length) html += '<ul class="list">' + Y.videos.slice(0, 4).map(v => '<li><div class="main"><b><a href="' + esc(v.url) + '" style="text-decoration:none">' + esc(v.title) + '</a></b><small>' + dfmt(v.at, { month: 'short', day: 'numeric', year: 'numeric' }) + '</small></div><span class="val">' + n(v.views) + '</span></li>').join('') + '</ul>';
+  } else html += '<p class="empty">' + (Y && Y.missing ? 'Add YOUTUBE_API_KEY to your .env file.' : esc(Y && Y.error)) + '</p>';
+  html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' + ext('https://studio.youtube.com', 'YouTube Studio ↗') + ext('https://www.youtube.com/@SynqStudios', 'Channel ↗') + '</div></div></div>';
+
+  html += '<div class="g3">' +
+    '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:linear-gradient(45deg,#f9a13a,#e1306c,#833ab4)">IG</div><div><b>@synq.studios</b><small>Instagram</small></div></div><p class="empty">Instagram doesn’t share numbers with outside apps. Check Insights in the Instagram app.</p>' + ext('https://www.instagram.com/synq.studios/', 'Open Instagram ↗') + '</div>' +
+    '<div class="panel social"><div class="ep"><img src="https://synqstudios815.com/images/los-serenos-ep.jpg" alt="Los Serenos EP cover"><div><b>Desde SYNQ Studios</b><br><small class="empty">Los Serenos · Live EP · 6 songs</small></div></div>' + ext('https://music.apple.com/us/album/desde-synq-studios-rockford-illinois-live-ep/6819910931', 'Apple Music ↗') + '</div>' +
+    '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:var(--accent)">W</div><div><b>synqstudios815.com</b><small>Your website</small></div></div><div style="display:flex;gap:8px;flex-wrap:wrap">' + ext('https://synqstudios815.com', 'English ↗') + ext('https://synqstudios815.com/es.html', 'Español ↗') + '</div></div>' +
+    '</div></section>';
+
+  // ---------- Studio
+  const st = S && S.ok ? S.studio || {} : {};
+  html += '<section class="section" id="studio"><div class="section__head"><h2>Studio</h2><small>' + esc(st.address || '4040 Charles St · Rockford, IL · 61108') + '</small></div><div class="g2">';
+  html += '<div class="panel"><h3>Your services on Square ' + ext('https://squareup.com/appointments/services', 'Edit ↗', 'plain') + '</h3>' +
+    (st.services && st.services.length ? '<ul class="list">' + st.services.map(s => '<li><div class="main"><b>' + esc(s.name) + '</b><small>' + (s.minutes ? (s.minutes >= 60 ? +(s.minutes / 60).toFixed(1) + ' hr' : s.minutes + ' min') : '') + '</small></div><span class="val">' + (s.variable ? 'Varies' : money(s.price)) + '</span></li>').join('') + '</ul>'
+      : '<p class="empty">' + (S && S.ok ? 'No appointment services found in Square.' : 'Connect Square to see your services and prices.') + '</p>') + '</div>';
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
+  html += '<div style="display:grid;gap:12px">';
+  html += '<div class="panel"><h3>Hours' + (S && S.ok ? ' (from Square)' : '') + '</h3>' + (st.hours && st.hours.length
+    ? '<dl class="hours">' + st.hours.map(x => '<dt class="' + (x.day === today ? 'today' : '') + '">' + x.day + '</dt><dd class="' + (x.day === today ? 'today' : '') + '">' + x.open + ' – ' + x.close + '</dd>').join('') + '</dl>'
+    : '<p class="empty">No hours set in Square. You can add them under Settings → Locations.</p>') + '</div>';
+  html += '<div class="panel"><h3>Clients</h3><div class="tile" style="padding:0"><div class="num">' + (st.clients != null ? n(st.clients) : '—') + '</div><div class="sub">people saved in your Square customer list</div></div></div>';
+  html += '</div></div>';
+  html += '<div class="panel" style="margin-top:12px"><h3>Quick links</h3><div class="quick">' +
+    ext('https://squareup.com/appointments/book/L6PTGPVMKXW8A', 'Your booking page ↗') + ext('https://squareup.com/dashboard', 'Square dashboard ↗') +
+    ext('https://squareup.com/appointments/calendar', 'Appointments ↗') + ext('https://synqstudiosrkfd.goatcounter.com', 'Website stats ↗') +
+    ext('https://studio.youtube.com', 'YouTube Studio ↗') + ext('https://www.tiktok.com/tiktokstudio', 'TikTok Studio ↗') +
+    ext('https://www.instagram.com/synq.studios/', 'Instagram ↗') + ext('https://www.google.com/maps/search/?api=1&query=4040+Charles+St%2C+Rockford%2C+IL+61108', 'Google Maps ↗') +
+    ext('https://web3forms.com/', 'Form emails ↗') + ext('https://github.com/synqstuRKFD/Synq-Studios-site', 'Website code ↗') +
+    '</div></div></section>';
+
+  // ---------- Phone
+  const P = D.phone;
+  html += '<section class="section" id="phone"><div class="section__head"><h2>On your phone</h2><small>locked with your passcode</small></div>';
+  if (ON_PHONE_PAGE) {
+    html += '<div class="panel phone"><div style="flex:1;min-width:220px"><p class="empty" style="color:var(--muted)">This phone is unlocked. To hide your numbers again, lock it.</p></div><button class="lockbtn" id="lockNow" type="button">Lock this phone</button></div>';
+  } else if (P && P.ok) {
+    html += '<div class="panel phone"><div class="phone__qr" id="qr"></div><div style="flex:1;min-width:240px"><b>Scan with your iPhone camera</b><p class="empty" style="margin:6px 0 10px">Open the link, enter your passcode, then tap <b>Share → Add to Home Screen</b>. Your phone gets the same numbers, updated every 15 minutes while this Mac is on.</p><code>' + esc(P.url) + '</code></div></div>';
+  } else if (P && P.missing) {
+    html += '<div class="panel notice">Want this on your phone? Add <b>PHONE_PASSCODE</b> and <b>GITHUB_GIST_TOKEN</b> to your .env file (open SYNQ Dashboard Keys).</div>';
+  } else html += '<div class="panel notice err"><b>Couldn’t update the phone version.</b> ' + esc(P && P.error) + '</div>';
+  html += '</section>';
+
+  const y = scrollY;
+  app.innerHTML = html;
+  scrollTo(0, y);
+  const qr = document.getElementById('qr');
+  if (qr && P && P.url && window.qrcode) { const q = qrcode(0, 'M'); q.addData(P.url); q.make(); qr.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+  const lockNow = document.getElementById('lockNow');
+  if (lockNow) lockNow.onclick = () => { forgetKey(); location.reload(); };
+
+  // count-up numbers on first open
+  if (firstRender && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      const target = +el.dataset.count, final = el.innerHTML, isMoney = final.indexOf('$') !== -1, t0 = performance.now();
+      const step = t => {
+        const k = Math.min(1, (t - t0) / 900), v = target * (1 - Math.pow(1 - k, 3));
+        el.textContent = isMoney ? money(Math.round(v)) : n(Math.round(v));
+        if (k < 1) requestAnimationFrame(step); else el.innerHTML = final;
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  firstRender = false;
+
+  // tooltips
+  const tip = document.getElementById('tip');
+  document.querySelectorAll('[data-tip]').forEach(el => {
+    el.addEventListener('mouseenter', () => { tip.textContent = el.dataset.tip; tip.style.display = 'block'; });
+    el.addEventListener('mousemove', e => { tip.style.left = Math.min(e.clientX + 12, innerWidth - tip.offsetWidth - 8) + 'px'; tip.style.top = (e.clientY - 38) + 'px'; });
+    el.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+}
+render();
+
+// live clock
+setInterval(() => { const c = document.getElementById('clock'); if (c) c.textContent = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }); }, 1000);
+
+// highlight the section you're looking at
+const links = [...document.querySelectorAll('.tabs a')];
+const spy = () => {
+  let current = 'overview';
+  ['overview', 'money', 'website', 'socials', 'studio', 'phone'].forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < 140) current = id; });
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) current = 'phone';
+  links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + current));
+};
+addEventListener('scroll', spy, { passive: true });
+
+// 3D logo: dark-red layers for the edge, glowing white faces front and back
+['logo3d', 'logo3dLock'].forEach(function (id) {
+  const spin = document.getElementById(id), depth = 16;
+  for (let i = 0; i < depth; i++) {
+    const img = new Image(), face = i === 0 || i === depth - 1;
+    img.src = face ? 'logo.png' : 'logo-edge.png';
+    if (face) img.className = 'face';
+    img.style.transform = 'translateZ(' + ((i - (depth - 1) / 2) * 1.15) + 'px)';
+    spin.appendChild(img);
+  }
+});
+
+// Mac: check data.js for fresh numbers every 30 seconds; only redraw when they changed
+if (!ON_PHONE_PAGE) setInterval(() => {
+  const old = document.getElementById('data-src'), s = document.createElement('script');
+  s.id = 'data-src';
+  s.src = 'data.js?t=' + Date.now();
+  s.onload = () => { if (window.SYNQ && window.SYNQ.updatedAt !== lastStamp) render(); };
+  if (old) old.remove();
+  document.body.appendChild(s);
+}, 30000);
+
+// ---------- Phone page: download the locked numbers and unlock them on this phone ----------
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+                del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
+let sessionKey = null;
+function forgetKey() { sessionKey = null; store.del('synq-key'); store.del('synq-salt'); }
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const toB64 = u => btoa(String.fromCharCode.apply(null, u));
+function loadScript(src) { return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => bad(new Error('Could not load ' + src)); document.head.appendChild(s); }); }
+
+async function getLocked() {
+  const gist = store.get('synq-gist');
+  if (!gist) throw new Error('Open the link from your Mac dashboard once (scan its QR code) so this phone knows where your numbers are.');
+  const r = await fetch('https://api.github.com/gists/' + encodeURIComponent(gist), { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
+  if (!r.ok) throw new Error(r.status === 404 ? 'Your numbers weren’t found. Scan the QR code on your Mac dashboard again.' : 'Couldn’t download your numbers (error ' + r.status + '). Try again in a minute.');
+  const g = await r.json(), f = g.files && g.files['synq-dashboard.json'];
+  if (!f) throw new Error('Your Mac hasn’t uploaded any numbers yet.');
+  return JSON.parse(f.truncated ? await (await fetch(f.raw_url, { cache: 'no-store' })).text() : f.content);
+}
+function unlockBox(locked, key) {
+  const out = nacl.secretbox.open(fromB64(locked.box), fromB64(locked.nonce), key);
+  if (!out) return null;
+  return JSON.parse(new TextDecoder().decode(out));
+}
+async function phoneRefresh() {
+  try {
+    const locked = await getLocked();
+    if (!sessionKey || store.get('synq-salt') !== locked.salt) return showLock();
+    const data = unlockBox(locked, sessionKey);
+    if (!data) { forgetKey(); return showLock('Your passcode changed. Enter the new one.'); }
+    window.SYNQ = data;
+    document.getElementById('lock').hidden = true;
+    if (data.updatedAt !== lastStamp) render();
+  } catch (e) {
+    if (!window.SYNQ) showLock(e.message, true);
+  }
+}
+function showLock(msg, isError) {
+  const lock = document.getElementById('lock');
+  lock.hidden = false;
+  document.getElementById('lockMsg').textContent = msg || '';
+  if (isError) document.getElementById('unlockBtn').disabled = !store.get('synq-gist');
+  setTimeout(() => document.getElementById('pass').focus(), 50);
+}
+
+if (ON_PHONE_PAGE) {
+  // The QR link carries where your locked numbers live (#g=...); remember it on this phone
+  const takeLink = () => {
+    const m = location.hash.match(/g=([A-Za-z0-9]+)/);
+    if (!m) return false;
+    store.set('synq-gist', m[1]);
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('unlockBtn').disabled = false;
+    document.getElementById('lockMsg').textContent = '';
+    return true;
+  };
+  takeLink();
+  addEventListener('hashchange', () => { if (takeLink() && window.nacl) phoneRefresh(); });
+  document.getElementById('summary').textContent = 'Unlocking…';
+  Promise.all([loadScript('vendor/nacl-fast.min.js'), loadScript('vendor/scrypt.js')]).then(() => {
+    const k = store.get('synq-key');
+    if (k) sessionKey = fromB64(k);
+    phoneRefresh();
+    setInterval(phoneRefresh, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && sessionKey) phoneRefresh(); });
+  }).catch(e => showLock(e.message, true));
+
+  document.getElementById('lockForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('unlockBtn'), msg = document.getElementById('lockMsg');
+    btn.disabled = true; btn.textContent = 'Unlocking…'; msg.textContent = '';
+    try {
+      const locked = await getLocked();
+      await new Promise(r => setTimeout(r, 30)); // let the button update before the heavy step
+      const key = scrypt.syncScrypt(new TextEncoder().encode(document.getElementById('pass').value.trim()), fromB64(locked.salt), locked.N, locked.r, locked.p, 32);
+      const data = unlockBox(locked, key);
+      if (!data) { msg.textContent = 'That passcode didn’t work. Try again.'; return; }
+      sessionKey = key;
+      if (document.getElementById('remember').checked) { store.set('synq-key', toB64(key)); store.set('synq-salt', locked.salt); }
+      else { store.del('synq-key'); store.set('synq-salt', locked.salt); }
+      document.getElementById('pass').value = '';
+      window.SYNQ = data;
+      document.getElementById('lock').hidden = true;
+      render();
+    } catch (err) {
+      msg.textContent = err.message;
+    } finally { btn.disabled = false; btn.textContent = 'Unlock'; }
+  });
+}
+</script>
+</body>
+</html>

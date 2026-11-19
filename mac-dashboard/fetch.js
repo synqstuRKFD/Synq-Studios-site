@@ -59,7 +59,7 @@ function loadEnv() {
   return ENV;
 }
 const cfg = name => String(loadEnv()[name] || '').trim();
-const SECRET_NAMES = ['GOATCOUNTER_API_KEY', 'SQUARE_ACCESS_TOKEN', 'YOUTUBE_API_KEY'];
+const SECRET_NAMES = ['GOATCOUNTER_API_KEY', 'SQUARE_ACCESS_TOKEN', 'YOUTUBE_API_KEY', 'GITHUB_GIST_TOKEN', 'PHONE_PASSCODE'];
 // Strip any key value out of a message before it can be shown or saved
 function scrub(msg) {
   let out = String(msg);
@@ -69,7 +69,7 @@ function scrub(msg) {
 
 // HTTP through curl. The URL and headers (which carry keys) go in a private temp config
 // file read with -K, so they never appear on a command line or in the process list.
-function http(method, url, headers, raw) {
+function http(method, url, headers, raw, body) {
   if (!IS_JXA && process.env.SYNQ_TEST_BASE) url = url.replace(/^https:\/\/[^/]+/, process.env.SYNQ_TEST_BASE); // local tests only
   const tmp = sh('mktemp -d').trim();
   const cq = v => '"' + String(v).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
@@ -77,6 +77,12 @@ function http(method, url, headers, raw) {
     const conf = tmp + '/curl.conf';
     const lines = ['url = ' + cq(url), 'request = ' + cq(method)]
       .concat(Object.entries(headers || {}).map(([k, v]) => 'header = ' + cq(k + ': ' + v)));
+    if (body !== undefined) {
+      const bfile = tmp + '/body.json';
+      sh('umask 077; : > ' + q(bfile));
+      writeFile(bfile, JSON.stringify(body));
+      lines.push('header = ' + cq('Content-Type: application/json'), 'data-binary = ' + cq('@' + bfile));
+    }
     sh('umask 077; : > ' + q(conf));
     writeFile(conf, lines.join('\n') + '\n');
     let out;
@@ -91,6 +97,7 @@ function http(method, url, headers, raw) {
       let msg = code ? 'HTTP ' + code : 'Could not reach ' + url.split('/')[2];
       if (json && json.errors) msg += ': ' + (json.errors.map ? json.errors.map(e => e.detail || e.message || e.code || '').join('; ') : JSON.stringify(json.errors));
       else if (json && json.error) msg += ': ' + (json.error.message || json.error);
+      else if (json && json.message) msg += ': ' + json.message;
       throw new Error(scrub(msg));
     }
     if (raw) return text;
@@ -329,6 +336,77 @@ function tiktok(histPath) {
   });
 }
 
+// ---------- phone: lock the numbers with your passcode, upload the locked copy ----------
+// The numbers are encrypted on this Mac (scrypt key from PHONE_PASSCODE + XSalsa20-Poly1305 via
+// tweetnacl) and only the locked copy goes to a secret GitHub gist. The phone page downloads it and
+// unlocks it on the phone. Your API keys are never uploaded.
+const B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+function b64enc(u8) {
+  let out = '', i = 0;
+  for (; i + 2 < u8.length; i += 3) { const n = (u8[i] << 16) | (u8[i + 1] << 8) | u8[i + 2]; out += B64[n >> 18 & 63] + B64[n >> 12 & 63] + B64[n >> 6 & 63] + B64[n & 63]; }
+  if (i < u8.length) { const n = (u8[i] << 16) | ((u8[i + 1] || 0) << 8); out += B64[n >> 18 & 63] + B64[n >> 12 & 63] + (i + 1 < u8.length ? B64[n >> 6 & 63] : '=') + '='; }
+  return out;
+}
+function b64dec(str) {
+  str = str.replace(/[^A-Za-z0-9+/]/g, '');
+  const out = new Uint8Array(Math.floor(str.length * 3 / 4)); let bits = 0, val = 0, j = 0;
+  for (let i = 0; i < str.length; i++) { val = (val << 6) | B64.indexOf(str[i]); bits += 6; if (bits >= 8) { bits -= 8; out[j++] = (val >> bits) & 255; } }
+  return out.subarray(0, j);
+}
+const utf8 = s => { const b = unescape(encodeURIComponent(s)), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+const KDF = { N: 32768, r: 8, p: 1 };
+let LIBS = null;
+function cryptoLibs() {
+  if (LIBS) return LIBS;
+  const g = (0, eval)('this');
+  if (!g.self) g.self = g;
+  ['nacl-fast.min.js', 'scrypt.js'].forEach(f => {
+    const code = readFile(here() + '/vendor/' + f);
+    if (!code) throw new Error('Missing ' + f + '. Re-run the installer.');
+    (0, eval)(code);
+  });
+  // Randomness from the Mac's secure random source
+  g.nacl.setPRNG((x, n) => {
+    const b = b64dec(sh('head -c ' + n + ' /dev/urandom | base64'));
+    if (b.length !== n) throw new Error('Could not get random bytes');
+    for (let i = 0; i < n; i++) x[i] = b[i];
+  });
+  LIBS = { nacl: g.nacl, scrypt: g.scrypt };
+  return LIBS;
+}
+function lockData(data, pass, salt) {
+  const { nacl, scrypt } = cryptoLibs();
+  const key = scrypt.syncScrypt(utf8(pass), b64dec(salt), KDF.N, KDF.r, KDF.p, 32);
+  const nonce = nacl.randomBytes(24);
+  const box = nacl.secretbox(utf8(JSON.stringify(data)), nonce, key);
+  return { v: 1, kdf: 'scrypt', N: KDF.N, r: KDF.r, p: KDF.p, salt, nonce: b64enc(nonce), box: b64enc(box) };
+}
+const GH = tok => ({ Authorization: 'Bearer ' + tok, Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28', 'User-Agent': 'synq-dashboard' });
+const PHONE_FILE = 'synq-dashboard.json';
+function phone(data, dir) {
+  const pass = cfg('PHONE_PASSCODE'), tok = cfg('GITHUB_GIST_TOKEN');
+  if (!pass && !tok) return { ok: false, missing: true };
+  return safe('phone', () => {
+    if (!pass) throw new Error('PHONE_PASSCODE is empty in your .env file.');
+    if (!tok) throw new Error('GITHUB_GIST_TOKEN is empty in your .env file.');
+    if (pass.length < 12) throw new Error('PHONE_PASSCODE is too short. Use at least 12 characters, like 4 words.');
+    let state = {};
+    try { state = JSON.parse(readFile(dir + '/phone.json') || '{}'); } catch (e) { state = {}; }
+    if (!state.salt) state.salt = b64enc(cryptoLibs().nacl.randomBytes(16));
+    const files = {}; files[PHONE_FILE] = { content: JSON.stringify(lockData(data, pass, state.salt)) };
+    if (state.gist) {
+      try { http('PATCH', 'https://api.github.com/gists/' + state.gist, GH(tok), false, { files }); }
+      catch (e) { if (/HTTP 404/.test(e.message)) state.gist = ''; else throw e; }
+    }
+    if (!state.gist) {
+      const r = http('POST', 'https://api.github.com/gists', GH(tok), false, { description: 'SYNQ Dashboard (locked numbers for the phone page)', public: false, files });
+      state.gist = r.id;
+    }
+    writeFile(dir + '/phone.json', JSON.stringify(state));
+    return { url: 'https://synqstudios815.com/dash/#g=' + state.gist, at: new Date().toISOString() };
+  });
+}
+
 // ---------- test each connection (prints only OK / problem, never key values) ----------
 function test() {
   const line = (name, varName, fn) => {
@@ -354,6 +432,14 @@ function test() {
       return 'connected (@' + YT_HANDLE + ', ' + Number(c.statistics.viewCount).toLocaleString('en-US') + ' total views)';
     }),
   ];
+  if (cfg('PHONE_PASSCODE') || cfg('GITHUB_GIST_TOKEN')) {
+    out.push(line('Phone', 'GITHUB_GIST_TOKEN', () => {
+      if (cfg('PHONE_PASSCODE').length < 12) throw new Error('PHONE_PASSCODE is missing or too short (use at least 12 characters)');
+      http('GET', 'https://api.github.com/gists?per_page=1', GH(cfg('GITHUB_GIST_TOKEN')));
+      cryptoLibs();
+      return 'GitHub token works and your passcode is set';
+    }));
+  }
   return out.join('\n');
 }
 
@@ -368,6 +454,7 @@ function run(argv) {
     youtube: youtube(dir + '/youtube-history.json'),
     tiktok: tiktok(dir + '/tiktok-history.json'),
   };
+  data.phone = phone(data, dir);
   writeFile(dir + '/data.js', 'window.SYNQ = ' + JSON.stringify(data) + ';\n');
   return 'Dashboard numbers updated.';
 }

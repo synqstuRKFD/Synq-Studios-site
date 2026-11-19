@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SYNQ Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070404">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SYNQ">
 <link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
@@ -154,6 +162,53 @@
   footer { margin-top: 46px; color: var(--dim); font-size: .8rem; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
+  /* unlock screen (phone) */
+  .lock { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px; background: radial-gradient(600px 400px at 50% 20%, rgba(255, 59, 31, .22), transparent 70%), var(--bg); }
+  .lock[hidden] { display: none; }
+  .lock__box { width: 100%; max-width: 360px; text-align: center; }
+  .lock__box .logo3d { margin: 0 auto 18px; width: 110px; height: 136px; }
+  .lock__box h2 { font: 400 1.9rem/1 var(--display); text-transform: uppercase; margin: 0 0 6px; }
+  .lock__box h2 span { color: var(--accent); }
+  .lock__box p { color: var(--muted); margin: 0 0 18px; font-size: .92rem; }
+  .lock__box input[type=password] { width: 100%; font: 600 16px var(--body); color: var(--text); background: rgba(255, 255, 255, .05); border: 1px solid var(--line-strong); border-radius: 12px; padding: 14px 16px; outline: none; }
+  .lock__box input[type=password]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 59, 31, .25); }
+  .lock__box label { display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted); font-size: .85rem; margin: 12px 0 16px; }
+  .lock__box button { width: 100%; font: 800 1rem var(--body); color: #fff; background: var(--accent); border: 0; border-radius: 12px; padding: 14px; cursor: pointer; }
+  .lock__box button:disabled { opacity: .6; }
+  .lock__msg { min-height: 1.4em; margin-top: 12px; font-size: .88rem; color: var(--gold); }
+  .lockbtn { font: 700 .78rem var(--body); color: var(--muted); background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; padding: .4em .9em; cursor: pointer; }
+  .phone { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .phone__qr { background: #fff; padding: 10px; border-radius: 12px; line-height: 0; }
+  .phone__qr img, .phone__qr svg { width: 150px; height: 150px; display: block; }
+  .phone code { font: 500 .78rem var(--mono); color: var(--muted); word-break: break-all; }
+
+  /* phones */
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+    .top__in { padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); gap: 10px; }
+    .top__mark, .clock, .dot span { display: none; }
+    .tabs { margin-left: 0; }
+    .status { gap: 8px; }
+    .wrap { padding: 0 14px calc(40px + env(safe-area-inset-bottom)); }
+    .hero { gap: 16px; padding: 22px 0 6px; align-items: flex-start; }
+    .hero .logo3d { width: 70px; height: 88px; }
+    .hero h1 { font-size: 2.1rem; margin: 6px 0 8px; }
+    .summary { font-size: .92rem; }
+    .kpis { grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .kpi { padding: 14px 14px 0; min-height: 140px; }
+    .kpi .num { font-size: 1.9rem; }
+    .kpi .label { font-size: .64rem; letter-spacing: .08em; }
+    .kpi .sub { font-size: .74rem; }
+    .kpi .spark { margin: auto -14px 0; width: calc(100% + 28px); height: 40px; }
+    .tiles { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tile .num { font-size: 1.6rem; }
+    .panel { padding: 16px; }
+    .chart { height: 150px; gap: 2px; }
+    .section { margin-top: 34px; }
+    .social__nums b { font-size: 1.25rem; }
+    footer { font-size: .74rem; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .logo3d, .logo3d__spin, .logo3d__shadow, .chart .b i { animation: none; }
     .logo3d__spin { transform: rotateY(-20deg); }
@@ -166,7 +221,7 @@
   <div class="top__in">
     <div class="top__mark">SYNQ <span>Studios</span></div>
     <nav class="tabs" aria-label="Sections">
-      <a href="#overview" class="on">Overview</a><a href="#money">Money</a><a href="#website">Website</a><a href="#socials">Socials</a><a href="#studio">Studio</a>
+      <a href="#overview" class="on">Overview</a><a href="#money">Money</a><a href="#website">Website</a><a href="#socials">Socials</a><a href="#studio">Studio</a><a href="#phone">Phone</a>
     </nav>
     <div class="status" id="status"></div>
   </div>
@@ -188,11 +243,23 @@
   </footer>
 </div>
 <div class="tip" id="tip"></div>
+<div class="lock" id="lock" hidden>
+  <form class="lock__box" id="lockForm" autocomplete="off">
+    <div class="logo3d" aria-hidden="true"><div class="logo3d__spin" id="logo3dLock"></div><div class="logo3d__shadow"></div></div>
+    <h2>SYNQ <span>Dashboard</span></h2>
+    <p id="lockText">Enter your passcode to see your numbers.</p>
+    <input type="password" id="pass" placeholder="Passcode" aria-label="Passcode" autocomplete="current-password" required>
+    <label><input type="checkbox" id="remember" checked> Remember on this phone</label>
+    <button type="submit" id="unlockBtn">Unlock</button>
+    <div class="lock__msg" id="lockMsg" role="status"></div>
+  </form>
+</div>
 
-<script id="data-src" src="data.js"></script>
+<script>if (location.protocol === 'file:') document.write('<script id="data-src" src="data.js"><\/script><script src="vendor/qrcode.js"><\/script>');</script>
 <script>
 // Inside the SYNQ Dashboard app window, links open in your normal browser
-const IN_APP = !/Safari\/|Chrome\/|Firefox\//.test(navigator.userAgent);
+const IN_APP = location.protocol === 'file:' && !/Safari\/|Chrome\/|Firefox\//.test(navigator.userAgent);
+const ON_PHONE_PAGE = /^https?:$/.test(location.protocol);
 document.addEventListener('click', e => {
   const a = e.target.closest('a[href^="http"]');
   if (!a || !IN_APP) return;
@@ -219,7 +286,7 @@ function render() {
   document.getElementById('hello').textContent = (h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening') + ' · ' + new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   if (!D) {
-    document.getElementById('summary').textContent = 'No numbers yet. Open the SYNQ Dashboard app to pull them in.';
+    document.getElementById('summary').textContent = ON_PHONE_PAGE ? 'Unlock to see your numbers.' : 'No numbers yet. Open the SYNQ Dashboard app to pull them in.';
     return;
   }
   lastStamp = D.updatedAt;
@@ -360,9 +427,25 @@ function render() {
     ext('https://web3forms.com/', 'Form emails ↗') + ext('https://github.com/synqstuRKFD/Synq-Studios-site', 'Website code ↗') +
     '</div></div></section>';
 
+  // ---------- Phone
+  const P = D.phone;
+  html += '<section class="section" id="phone"><div class="section__head"><h2>On your phone</h2><small>locked with your passcode</small></div>';
+  if (ON_PHONE_PAGE) {
+    html += '<div class="panel phone"><div style="flex:1;min-width:220px"><p class="empty" style="color:var(--muted)">This phone is unlocked. To hide your numbers again, lock it.</p></div><button class="lockbtn" id="lockNow" type="button">Lock this phone</button></div>';
+  } else if (P && P.ok) {
+    html += '<div class="panel phone"><div class="phone__qr" id="qr"></div><div style="flex:1;min-width:240px"><b>Scan with your iPhone camera</b><p class="empty" style="margin:6px 0 10px">Open the link, enter your passcode, then tap <b>Share → Add to Home Screen</b>. Your phone gets the same numbers, updated every 15 minutes while this Mac is on.</p><code>' + esc(P.url) + '</code></div></div>';
+  } else if (P && P.missing) {
+    html += '<div class="panel notice">Want this on your phone? Add <b>PHONE_PASSCODE</b> and <b>GITHUB_GIST_TOKEN</b> to your .env file (open SYNQ Dashboard Keys).</div>';
+  } else html += '<div class="panel notice err"><b>Couldn’t update the phone version.</b> ' + esc(P && P.error) + '</div>';
+  html += '</section>';
+
   const y = scrollY;
   app.innerHTML = html;
   scrollTo(0, y);
+  const qr = document.getElementById('qr');
+  if (qr && P && P.url && window.qrcode) { const q = qrcode(0, 'M'); q.addData(P.url); q.make(); qr.innerHTML = q.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); }
+  const lockNow = document.getElementById('lockNow');
+  if (lockNow) lockNow.onclick = () => { forgetKey(); location.reload(); };
 
   // count-up numbers on first open
   if (firstRender && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -395,15 +478,15 @@ setInterval(() => { const c = document.getElementById('clock'); if (c) c.textCon
 const links = [...document.querySelectorAll('.tabs a')];
 const spy = () => {
   let current = 'overview';
-  ['overview', 'money', 'website', 'socials', 'studio'].forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < 140) current = id; });
-  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) current = 'studio';
+  ['overview', 'money', 'website', 'socials', 'studio', 'phone'].forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < 140) current = id; });
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) current = 'phone';
   links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + current));
 };
 addEventListener('scroll', spy, { passive: true });
 
 // 3D logo: dark-red layers for the edge, glowing white faces front and back
-(function () {
-  const spin = document.getElementById('logo3d'), depth = 16;
+['logo3d', 'logo3dLock'].forEach(function (id) {
+  const spin = document.getElementById(id), depth = 16;
   for (let i = 0; i < depth; i++) {
     const img = new Image(), face = i === 0 || i === depth - 1;
     img.src = face ? 'logo.png' : 'logo-edge.png';
@@ -411,10 +494,10 @@ addEventListener('scroll', spy, { passive: true });
     img.style.transform = 'translateZ(' + ((i - (depth - 1) / 2) * 1.15) + 'px)';
     spin.appendChild(img);
   }
-})();
+});
 
-// Check for fresh numbers every 30 seconds; only redraw when they changed
-setInterval(() => {
+// Mac: check data.js for fresh numbers every 30 seconds; only redraw when they changed
+if (!ON_PHONE_PAGE) setInterval(() => {
   const old = document.getElementById('data-src'), s = document.createElement('script');
   s.id = 'data-src';
   s.src = 'data.js?t=' + Date.now();
@@ -422,6 +505,96 @@ setInterval(() => {
   if (old) old.remove();
   document.body.appendChild(s);
 }, 30000);
+
+// ---------- Phone page: download the locked numbers and unlock them on this phone ----------
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+                set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+                del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
+let sessionKey = null;
+function forgetKey() { sessionKey = null; store.del('synq-key'); store.del('synq-salt'); }
+const fromB64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const toB64 = u => btoa(String.fromCharCode.apply(null, u));
+function loadScript(src) { return new Promise((ok, bad) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => bad(new Error('Could not load ' + src)); document.head.appendChild(s); }); }
+
+async function getLocked() {
+  const gist = store.get('synq-gist');
+  if (!gist) throw new Error('Open the link from your Mac dashboard once (scan its QR code) so this phone knows where your numbers are.');
+  const r = await fetch('https://api.github.com/gists/' + encodeURIComponent(gist), { cache: 'no-store', headers: { Accept: 'application/vnd.github+json' } });
+  if (!r.ok) throw new Error(r.status === 404 ? 'Your numbers weren’t found. Scan the QR code on your Mac dashboard again.' : 'Couldn’t download your numbers (error ' + r.status + '). Try again in a minute.');
+  const g = await r.json(), f = g.files && g.files['synq-dashboard.json'];
+  if (!f) throw new Error('Your Mac hasn’t uploaded any numbers yet.');
+  return JSON.parse(f.truncated ? await (await fetch(f.raw_url, { cache: 'no-store' })).text() : f.content);
+}
+function unlockBox(locked, key) {
+  const out = nacl.secretbox.open(fromB64(locked.box), fromB64(locked.nonce), key);
+  if (!out) return null;
+  return JSON.parse(new TextDecoder().decode(out));
+}
+async function phoneRefresh() {
+  try {
+    const locked = await getLocked();
+    if (!sessionKey || store.get('synq-salt') !== locked.salt) return showLock();
+    const data = unlockBox(locked, sessionKey);
+    if (!data) { forgetKey(); return showLock('Your passcode changed. Enter the new one.'); }
+    window.SYNQ = data;
+    document.getElementById('lock').hidden = true;
+    if (data.updatedAt !== lastStamp) render();
+  } catch (e) {
+    if (!window.SYNQ) showLock(e.message, true);
+  }
+}
+function showLock(msg, isError) {
+  const lock = document.getElementById('lock');
+  lock.hidden = false;
+  document.getElementById('lockMsg').textContent = msg || '';
+  if (isError) document.getElementById('unlockBtn').disabled = !store.get('synq-gist');
+  setTimeout(() => document.getElementById('pass').focus(), 50);
+}
+
+if (ON_PHONE_PAGE) {
+  // The QR link carries where your locked numbers live (#g=...); remember it on this phone
+  const takeLink = () => {
+    const m = location.hash.match(/g=([A-Za-z0-9]+)/);
+    if (!m) return false;
+    store.set('synq-gist', m[1]);
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('unlockBtn').disabled = false;
+    document.getElementById('lockMsg').textContent = '';
+    return true;
+  };
+  takeLink();
+  addEventListener('hashchange', () => { if (takeLink() && window.nacl) phoneRefresh(); });
+  document.getElementById('summary').textContent = 'Unlocking…';
+  Promise.all([loadScript('vendor/nacl-fast.min.js'), loadScript('vendor/scrypt.js')]).then(() => {
+    const k = store.get('synq-key');
+    if (k) sessionKey = fromB64(k);
+    phoneRefresh();
+    setInterval(phoneRefresh, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && sessionKey) phoneRefresh(); });
+  }).catch(e => showLock(e.message, true));
+
+  document.getElementById('lockForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('unlockBtn'), msg = document.getElementById('lockMsg');
+    btn.disabled = true; btn.textContent = 'Unlocking…'; msg.textContent = '';
+    try {
+      const locked = await getLocked();
+      await new Promise(r => setTimeout(r, 30)); // let the button update before the heavy step
+      const key = scrypt.syncScrypt(new TextEncoder().encode(document.getElementById('pass').value.trim()), fromB64(locked.salt), locked.N, locked.r, locked.p, 32);
+      const data = unlockBox(locked, key);
+      if (!data) { msg.textContent = 'That passcode didn’t work. Try again.'; return; }
+      sessionKey = key;
+      if (document.getElementById('remember').checked) { store.set('synq-key', toB64(key)); store.set('synq-salt', locked.salt); }
+      else { store.del('synq-key'); store.set('synq-salt', locked.salt); }
+      document.getElementById('pass').value = '';
+      window.SYNQ = data;
+      document.getElementById('lock').hidden = true;
+      render();
+    } catch (err) {
+      msg.textContent = err.message;
+    } finally { btn.disabled = false; btn.textContent = 'Unlock'; }
+  });
+}
 </script>
 </body>
 </html>

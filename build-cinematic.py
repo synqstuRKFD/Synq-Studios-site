@@ -569,7 +569,7 @@ for rel in sorted(needed):
     shutil.copy2(ROOT / rel, dest)
 
 # robots.txt + sitemap.xml
-robots = "User-agent: *\nAllow: /\n"
+robots = "User-agent: *\nAllow: /\nDisallow: /dash/\n"
 if SITE_URL:
     u = SITE_URL.rstrip("/")
     robots += f"\nSitemap: {u}/sitemap.xml\n"
@@ -583,6 +583,13 @@ if SITE_URL:
             for path in ("", "es.html"))
         + "</urlset>\n")
 (DIST / "robots.txt").write_text(robots)
+# Phone dashboard at /dash/ (the page code only; your numbers stay locked with your passcode)
+DASH = DIST / "dash"
+(DASH / "vendor").mkdir(parents=True, exist_ok=True)
+shutil.copy2(ROOT / "mac-dashboard" / "dashboard.html", DASH / "index.html")
+for f in ["logo.png", "logo-edge.png", "icon-180.png", "icon-192.png", "icon-512.png", "manifest.webmanifest",
+          "vendor/nacl-fast.min.js", "vendor/scrypt.js", "vendor/README.txt"]:
+    shutil.copy2(ROOT / "mac-dashboard" / f, DASH / f)
 # GitHub Pages: custom domain + serve files as-is (no Jekyll processing)
 (DIST / "CNAME").write_text("synqstudios815.com\n")
 (DIST / ".nojekyll").write_text("")
