@@ -1,6 +1,6 @@
 // SYNQ Trajes: the 3D designer screen. Holds the design, builds the controls, lets people upload
 // their own logos/photos and place them on the suit, and handles save, share, image and tailor sheet.
-import { createStudio, patternCanvas } from './studio.js';
+import { createStudio, patternCanvas, jacketCfg } from './studio.js';
 
 // ---------- words ----------
 const T = {
@@ -13,6 +13,12 @@ const T = {
     piping: 'Vivos (cordón en las costuras)', pipOn: 'Ponerle vivos', pipSides: 'Costuras de los lados', pipRacing: 'Líneas curvas (estilo carrera)', pipLapels: 'Orilla de las solapas', pipFront: 'Orilla del cierre', pipPants: 'Pantalón', pipSleeves: 'Mangas', pipCuffs: 'Puños', pipSize: 'Grosor',
     fMetallic: 'Piel metálica', fCrushed: 'Terciopelo arrugado', fFoil: 'Foil espejo', fSnake: 'Piel de víbora', fQuilted: 'Acolchado',
     bright: 'Brillo', recent: 'Recientes', quick: 'Colores rápidos', pickScreen: 'Tomar color de la pantalla',
+    tPieces: 'Piezas', secJacket: 'Saco', secPants: 'Pantalón', secShirt: 'Camisa y cuello', secShoes: 'Calzado y tejana', secPanels: 'Paneles', secPiping: 'Vivos', secHardware: 'Metales',
+    startFrom: 'Empezar desde', length: 'Largo', fit: 'Ajuste', fitSlim: 'Entallado', fitLoose: 'Holgado', collar: 'Cuello', cNotch: 'Solapa muesca', cPeak: 'Solapa pico', cShawl: 'Solapa chal', cStand: 'Cuello parado', cRib: 'Cuello de resorte', cShirt: 'Cuello camisero', cNone: 'Sin cuello',
+    closure: 'Cierre', clButtons: 'Botones', clZipper: 'Cierre (zipper)', clSnaps: 'Broches', clOpen: 'Abierto', count: 'Cuántos', pockets: 'Bolsas', pkNone: 'Sin bolsas', pkFlap: 'Con cartera', pkWelt: 'De ribete', pkZip: 'Con zipper', pkPatch: 'De parche',
+    chestPocket: 'Bolsa de pecho', pocketContrast: 'Bolsas en color de contraste', cuffsT: 'Puños', cfPlain: 'Sencillos', cfContrast: 'De contraste', cfRib: 'De resorte', cfButtons: 'Con botones', hemT: 'Bajo del saco', hmPlain: 'Sencillo', hmRib: 'Resorte',
+    yokeT: 'Canesú', ykNone: 'Sin canesú', ykWestern: 'Vaquero (picos)', ykStraight: 'Recto', epaulettes: 'Charreteras (hombros)', turnups: 'Dobladillo vuelto', belt: 'Cinturón',
+    shirtT: 'Camisa', shDress: 'De vestir', shTee: 'Playera', shTurtle: 'Cuello de tortuga', chain: 'Cadena de oro', shoesT: 'Zapatos', soBoots: 'Botas', soSneakers: 'Tenis', soDress: 'De vestir', refColors: 'Colores de tus referencias',
     title: 'Diseña tu traje', mine: 'Mis diseños', mineShort: 'Mis trajes', save: 'Guardar', share: 'Compartir', sheet: 'Hoja para el sastre', image: 'Imagen',
     front: 'Frente', back: 'Espalda', sideL: 'Lado', sideR: 'Otro lado', spin: 'Girar', dragHint: 'Arrastra para girar · pellizca para acercar', loading: 'Preparando el maniquí…',
     download: 'Descargar imagen', close: 'Cerrar', mineHelp: 'Se guardan en este teléfono o computadora.', madeBy: 'Hecho por SYNQ Studios · estudio de grabación en Rockford, IL', visit: 'Visita el estudio',
@@ -51,6 +57,12 @@ const T = {
     piping: 'Piping (cord along the seams)', pipOn: 'Add piping', pipSides: 'Side seams', pipRacing: 'Curved lines (racing style)', pipLapels: 'Lapel edges', pipFront: 'Zipper edges', pipPants: 'Pants', pipSleeves: 'Sleeves', pipCuffs: 'Cuffs', pipSize: 'Thickness',
     fMetallic: 'Metallic leather', fCrushed: 'Crushed velvet', fFoil: 'Mirror foil', fSnake: 'Snakeskin', fQuilted: 'Quilted',
     bright: 'Brightness', recent: 'Recent', quick: 'Quick colors', pickScreen: 'Pick a color from the screen',
+    tPieces: 'Pieces', secJacket: 'Jacket', secPants: 'Pants', secShirt: 'Shirt & neck', secShoes: 'Shoes & hat', secPanels: 'Panels', secPiping: 'Piping', secHardware: 'Hardware',
+    startFrom: 'Start from', length: 'Length', fit: 'Fit', fitSlim: 'Slim', fitLoose: 'Loose', collar: 'Collar', cNotch: 'Notch lapel', cPeak: 'Peak lapel', cShawl: 'Shawl lapel', cStand: 'Stand collar', cRib: 'Rib collar', cShirt: 'Shirt collar', cNone: 'No collar',
+    closure: 'Closure', clButtons: 'Buttons', clZipper: 'Zipper', clSnaps: 'Snaps', clOpen: 'Open', count: 'How many', pockets: 'Pockets', pkNone: 'No pockets', pkFlap: 'Flap', pkWelt: 'Welt', pkZip: 'Zipper', pkPatch: 'Patch',
+    chestPocket: 'Chest pocket', pocketContrast: 'Pockets in the contrast color', cuffsT: 'Cuffs', cfPlain: 'Plain', cfContrast: 'Contrast', cfRib: 'Rib', cfButtons: 'With buttons', hemT: 'Jacket hem', hmPlain: 'Plain', hmRib: 'Rib',
+    yokeT: 'Yoke', ykNone: 'No yoke', ykWestern: 'Western (points)', ykStraight: 'Straight', epaulettes: 'Epaulettes (shoulders)', turnups: 'Turn-ups', belt: 'Belt',
+    shirtT: 'Shirt', shDress: 'Dress shirt', shTee: 'T-shirt', shTurtle: 'Turtleneck', chain: 'Gold chain', shoesT: 'Shoes', soBoots: 'Boots', soSneakers: 'Sneakers', soDress: 'Dress shoes', refColors: 'Colors from your references',
     title: 'Design your suit', mine: 'My designs', mineShort: 'My suits', save: 'Save', share: 'Share', sheet: 'Tailor sheet', image: 'Image',
     front: 'Front', back: 'Back', sideL: 'Side', sideR: 'Other side', spin: 'Spin', dragHint: 'Drag to spin · pinch to zoom', loading: 'Getting the mannequin ready…',
     download: 'Download image', close: 'Close', mineHelp: 'Saved on this phone or computer.', madeBy: 'Made by SYNQ Studios · recording studio in Rockford, IL', visit: 'Visit the studio',
@@ -94,6 +106,9 @@ const COLORS = [
 ];
 const FABRICS = [['satin', 'fSatin'], ['velvet', 'fVelvet'], ['crushed', 'fCrushed'], ['suede', 'fSuede'], ['sequin', 'fSequin'], ['glitter', 'fGlitter'], ['holo', 'fHolo'], ['foil', 'fFoil'], ['snake', 'fSnake'], ['leather', 'fLeather'], ['metallic', 'fMetallic'], ['quilted', 'fQuilted'], ['wool', 'fWool']];
 const GEMS = [['crystal', 'gCrystal', 'radial-gradient(circle at 35% 35%,#fff,#dfe9f5 45%,#8fa3bd)'], ['ab', 'gAb', 'radial-gradient(circle at 35% 35%,#fff,#cfe7ff 40%,#c79be8)'], ['gold', 'gGold', 'radial-gradient(circle at 35% 35%,#fff6c8,#e8c050 45%,#8c6512)'], ['silver', 'gSilver', 'radial-gradient(circle at 35% 35%,#fff,#c9ced6 45%,#6f7782)'], ['jet', 'gJet', 'radial-gradient(circle at 35% 35%,#9aa0a8,#2a2c31 45%,#050506)'], ['red', 'gRed', 'radial-gradient(circle at 35% 35%,#ffd2d2,#e0283a 45%,#6b0610)'], ['blue', 'gBlue', 'radial-gradient(circle at 35% 35%,#d6ecff,#2f7de0 45%,#0b2a63)'], ['pink', 'gPink', 'radial-gradient(circle at 35% 35%,#ffe1f0,#f06aa8 45%,#7a1446)'], ['green', 'gGreen', 'radial-gradient(circle at 35% 35%,#d9ffe6,#22b05e 45%,#063d1d)']];
+// colors sampled from the reference suits you sent
+const REF_COLORS = [['#c8202e', 'Xclusivo rojo'], ['#0d0d0f', 'Xclusivo negro'], ['#1aa0dc', 'Azul satín'], ['#5a2bc4', 'Morado satín'], ['#6a3fc9', 'Los de la Lou morado'], ['#7b3fe0', 'Profugos morado'],
+  ['#18a85a', 'Bandera Verde'], ['#d9a62e', 'Los Aliados oro'], ['#b3121f', 'Edición NM rojo'], ['#9da2a8', 'Mala Conducta plata'], ['#d9dde2', 'Viada gris'], ['#c9bfb4', 'Gamuza gris'], ['#efe9f2', 'Malicia tornasol'], ['#e3241b', 'Marca Alianza rojo']];
 const PATTERNS = [['tribal', 'patTribal'], ['damasco', 'patDamasco'], ['llamas', 'patLlamas'], ['zebra', 'patZebra'], ['estrellas', 'patEstrellas']];
 const PARTS = [['body', 'pBody'], ['sleeves', 'pSleeves'], ['panel', 'pPanel'], ['piping', 'pPiping'], ['collar', 'pCollar'], ['cuffs', 'pCuffs'], ['pants', 'pPants'], ['stripes', 'pStripes'], ['shirt', 'pShirt'], ['trim', 'pTrim'], ['hat', 'pHat'], ['shoes', 'pShoes']];
 const TECHS = [['print', 'tPrintT'], ['embroidery', 'tEmb'], ['stones', 'tStones'], ['patch', 'tPatch']];
@@ -428,7 +443,7 @@ function markSelected() { document.querySelectorAll('.placed').forEach(c => c.se
 function faceDecal(dc) { const [nx, , nz] = dc.normal; studio.view(Math.abs(nz) >= Math.abs(nx) ? (nz > 0 ? 'front' : 'back') : (nx > 0 ? 'left' : 'right')); }
 
 // ---------- tabs and panes ----------
-const TABS = [['styles', 'tStyles'], ['cut', 'tCut'], ['fabric', 'tFabric'], ['stones', 'tStonesTab'], ['logos', 'tLogos'], ['print', 'tPrint'], ['text', 'tText'], ['band', 'tBand']];
+const TABS = [['styles', 'tStyles'], ['cut', 'tPieces'], ['fabric', 'tFabric'], ['stones', 'tStonesTab'], ['logos', 'tLogos'], ['print', 'tPrint'], ['text', 'tText'], ['band', 'tBand']];
 let current = store.get('synq-traje3d-tab') || 'styles', zone = 'body';
 const tabsEl = $('#tabs'), panes = $('#panes');
 function buildTabs() {
@@ -451,7 +466,7 @@ const PANES = {
     const wrap = h('div', { class: 'opts' }, PRESETS.map(p => h('button', { type: 'button', class: 'opt', on: { click: () => {
       // keep the person's own logos and print; drop anything that came from another starter look
       const mineDecals = D.decals.filter(dc => !dc.fromLook);
-      const keep = { images: D.images, members: D.members, notes: D.notes };
+      const keep = { images: D.images, members: D.members, notes: D.notes, jacket: undefined, pantsCfg: undefined };
       D = Object.assign(clone(p), keep);
       D.decals = D.decals.map(dc => Object.assign(dc, { fromLook: true })).concat(mineDecals);
       if (!p.print && keep.images && D.print == null) { const old = JSON.parse(JSON.stringify(window.__lastUserPrint || null)); if (old) D.print = old; } $('#designName').value = D.name; rebuild(); toast(p.name);
@@ -459,25 +474,55 @@ const PANES = {
     return [group(t('tStyles'), [wrap], t('stylesHelp'))];
   },
   cut() {
-    const k = [group(t('jacket'), [opts([['blazer', t('sBlazer')], ['bomber', t('sBomber')], ['varsity', t('sVarsity')], ['western', t('sWestern')]], D.style, v => shape(d => { d.style = v; }))])];
-    if (D.style === 'blazer') {
-      k.push(group(t('lapel'), [opts([['notch', t('lNotch')], ['peak', t('lPeak')], ['shawl', t('lShawl')]], D.lapel, v => shape(d => { d.lapel = v; }))]));
-      k.push(group(t('buttons'), [opts([[1, '1'], [2, '2'], [3, '3']], D.buttons, v => shape(d => { d.buttons = v; }))]));
-      k.push(group(t('neck'), [opts([['bow', t('nBow')], ['tie', t('nTie')], ['none', t('nNone')]], D.neckwear, v => shape(d => { d.neckwear = v; }))]));
-    }
-    if (D.style === 'western') k.push(group('', [toggle(t('yoke'), D.yoke, v => shape(d => { d.yoke = v; }))]));
-    k.push(group(t('hardware'), [opts([['gold', t('gold')], ['silver', t('silver')], ['black', t('black')]], D.hardware, v => color(d => { d.hardware = v; }))]));
-    k.push(group(t('stripes'), [opts([['none', t('none')], ['one', t('one')], ['two', t('two')]], D.stripes, v => shape(d => { d.stripes = v; })),
-      toggle(t('sleeveStripes'), D.sleeveStripes, v => shape(d => { d.sleeveStripes = v; }))]));
-    k.push(group(t('panels'), [['shoulders', 'panShoulders'], ['sides', 'panSides'], ['legs', 'panLegs']].map(([key, l]) => toggle(t(l), D.panels[key], v => shape(d => { d.panels[key] = v; }))).concat([
-      h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'panel'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('fabric') + ' / ' + t('color') + ' →'])]), t('panelsHelp')));
+    const J = jacketCfg(D), setJ = (key, v) => shape(d => { d.jacket = Object.assign(jacketCfg(d), { [key]: v }); });
+    const PN = Object.assign({ fit: 0.3, belt: true, turnups: false }, D.pantsCfg || {}), setP = (key, v) => shape(d => { d.pantsCfg = Object.assign({ fit: 0.3, belt: true, turnups: false }, d.pantsCfg || {}, { [key]: v }); });
+    const lapel = ['notch', 'peak', 'shawl'].includes(J.collar);
+    const sec = (title, kids, openIt) => { const el = h('details', { class: 'acc', open: openIt }, [h('summary', {}, [title])].concat([h('div', { class: 'acc__body' }, kids.filter(Boolean))])); return el; };
+    const lab = l => h('div', { class: 'acc__label' }, [l]);
+    const fitSlider = (v, onSet) => slider(t('fit'), 0, 100, 1, Math.round(v * 100), x => x < 30 ? t('fitSlim') : x > 65 ? t('fitLoose') : (lang === 'es' ? 'Normal' : 'Regular'), (x, live) => { if (!live) onSet(x / 100); });
+    const jacket = sec(t('secJacket'), [
+      lab(t('startFrom')), opts([['blazer', t('sBlazer')], ['bomber', t('sBomber')], ['varsity', t('sVarsity')], ['western', t('sWestern')]], D.jacket ? null : D.style, v => shape(d => { d.style = v; delete d.jacket; })),
+      slider(t('length'), 52, 76, 1, Math.round((1.5 - J.length) * 100), x => x + ' cm', (x, live) => { if (!live) setJ('length', 1.5 - x / 100); }),
+      fitSlider(J.fit, v => setJ('fit', v)),
+      lab(t('collar')), opts([['notch', t('cNotch')], ['peak', t('cPeak')], ['shawl', t('cShawl')], ['stand', t('cStand')], ['rib', t('cRib')], ['shirt', t('cShirt')], ['none', t('cNone')]], J.collar, v => setJ('collar', v)),
+      lab(t('closure')), opts((lapel ? [['buttons', t('clButtons')]] : [['buttons', t('clButtons')], ['zipper', t('clZipper')], ['snaps', t('clSnaps')], ['open', t('clOpen')]]), lapel ? 'buttons' : J.closure, v => setJ('closure', v)),
+      (J.closure === 'buttons' || J.closure === 'snaps' || lapel) ? slider(t('count'), 1, lapel ? 3 : 8, 1, Math.max(1, J.buttons || 1), x => String(x), (x, live) => { if (!live) setJ('buttons', x); }) : null,
+      lab(t('pockets')), opts([['none', t('pkNone')], ['flap', t('pkFlap')], ['welt', t('pkWelt')], ['zip', t('pkZip')], ['patch', t('pkPatch')]], J.pockets, v => setJ('pockets', v)),
+      toggle(t('chestPocket'), J.chestPocket, v => setJ('chestPocket', v)),
+      J.pockets !== 'none' || J.chestPocket ? toggle(t('pocketContrast'), J.pocketContrast, v => setJ('pocketContrast', v)) : null,
+      lab(t('cuffsT')), opts([['plain', t('cfPlain')], ['contrast', t('cfContrast')], ['rib', t('cfRib')], ['buttons', t('cfButtons')]], J.cuffs, v => setJ('cuffs', v)),
+      lab(t('hemT')), opts([['plain', t('hmPlain')], ['rib', t('hmRib')]], J.hem, v => setJ('hem', v)),
+      lab(t('yokeT')), opts([['none', t('ykNone')], ['western', t('ykWestern')], ['straight', t('ykStraight')]], J.yoke, v => setJ('yoke', v)),
+      toggle(t('epaulettes'), J.epaulettes, v => setJ('epaulettes', v)),
+      toggle(t('sleeveStripes'), D.sleeveStripes, v => shape(d => { d.sleeveStripes = v; })),
+    ], true);
+    const pants = sec(t('secPants'), [
+      fitSlider(PN.fit, v => setP('fit', v)),
+      lab(t('stripes')), opts([['none', t('none')], ['one', t('one')], ['two', t('two')]], D.stripes, v => shape(d => { d.stripes = v; })),
+      toggle(t('turnups'), PN.turnups, v => setP('turnups', v)), toggle(t('belt'), PN.belt, v => setP('belt', v)),
+    ]);
+    const shirt = sec(t('secShirt'), [
+      lab(t('shirtT')), opts([['dress', t('shDress')], ['tee', t('shTee')], ['turtle', t('shTurtle')]], D.shirt || 'dress', v => shape(d => { d.shirt = v; })),
+      (D.shirt || 'dress') === 'dress' ? lab(t('neck')) : null, (D.shirt || 'dress') === 'dress' ? opts([['bow', t('nBow')], ['tie', t('nTie')], ['none', t('nNone')]], D.neckwear, v => shape(d => { d.neckwear = v; })) : null,
+      toggle(t('chain'), D.chain, v => shape(d => { d.chain = v; })),
+    ]);
+    const shoes = sec(t('secShoes'), [
+      lab(t('shoesT')), opts([['boots', t('soBoots')], ['sneakers', t('soSneakers')], ['dress', t('soDress')]], D.shoes || 'boots', v => shape(d => { d.shoes = v; })),
+      toggle(t('hatShow'), D.hat, v => shape(d => { d.hat = v; })),
+    ]);
+    const panels = sec(t('secPanels'), [h('p', { class: 'hint' }, [t('panelsHelp')])].concat([['shoulders', 'panShoulders'], ['sides', 'panSides'], ['legs', 'panLegs']].map(([key, l]) => toggle(t(l), D.panels[key], v => shape(d => { d.panels[key] = v; })))).concat([
+      h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'panel'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('fabric') + ' / ' + t('color') + ' →'])]));
     const pp = D.piping, pipOpts = [['sides', 'pipSides'], ['racing', 'pipRacing'], ['lapels', 'pipLapels'], ['front', 'pipFront'], ['sleeves', 'pipSleeves'], ['cuffs', 'pipCuffs'], ['pants', 'pipPants']]
-      .filter(([key]) => !(key === 'lapels' && D.style !== 'blazer') && !(key === 'front' && D.style === 'blazer'));
-    k.push(group(t('piping'), [toggle(t('pipOn'), pp.on, v => shape(d => { d.piping.on = v; }))].concat(pp.on ? pipOpts.map(([key, l]) => toggle(t(l), pp[key], v => shape(d => { d.piping[key] = v; })))
+      .filter(([key]) => !(key === 'lapels' && !lapel) && !(key === 'front' && lapel));
+    const piping = sec(t('secPiping'), [toggle(t('pipOn'), pp.on, v => shape(d => { d.piping.on = v; }))].concat(pp.on ? pipOpts.map(([key, l]) => toggle(t(l), pp[key], v => shape(d => { d.piping[key] = v; })))
       .concat([slider(t('pipSize'), 2, 8, 0.5, +(pp.size * 2000).toFixed(1), v => v.toFixed(1) + ' mm', (v, live) => { if (!live) shape(d => { d.piping.size = v / 2000; }); }),
-        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'piping'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('color') + ' →'])]) : [])));
-    k.push(group(t('hat'), [toggle(t('hatShow'), D.hat, v => shape(d => { d.hat = v; }))]));
-    return k;
+        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'piping'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('color') + ' →'])]) : []));
+    const hw = sec(t('secHardware'), [opts([['gold', t('gold')], ['silver', t('silver')], ['black', t('black')]], D.hardware, v => color(d => { d.hardware = v; }))]);
+    // remember which sections are open while editing
+    const keep = store.get('synq-acc') || { 0: true };
+    const all = [jacket, pants, shirt, shoes, panels, piping, hw];
+    all.forEach((el, i) => { el.open = !!keep[i]; el.addEventListener('toggle', () => { keep[i] = el.open; store.set('synq-acc', keep); }); });
+    return all;
   },
   fabric() {
     const zones = h('div', { class: 'zones' }, PARTS.map(([key, label]) => h('button', { type: 'button', class: 'zone', 'aria-pressed': String(key === zone), on: { click: () => { zone = key; buildPane('fabric'); } } },
@@ -485,7 +530,7 @@ const PANES = {
     const label = t((PARTS.find(p => p[0] === zone) || PARTS[0])[1]);
     return [group(t('part'), [zones]),
       group(t('fabric') + ' · ' + label, [opts(FABRICS.map(([f, l]) => [f, t(l)]), D.parts[zone].fabric, v => color(d => { d.parts[zone].fabric = v; }))]),
-      group(t('color') + ' · ' + label, [colorWheel(D.parts[zone].color, (v, live) => color(d => { d.parts[zone].color = v; }, !live)), h('div', { class: 'hint', style: 'margin:12px 0 4px' }, [t('quick')]), swatches(D.parts[zone].color, v => { remember(v); color(d => { d.parts[zone].color = v; }); }, true)]),
+      group(t('color') + ' · ' + label, [colorWheel(D.parts[zone].color, (v, live) => color(d => { d.parts[zone].color = v; }, !live)), h('div', { class: 'hint', style: 'margin:12px 0 4px' }, [t('refColors')]), h('div', { class: 'mini' }, REF_COLORS.map(([c, n]) => h('button', { type: 'button', class: 'sw', title: n, 'aria-label': n, style: 'background:' + c, on: { click: () => { remember(c); color(d => { d.parts[zone].color = c; }); } } }))), h('div', { class: 'hint', style: 'margin:12px 0 4px' }, [t('quick')]), swatches(D.parts[zone].color, v => { remember(v); color(d => { d.parts[zone].color = v; }); }, true)]),
       ['body', 'sleeves', 'pants'].includes(zone) ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => color(d => { ['body', 'sleeves', 'pants'].forEach(k => { d.parts[k] = clone(d.parts[zone]); }); }) } }, [t('applyAll')]) : null];
   },
   stones() {

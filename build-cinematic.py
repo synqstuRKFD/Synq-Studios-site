@@ -588,7 +588,10 @@ if SITE_URL:
 TRAJES = DIST / "trajes"
 TRAJES.mkdir(parents=True, exist_ok=True)
 for f in ["index.html", "trajes.css", "app.js", "studio.js", "vendor/three.module.min.js", "vendor/OrbitControls.js",
-          "vendor/DecalGeometry.js", "vendor/RoomEnvironment.js", "vendor/three-LICENSE.txt"]:
+          "vendor/DecalGeometry.js", "vendor/RoomEnvironment.js", "vendor/three-LICENSE.txt",
+          "vendor/postprocessing/EffectComposer.js", "vendor/postprocessing/RenderPass.js", "vendor/postprocessing/GTAOPass.js", "vendor/postprocessing/OutputPass.js",
+          "vendor/postprocessing/Pass.js", "vendor/postprocessing/ShaderPass.js", "vendor/postprocessing/MaskPass.js", "vendor/shaders/CopyShader.js", "vendor/shaders/OutputShader.js",
+          "vendor/shaders/GTAOShader.js", "vendor/shaders/PoissonDenoiseShader.js", "vendor/math/SimplexNoise.js"]:
     (TRAJES / f).parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(ROOT / "trajes" / f, TRAJES / f)
 (DIST / "images").mkdir(exist_ok=True)

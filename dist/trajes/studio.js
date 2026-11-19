@@ -5,6 +5,10 @@ import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
 import { RoomEnvironment } from './vendor/RoomEnvironment.js';
 import { DecalGeometry } from './vendor/DecalGeometry.js';
+import { EffectComposer } from './vendor/postprocessing/EffectComposer.js';
+import { RenderPass } from './vendor/postprocessing/RenderPass.js';
+import { GTAOPass } from './vendor/postprocessing/GTAOPass.js';
+import { OutputPass } from './vendor/postprocessing/OutputPass.js';
 
 const DEG = Math.PI / 180;
 const FRONT = 90 * DEG; // angle that points to the front (+z)
@@ -28,16 +32,32 @@ const TORSO = profile({
   rz: [[0.80, 0.03], [0.83, 0.10], [0.90, 0.112], [0.98, 0.116], [1.08, 0.098], [1.20, 0.112], [1.32, 0.118], [1.40, 0.104], [1.445, 0.085], [1.475, 0.066], [1.50, 0.054]],
   cz: [[0.80, -0.01], [0.98, -0.012], [1.08, 0.0], [1.25, 0.016], [1.36, 0.016], [1.45, 0.0], [1.50, -0.01]],
 });
-const JACKET = profile({ // the jacket body: torso plus ease, continuing down over the hips
+const JACKET_BASE = profile({ // the jacket body: torso plus ease, continuing down over the hips
   rx: [[0.76, 0.204], [0.86, 0.196], [0.98, 0.188], [1.08, 0.176], [1.20, 0.184], [1.32, 0.196], [1.395, 0.206], [1.42, 0.204], [1.44, 0.18], [1.465, 0.13], [1.50, 0.072]],
   rz: [[0.76, 0.142], [0.86, 0.138], [0.98, 0.134], [1.08, 0.124], [1.20, 0.134], [1.32, 0.138], [1.40, 0.124], [1.445, 0.1], [1.475, 0.078], [1.50, 0.066]],
   cz: [[0.76, -0.004], [0.98, -0.008], [1.08, 0.004], [1.25, 0.02], [1.36, 0.02], [1.45, 0.002], [1.50, -0.01]],
 });
 const SEAT = profile({ rx: [[0.77, 0.03], [0.785, 0.1], [0.82, 0.13], [0.85, 0.155], [0.90, 0.18], [0.98, 0.186], [1.06, 0.166]], rz: [[0.77, 0.03], [0.785, 0.06], [0.82, 0.074], [0.85, 0.084], [0.90, 0.1], [0.98, 0.114], [1.06, 0.106]], cz: [[0.77, 0.0], [0.85, -0.008], [0.9, -0.014], [1.06, -0.008]] });
 const LEG = profile({ rx: [[0.04, 0.034], [0.10, 0.036], [0.30, 0.05], [0.47, 0.056], [0.56, 0.052], [0.75, 0.072], [0.92, 0.086], [0.98, 0.09]], rz: [[0.04, 0.038], [0.10, 0.04], [0.30, 0.054], [0.47, 0.06], [0.56, 0.054], [0.75, 0.076], [0.92, 0.088], [0.98, 0.09]] });
-const PANT = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.064], [0.50, 0.068], [0.75, 0.086], [0.92, 0.1], [1.0, 0.104]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.75, 0.088], [0.92, 0.102], [1.0, 0.106]] });
+const PANT_BASE = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.064], [0.50, 0.068], [0.75, 0.086], [0.92, 0.1], [1.0, 0.104]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.75, 0.088], [0.92, 0.102], [1.0, 0.106]] });
 const ARM = profile({ rx: [[-0.62, 0.026], [-0.59, 0.03], [-0.45, 0.04], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.05], [0.0, 0.054], [0.03, 0.04]], rz: [[-0.62, 0.022], [-0.59, 0.026], [-0.45, 0.038], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.048], [0.0, 0.05], [0.03, 0.04]] });
-const SLEEVE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.01, 0.062], [0.025, 0.05]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.01, 0.06], [0.025, 0.048]] });
+const SLEEVE_BASE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.01, 0.062], [0.025, 0.05]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.01, 0.06], [0.025, 0.048]] });
+let EASE = 0, PEASE = 0, SEASE = 0; // fit: slim (negative) to loose (positive), in meters
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const JACKET = y => { const p = JACKET_BASE(y), e = EASE * clamp01((1.42 - y) / 0.08); return { rx: p.rx + e, rz: p.rz + e * 0.75, cz: p.cz, cx: p.cx }; };
+const PANT = y => { const p = PANT_BASE(y), e = PEASE * clamp01((0.98 - y) / 0.15); return { rx: p.rx + e, rz: p.rz + e, cz: p.cz, cx: p.cx }; };
+const SLEEVE = y => { const p = SLEEVE_BASE(y), e = SEASE * clamp01((0.0 - y) / 0.1); return { rx: p.rx + e, rz: p.rz + e, cz: p.cz, cx: p.cx }; };
+// every piece of the jacket on its own; old designs (style/lapel/buttons/yoke) map onto these
+export function jacketCfg(d) {
+  const st = d.style || 'blazer';
+  const base = {
+    blazer: { length: 0.78, collar: d.lapel || 'notch', closure: 'buttons', buttons: d.buttons || 1, pockets: 'flap', chestPocket: true, cuffs: 'contrast', hem: 'plain', yoke: 'none', epaulettes: false, fit: 0.3 },
+    bomber: { length: 0.86, collar: 'rib', closure: 'zipper', buttons: 0, pockets: 'welt', chestPocket: false, cuffs: 'rib', hem: 'rib', yoke: 'none', epaulettes: false, fit: 0.4 },
+    varsity: { length: 0.86, collar: 'rib', closure: 'snaps', buttons: 6, pockets: 'welt', chestPocket: false, cuffs: 'rib', hem: 'rib', yoke: 'none', epaulettes: false, fit: 0.45 },
+    western: { length: 0.9, collar: 'stand', closure: 'snaps', buttons: 5, pockets: 'flap', chestPocket: false, cuffs: 'contrast', hem: 'plain', yoke: d.yoke === false ? 'none' : 'western', epaulettes: false, fit: 0.3 },
+  }[st] || {};
+  return Object.assign({}, base, d.jacket || {});
+}
 const LEG_X = y => 0.094 + (0.98 - y) * 0.03; // legs spread a little toward the floor
 const SHOULDER = new THREE.Vector3(0.196, 1.4, 0.0);
 const ARM_TILT = 9 * DEG;
@@ -365,15 +385,33 @@ export function createStudio(host) {
   const rim = new THREE.DirectionalLight(0xffd2c4, 1.3); rim.position.set(-2, 2.5, -2.5); scene.add(rim);
   const fill = new THREE.DirectionalLight(0xe8eeff, 0.7); fill.position.set(-2.4, 1.4, 2.2); scene.add(fill);
   const back = new THREE.DirectionalLight(0xffffff, 0.6); back.position.set(1.8, 1.8, -2.6); scene.add(back);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x2a1a16, 0.35));
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x4a403a, 0.45));
 
   // display base + soft contact shadow
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.52, 0.03, 64), new THREE.MeshPhysicalMaterial({ color: 0x141010, roughness: 0.25, metalness: 0.2, clearcoat: 1 }));
-  base.position.y = -0.015; base.receiveShadow = true; scene.add(base);
+  // seamless photo-studio sweep all the way around (floor curves up into the wall)
+  const sweepPts = [[0, 0], [3.2, 0], [4.2, 0.12], [4.9, 0.6], [5.2, 1.4], [5.25, 9]].map(([x, y]) => new THREE.Vector2(x, y));
+  const sweep = new THREE.Mesh(new THREE.LatheGeometry(sweepPts, 96), new THREE.MeshStandardMaterial({ color: 0x8c8580, roughness: 1, side: THREE.BackSide, envMapIntensity: 0.3 }));
+  sweep.receiveShadow = true; scene.add(sweep);
+  const floorShadow = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), new THREE.ShadowMaterial({ opacity: 0.32 }));
+  floorShadow.rotation.x = -Math.PI / 2; floorShadow.position.y = 0.001; floorShadow.receiveShadow = true; scene.add(floorShadow);
   const sc = canvas(256), sx = sc.getContext('2d'), gr = sx.createRadialGradient(128, 128, 10, 128, 128, 128);
-  gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); sx.fillStyle = gr; sx.fillRect(0, 0, 256, 256);
-  const shadowDisc = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
+  gr.addColorStop(0, 'rgba(0,0,0,.5)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); sx.fillStyle = gr; sx.fillRect(0, 0, 256, 256);
+  const shadowDisc = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.75), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(sc), transparent: true, depthWrite: false }));
   shadowDisc.rotation.x = -Math.PI / 2; shadowDisc.position.y = 0.002; scene.add(shadowDisc);
+  scene.fog = new THREE.Fog(0x6f6964, 7, 16);
+
+  // soft shadows where pieces meet (ambient occlusion); lighter setup on phones
+  const PHONE = matchMedia('(pointer: coarse)').matches;
+  if (PHONE) renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
+  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: PHONE ? 0 : 4 });
+  const composer = new EffectComposer(renderer, rt);
+  composer.addPass(new RenderPass(scene, camera));
+  const ao = new GTAOPass(scene, camera, 4, 4);
+  ao.updateGtaoMaterial({ radius: 0.12, distanceExponent: 1.4, thickness: 1, scale: 1.4, samples: PHONE ? 8 : 16 });
+  ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: PHONE ? 8 : 16 });
+  ao.blendIntensity = 0.9;
+  composer.addPass(ao);
+  composer.addPass(new OutputPass());
 
   // the mannequin (stays the same)
   const skin = fabric('skin', '#cfc8bd');
@@ -438,15 +476,17 @@ export function createStudio(host) {
     clear(suit); pickables.length = 0;
     makeMats(d);
     const put = (g, m, part, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; mesh.userData.part = part; mesh.userData.matKey = Object.keys(mats).find(k => mats[k] === m); (parent || suit).add(mesh); if (part) pickables.push(mesh); return mesh; };
-    const style = d.style; // blazer | bomber | varsity | western
+    const J = jacketCfg(d), PN = Object.assign({ fit: 0.3, belt: true, turnups: false }, d.pantsCfg || {});
+    EASE = (J.fit - 0.3) * 0.035; PEASE = (PN.fit - 0.3) * 0.035; SEASE = (J.fit - 0.3) * 0.022;
     const lapelEdges = [];
-    const hem = { blazer: 0.78, bomber: 0.86, varsity: 0.86, western: 0.9 }[style] || 0.8;
-    const rib = style === 'bomber' || style === 'varsity';
-    const open = style === 'blazer';
-    const brk = d.lapel === 'shawl' ? 1.1 : 1.14;
-    // front opening (blazer V + rounded cutaway at the hem)
-    const half = y => !open ? (style === 'western' ? 0.004 : 0.003) :
-      y > brk ? 0.62 * Math.pow((y - brk) / (1.5 - brk), 0.85) : y < hem + 0.1 ? 0.22 * Math.pow((hem + 0.1 - y) / 0.1, 1.6) : 0.003;
+    const hem = J.length;
+    const rib = J.hem === 'rib';
+    const open = ['notch', 'peak', 'shawl'].includes(J.collar);
+    const loose = !open && J.closure === 'open';
+    const brk = J.collar === 'shawl' ? 1.1 : 1.14;
+    // front opening (V for lapels + rounded cutaway at the hem; straight gap if worn open)
+    const half = y => !open ? (loose ? 0.075 : 0.004) :
+      y > brk ? 0.62 * Math.pow((y - brk) / (1.5 - brk), 0.85) : y < hem + 0.1 && J.closure !== 'zipper' ? 0.22 * Math.pow((hem + 0.1 - y) / 0.1, 1.6) : 0.003;
     const th = y => [FRONT + half(y), FRONT + 2 * Math.PI - half(y)];
 
     const on = (prof, y, a, off, xAt, fold) => { const p = prof(y), o = off + (fold ? fold(y, a) : 0), cx = (xAt ? xAt(y) : 0) + p.cx; return new THREE.Vector3(cx + (p.rx + o) * Math.cos(a), y, p.cz + (p.rz + o) * Math.sin(a)); };
@@ -455,31 +495,45 @@ export function createStudio(host) {
     const seamMat = new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.42, roughness: 1, depthWrite: false });
 
     // shirt + pants underneath
-    put(rings(TORSO, 1.0, 1.5, full, 0.006, 64, 30), mat('shirt'), null);
+    const shirt = d.shirt || 'dress';
+    put(rings(TORSO, 1.0, shirt === 'tee' ? 1.49 : 1.5, full, 0.006, 64, 30), mat('shirt'), null);
+    if (shirt === 'turtle') { const TN = profile({ rx: [[1.47, 0.07], [1.6, 0.056]], rz: [[1.47, 0.066], [1.6, 0.054]], cz: [[1.47, -0.008], [1.6, -0.01]] }); put(rings(TN, 1.47, 1.6, full, 0.004, 48, 10), mat('shirt'), null); }
+    if (shirt === 'dress' && (open || loose)) [-1, 1].forEach(sd => { // shirt collar points (only where the shirt shows)
+      put(strip(t => new THREE.Vector3(sd * (0.012 + 0.045 * t), 1.5 - 0.02 * t, 0.07 + 0.012 * t), t => new THREE.Vector3(sd * (0.03 + 0.05 * t), 1.47 - 0.055 * t, 0.068 + 0.03 * t), 12), mat('shirt'), null);
+    });
     put(rings(SEAT, 0.77, 1.06, full, 0.006, 64, 26), mat('pants'), 'pants');
     [-1, 1].forEach(s => {
       put(rings(PANT, 0.035, 1.0, full, 0, 96, 160, y => s * LEG_X(y), FOLD.pant), mat('pants'), 'pants');
       cord(t => on(PANT, 0.04 + 0.86 * t, FRONT, 0.0012, y => s * LEG_X(y), FOLD.pant), 80, seamMat, 0.0008); // front crease
       cord(t => on(PANT, 0.036, t * Math.PI * 2, 0.002, y => s * LEG_X(y)), 64, mat('pants'), 0.003, null, true); // hem
+      if (PN.turnups) { put(rings(PANT, 0.036, 0.078, full, 0.0045, 72, 6, y => s * LEG_X(y)), mat('pants'), 'pants'); cord(t => on(PANT, 0.078, t * Math.PI * 2, 0.0045, y => s * LEG_X(y)), 64, mat('pants'), 0.0025, null, true); }
       const outer = s > 0 ? 0 : Math.PI;
       if (d.stripes !== 'none') {
         const w = d.stripes === 'two' ? 0.006 : 0.012, offs = d.stripes === 'two' ? [-0.012, 0.012] : [0];
         offs.forEach(o => { const a = outer + o / 0.08; put(patch(PANT, a - w / 0.08, a + w / 0.08, () => [0.04, 0.99], 0.0025, 6, 160, y => s * LEG_X(y), FOLD.pant), mat('stripes'), 'pants'); });
       }
-      // boots: shaped sole, upper and heel
+      // shoes: boots, sneakers or dress shoes
+      const kind = d.shoes || 'boots';
       const shoe = new THREE.Group(); shoe.position.set(s * LEG_X(0.04), 0, 0.012); suit.add(shoe);
-      const sole = new THREE.Shape(); sole.moveTo(-0.034, -0.085);
-      sole.bezierCurveTo(-0.044, -0.02, -0.046, 0.06, -0.022, 0.14); sole.quadraticCurveTo(0, 0.19, 0.022, 0.14);
+      const sole = new THREE.Shape(); const toeP = kind === 'boots' ? 0.19 : 0.17, toeW = kind === 'boots' ? 0.022 : 0.03;
+      sole.moveTo(-0.034, -0.085);
+      sole.bezierCurveTo(-0.044, -0.02, -0.046, 0.06, -toeW, 0.14); sole.quadraticCurveTo(0, toeP, toeW, 0.14);
       sole.bezierCurveTo(0.046, 0.06, 0.044, -0.02, 0.034, -0.085); sole.quadraticCurveTo(0, -0.105, -0.034, -0.085);
-      const sg = new THREE.ExtrudeGeometry(sole, { depth: 0.012, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 2, curveSegments: 24 });
-      sg.rotateX(Math.PI / 2); put(sg, fabric('leather', '#1a120d'), null, shoe).position.y = 0.016;
+      const sd = kind === 'sneakers' ? 0.022 : kind === 'dress' ? 0.008 : 0.012;
+      const sg = new THREE.ExtrudeGeometry(sole, { depth: sd, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 2, curveSegments: 24 });
+      sg.rotateX(Math.PI / 2); put(sg, kind === 'sneakers' ? fabric('wool', '#f2f0ea') : fabric('leather', '#1a120d'), null, shoe).position.y = sd + 0.004;
       const up = new THREE.SphereGeometry(1, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2);
-      const upm = put(up, mat('shoes'), null, shoe); upm.scale.set(0.043, 0.07, 0.125); upm.position.set(0, 0.018, 0.03);
-      const toe = put(new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat('shoes'), null, shoe); toe.scale.set(0.03, 0.045, 0.06); toe.position.set(0, 0.018, 0.115);
-      const heel = put(new THREE.CylinderGeometry(0.026, 0.022, 0.035, 24), fabric('leather', '#1a120d'), null, shoe); heel.scale.z = 1.2; heel.position.set(0, 0.012, -0.06);
+      const upm = put(up, mat('shoes'), null, shoe), upY = sd + 0.006;
+      if (kind === 'sneakers') { upm.scale.set(0.046, 0.062, 0.122); upm.position.set(0, upY, 0.035); }
+      else if (kind === 'dress') { upm.scale.set(0.041, 0.055, 0.12); upm.position.set(0, upY, 0.03); }
+      else { upm.scale.set(0.043, 0.07, 0.125); upm.position.set(0, upY, 0.03); }
+      const toe = put(new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat('shoes'), null, shoe);
+      toe.scale.set(kind === 'boots' ? 0.03 : 0.036, kind === 'sneakers' ? 0.042 : 0.038, 0.06); toe.position.set(0, upY, kind === 'boots' ? 0.115 : 0.105);
+      if (kind !== 'sneakers') { const heel = put(new THREE.CylinderGeometry(0.026, 0.022, kind === 'boots' ? 0.035 : 0.02, 24), fabric('leather', '#1a120d'), null, shoe); heel.scale.z = 1.2; heel.position.set(0, kind === 'boots' ? 0.012 : 0.006, -0.06); }
+      else cord(t => { const a = t * Math.PI * 2; return new THREE.Vector3(Math.cos(a) * 0.047, upY + 0.012, 0.035 + Math.sin(a) * 0.123); }, 48, fabric('wool', '#f2f0ea'), 0.004, shoe, true);
     });
     // belt shows under short jackets
-    if (hem > 0.9) {
+    if (PN.belt && (hem > 0.88 || loose)) {
       put(rings(SEAT, 1.0, 1.035, full, 0.011, 64, 3), fabric('leather', '#1a120d'), null);
       const bk = new THREE.Shape(); bk.absarc(0, 0, 1, 0, Math.PI * 2);
       const bkg = new THREE.ExtrudeGeometry(bk, { depth: 0.2, bevelEnabled: true, bevelSize: 0.12, bevelThickness: 0.12, bevelSegments: 4, curveSegments: 32 });
@@ -490,7 +544,8 @@ export function createStudio(host) {
     const body = put(rings(JACKET, hem, 1.5, th, 0, 160, 140, null, FOLD.jacket), mat('body'), 'body');
     if (rib) put(rings(JACKET, hem - 0.002, hem + 0.055, full, 0.004, 96, 4), mats.rib, 'body');
     // western yoke (front points + back curve)
-    if (style === 'western' && d.yoke) {
+    if (J.yoke === 'straight') put(patch(JACKET, FRONT + half(1.37) + 0.01, FRONT + 2 * Math.PI - half(1.37) - 0.01, () => [1.37, 1.5], 0.003, 160, 16, null, FOLD.jacket), mat('collar'), 'body');
+    if (J.yoke === 'western') {
       const yb = a => { const da = Math.abs(((a - FRONT + Math.PI * 3) % (Math.PI * 2)) - Math.PI); const front = Math.max(0, 1 - Math.abs(da - 0.62) / 0.5); return 1.33 - front * 0.06 + (da > 1.6 ? -0.02 : 0); };
       put(patch(JACKET, FRONT + 0.01, FRONT + 2 * Math.PI - 0.01, a => [yb(a), 1.5], 0.003, 160, 20), mat('collar'), 'body');
     }
@@ -498,29 +553,39 @@ export function createStudio(host) {
     const edgeR = 0.0032, bodyM = mat('body');
     if (!rib) cord(t => on(JACKET, hem + 0.002, FRONT + (half(hem) + 0.006) + t * (2 * Math.PI - 2 * (half(hem) + 0.006)), 0.001, null, FOLD.jacket), 140, bodyM, edgeR);
     if (open) [-1, 1].forEach(s => cord(t => { const y = hem + 0.002 + (brk - hem - 0.002) * t; return on(JACKET, y, FRONT + s * (half(y) + 0.004), 0.001, null, FOLD.jacket); }, 60, bodyM, edgeR));
-    else [-1, 1].forEach(s => cord(t => on(JACKET, hem + 0.004 + (1.46 - hem) * t, FRONT + s * 0.012, 0.002, null, FOLD.jacket), 60, bodyM, edgeR));
+    else [-1, 1].forEach(s => cord(t => { const y = hem + 0.004 + (1.46 - hem) * t; return on(JACKET, y, FRONT + s * (half(y) + 0.008), 0.002, null, FOLD.jacket); }, 60, bodyM, edgeR));
     // seams
     [0, Math.PI].forEach(a => cord(t => on(JACKET, hem + 0.01 + (1.36 - hem - 0.01) * t, a, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0011));
     [0, Math.PI].forEach(a => cord(t => on(JACKET, 1.42 + (1.49 - 1.42) * t, a + (a === 0 ? 0.08 : -0.08), 0.0012, null, FOLD.jacket), 20, seamMat, 0.0011));
-    if (style === 'blazer') cord(t => on(JACKET, hem + 0.01 + (1.46 - hem) * t, FRONT + Math.PI, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0011);
+    if (!rib) cord(t => on(JACKET, hem + 0.01 + (1.46 - hem) * t, FRONT + Math.PI, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0011);
     [-1, 1].forEach(s => { const ox = s * 0.105; cord(t => on(JACKET, hem + 0.02 + (1.33 - hem) * t, FRONT + Math.PI + s * 0.62, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0009); });
 
     // closure: zipper / snaps / buttons
-    if (style === 'bomber') put(patch(JACKET, FRONT - 0.012, FRONT + 0.012, () => [hem + 0.01, 1.49], 0.004, 2, 40), mat('metal'), null);
-    const dots = (ys, r) => ys.forEach(y => { const p = JACKET(y); const b = put(new THREE.SphereGeometry(r, 16, 10), mat('metal'), null); b.position.set(0, y, p.cz + p.rz + 0.004); b.scale.z = 0.5; });
-    if (style === 'varsity') dots([0.99, 1.08, 1.17, 1.26, 1.35, 1.43], 0.009);
-    if (style === 'western') dots([1.03, 1.11, 1.19, 1.27, 1.35], 0.007);
-    if (style === 'blazer') dots([1.0, 1.07, 1.14].slice(0, d.buttons || 2).map((y, i, a) => brk - 0.02 - (a.length - 1 - i) * 0.07), 0.011);
+    const dots = (ys, r) => ys.forEach(y => { const p = JACKET(y); const b = put(new THREE.SphereGeometry(r, 16, 10), mat('metal'), null); b.position.set(0, y, p.cz + p.rz + 0.004 + (FOLD.jacket(y, FRONT) || 0)); b.scale.z = 0.5; });
+    const even = (n, lo, hi) => Array.from({ length: n }, (_, i) => n === 1 ? (lo + hi) / 2 : lo + (hi - lo) * i / (n - 1));
+    if (J.closure === 'zipper') {
+      put(patch(JACKET, FRONT - 0.012, FRONT + 0.012, () => [hem + (rib ? 0.01 : 0.004), 1.49], 0.004, 2, 40, null, FOLD.jacket), mat('metal'), null);
+      const pull = put(new THREE.BoxGeometry(0.012, 0.026, 0.004), mat('metal'), null); const pz = JACKET(1.45); pull.position.set(0, 1.44, pz.cz + pz.rz + 0.008);
+    } else if (J.closure === 'snaps' && !open) dots(even(Math.max(1, J.buttons || 5), hem + 0.07, 1.43), 0.008);
+    else if (J.closure === 'buttons' && !open) dots(even(Math.max(1, J.buttons || 5), hem + 0.07, 1.42), 0.0095);
+    else if (J.closure === 'buttons' && open) dots(Array.from({ length: Math.min(3, J.buttons || 1) }, (_, i) => brk - 0.02 - i * 0.07), 0.011);
     // pockets
-    if (style === 'blazer') [-1, 1].forEach(s => {
-      const a = FRONT + s * 0.75; put(patch(JACKET, a - 0.32, a + 0.32, () => [hem + 0.13, hem + 0.165], 0.004, 16, 2), mat('collar'), 'body');
+    const pY = hem + (hem < 0.82 ? 0.13 : 0.1);
+    [-1, 1].forEach(s => {
+      const a = FRONT + s * 0.75;
+      if (J.pockets === 'flap') { put(patch(JACKET, a - 0.32, a + 0.32, () => [pY, pY + 0.038], 0.004, 16, 2, null, FOLD.jacket), mat(J.pocketContrast ? 'collar' : 'body'), 'body'); cord(t => on(JACKET, pY, a - 0.32 + 0.64 * t, 0.005, null, FOLD.jacket), 16, mat(J.pocketContrast ? 'collar' : 'body'), 0.0018); }
+      if (J.pockets === 'welt') { put(patch(JACKET, a - 0.3, a + 0.3, () => [pY + 0.012, pY + 0.024], 0.0028, 12, 2, null, FOLD.jacket), mat(J.pocketContrast ? 'collar' : 'body'), 'body'); [pY + 0.012, pY + 0.024].forEach(y => cord(t => on(JACKET, y, a - 0.3 + 0.6 * t, 0.003, null, FOLD.jacket), 12, seamMat, 0.0009)); }
+      if (J.pockets === 'zip') cord(t => on(JACKET, pY - 0.01 + 0.08 * t, a + s * (0.18 - 0.36 * t) * 0.5, 0.004, null, FOLD.jacket), 16, mat('metal'), 0.0024);
+      if (J.pockets === 'patch') { put(patch(JACKET, a - 0.3, a + 0.3, () => [pY - 0.05, pY + 0.04], 0.0032, 16, 8, null, FOLD.jacket), mat(J.pocketContrast ? 'collar' : 'body'), 'body'); const ed = [[0, 0, 0, 1], [0, 1, 1, 1], [1, 1, 1, 0]]; ed.forEach(([u0, v0, u1, v1]) => cord(t => on(JACKET, pY - 0.05 + 0.09 * (v0 + (v1 - v0) * t), a - 0.3 + 0.6 * (u0 + (u1 - u0) * t), 0.0042, null, FOLD.jacket), 10, seamMat, 0.0008)); }
     });
+    if (J.chestPocket) { const a = FRONT - 0.55; put(patch(JACKET, a - 0.2, a + 0.2, () => [1.3, 1.312], 0.003, 10, 2, null, FOLD.jacket), mat(J.pocketContrast ? 'collar' : 'body'), 'body'); [1.3, 1.312].forEach(y => cord(t => on(JACKET, y, a - 0.2 + 0.4 * t, 0.0033, null, FOLD.jacket), 10, seamMat, 0.0008)); }
+    if (J.epaulettes) [0, Math.PI].forEach(c => { put(patch(JACKET, c - 0.3, c + 0.3, () => [1.432, 1.452], 0.005, 12, 3), mat('collar'), 'body'); const p = JACKET(1.445), b = put(new THREE.SphereGeometry(0.006, 12, 8), mat('metal'), null); b.position.set(Math.cos(c) * (p.rx * 0.8), 1.452, p.cz); });
 
     // lapels / collar
     if (open) {
       const W = { notch: [[brk, 0], [brk + 0.08, 0.05], [1.34, 0.074], [1.385, 0.08], [1.4, 0.03], [1.47, 0.042]],
         peak: [[brk, 0], [brk + 0.08, 0.05], [1.34, 0.08], [1.4, 0.112], [1.41, 0.03], [1.47, 0.042]],
-        shawl: [[brk, 0], [brk + 0.08, 0.052], [1.36, 0.072], [1.47, 0.05]] }[d.lapel] || [];
+        shawl: [[brk, 0], [brk + 0.08, 0.052], [1.36, 0.072], [1.47, 0.05]] }[J.collar] || [];
       [-1, 1].forEach(s => {
         const yAt = t => brk + (1.475 - brk) * t;
         const pt = (y, a, off) => { const p = JACKET(y); return new THREE.Vector3((p.rx + off) * Math.cos(a), y, p.cz + (p.rz + off) * Math.sin(a)); };
@@ -536,15 +601,26 @@ export function createStudio(host) {
     } else {
       // stand-up collar (rib on bombers, fabric on western)
       const NECK = profile({ rx: [[1.46, 0.09], [1.54, 0.072]], rz: [[1.46, 0.08], [1.54, 0.068]], cz: [[1.46, -0.006], [1.54, -0.012]] });
-      put(rings(NECK, 1.465, 1.535, () => [FRONT + 0.12, FRONT + 2 * Math.PI - 0.12], 0, 64, 6), rib ? mats.rib : mat('collar'), 'body');
+      if (J.collar === 'stand' || J.collar === 'rib') put(rings(NECK, 1.465, 1.535, () => [FRONT + 0.12 + (loose ? 0.6 : 0), FRONT + 2 * Math.PI - 0.12 - (loose ? 0.6 : 0)], 0, 64, 6), J.collar === 'rib' ? mats.rib : mat('collar'), 'body');
+      if (J.collar === 'shirt') { // fold-down point collar
+        put(rings(NECK, 1.465, 1.51, () => [FRONT + 0.3, FRONT + 2 * Math.PI - 0.3], 0, 64, 4), mat('collar'), 'body');
+        [-1, 1].forEach(sd => put(strip(t => { const a = FRONT + sd * (0.32 + 2.2 * t); return on(NECK, 1.51, a, 0.002); }, t => { const a = FRONT + sd * (0.32 + 2.2 * t); const q = on(JACKET, 1.445 - 0.03 * (1 - t), a, 0.012); return q; }, 24), mat('collar'), 'body'));
+      }
     }
     // neckwear peeking out
-    if (open && d.neckwear === 'bow') {
+    const neckShow = (open || loose) && (d.shirt || 'dress') === 'dress';
+    if (neckShow && d.neckwear === 'bow') {
       const bow = new THREE.Group(); bow.position.set(0, 1.468, 0.068); suit.add(bow);
       [-1, 1].forEach(s => { const w = put(new THREE.SphereGeometry(1, 20, 12), mat('trim'), null, bow); w.scale.set(0.032, 0.018, 0.012); w.position.x = s * 0.028; });
       const k = put(new THREE.SphereGeometry(0.011, 12, 8), mat('trim'), null, bow);
-    } else if (open && d.neckwear === 'tie') {
+    } else if (neckShow && d.neckwear === 'tie') {
       const tie = put(patch(TORSO, FRONT - 0.13, FRONT + 0.13, a => [1.2 + Math.abs(a - FRONT) * 0.25, 1.47], 0.011, 8, 20), mat('trim'), null);
+    }
+
+    if (d.chain) { // gold chain over the shirt
+      const cm = fabric('metal', '#d6ae4f');
+      cord(t => { const a = FRONT - Math.PI + t * 2 * Math.PI, dz = Math.max(0, Math.sin(a)); const p = on(TORSO, 1.49 - 0.17 * Math.pow(dz, 3), a, 0.018); return p; }, 120, cm, 0.0028, null, true);
+      const pd = put(new THREE.CylinderGeometry(0.014, 0.014, 0.004, 24), cm, null); const pt = on(TORSO, 1.305, FRONT, 0.022); pd.position.copy(pt); pd.rotation.x = Math.PI / 2;
     }
 
     // sleeves
@@ -554,8 +630,9 @@ export function createStudio(host) {
       cord(t => on(SLEEVE, 0.012, t * Math.PI * 2, 0.0012), 64, seamMat, 0.0012, arm, true); // armhole seam
       cord(t => on(SLEEVE, -0.6 + 0.6 * t, Math.PI * 1.15, 0.0012, null, FOLD.sleeve), 50, seamMat, 0.0009, arm); // under-sleeve seam
       cord(t => on(SLEEVE, -0.6, t * Math.PI * 2, 0.0025), 64, mat('sleeves'), 0.0028, arm, true); // sleeve hem edge
-      if (rib) put(rings(SLEEVE, -0.615, -0.55, full, 0.003, 48, 4), mats.rib, 'sleeves', arm);
-      else put(rings(SLEEVE, -0.605, -0.53, full, 0.003, 48, 6), mat('cuffs'), 'sleeves', arm);
+      if (J.cuffs === 'rib') put(rings(SLEEVE, -0.615, -0.55, full, 0.003, 48, 4), mats.rib, 'sleeves', arm);
+      else if (J.cuffs === 'contrast') put(rings(SLEEVE, -0.605, -0.53, full, 0.003, 48, 6), mat('cuffs'), 'sleeves', arm);
+      else if (J.cuffs === 'buttons') [-0.57, -0.55, -0.53].forEach(y => { const b = put(new THREE.SphereGeometry(0.005, 12, 8), mat('metal'), null, arm); const q = on(SLEEVE, y, Math.PI * 1.55, 0.002); b.position.copy(q); });
       if (d.sleeveStripes) [-0.012, 0.012].forEach(o => put(patch(SLEEVE, -0.04 + o / 0.06, 0.04 + o / 0.06 - 0.05, () => [-0.5, 0.0], 0.004, 3, 40), mat('stripes'), 'sleeves', arm));
     });
 
@@ -600,7 +677,7 @@ export function createStudio(host) {
       if (pp.pants) [-1, 1].forEach(s2 => { const outer = s2 > 0 ? 0 : Math.PI; const offs = d.stripes === 'none' ? [0] : [-1, 1].map(e => e * (d.stripes === 'two' ? 0.32 : 0.17)); offs.forEach(o => tube(t => on(PANT, 0.04 + 0.95 * t, outer + o, 0.004, y => s2 * LEG_X(y), FOLD.pant), 80)); });
       suit.children.filter(o => o.userData.arm).forEach(arm => {
         if (pp.sleeves) tube(t => on(SLEEVE, -0.6 + 0.63 * t, 0, 0.0035, null, FOLD.sleeve), 60, arm);
-        if (pp.cuffs) tube(t => on(SLEEVE, rib ? -0.55 : -0.53, t * Math.PI * 2, 0.0055), 48, arm);
+        if (pp.cuffs) tube(t => on(SLEEVE, J.cuffs === 'rib' ? -0.55 : J.cuffs === 'contrast' ? -0.53 : -0.595, t * Math.PI * 2, 0.0055), 48, arm);
       });
     }
 
@@ -750,7 +827,7 @@ export function createStudio(host) {
 
   function resize() {
     const w = host.clientWidth || 1, h = host.clientHeight || 1;
-    renderer.setSize(w, h, false); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
+    renderer.setSize(w, h, false); composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h); renderer.domElement.style.width = '100%'; renderer.domElement.style.height = '100%';
     camera.aspect = w / h; camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(host); resize();
@@ -760,7 +837,7 @@ export function createStudio(host) {
     if (anim) anim();
     if (spin) { const a = Math.atan2(camera.position.x, camera.position.z) + 0.006, r = Math.hypot(camera.position.x, camera.position.z); camera.position.x = Math.sin(a) * r; camera.position.z = Math.cos(a) * r; }
     controls.update();
-    renderer.render(scene, camera);
+    composer.render();
   }
   loop();
 
@@ -769,9 +846,9 @@ export function createStudio(host) {
     const keep = { pos: camera.position.clone(), tgt: controls.target.clone(), aspect: camera.aspect, size: renderer.getSize(new THREE.Vector2()), pr: renderer.getPixelRatio() };
     renderer.setPixelRatio(1); renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.position.set(...VIEWS[name]); camera.position.multiplyScalar(w / h < 0.8 ? 1.0 : 0.98); controls.target.set(0, 0.93, 0); camera.lookAt(controls.target); camera.updateProjectionMatrix();
-    renderer.render(scene, camera);
+    composer.setPixelRatio(1); composer.setSize(w, h); composer.render();
     const url = renderer.domElement.toDataURL('image/png');
-    renderer.setPixelRatio(keep.pr); renderer.setSize(keep.size.x, keep.size.y, false);
+    renderer.setPixelRatio(keep.pr); renderer.setSize(keep.size.x, keep.size.y, false); composer.setPixelRatio(keep.pr); composer.setSize(keep.size.x, keep.size.y);
     camera.aspect = keep.aspect; camera.position.copy(keep.pos); controls.target.copy(keep.tgt); camera.updateProjectionMatrix(); controls.update();
     return url;
   }
