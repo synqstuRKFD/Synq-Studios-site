@@ -33,23 +33,26 @@ const TORSO = profile({
   cz: [[0.80, -0.01], [0.98, -0.012], [1.08, 0.0], [1.25, 0.016], [1.36, 0.016], [1.45, 0.0], [1.50, -0.01]],
 });
 const JACKET_BASE = profile({ // the jacket body: torso plus ease, continuing down over the hips
-  rx: [[0.76, 0.204], [0.86, 0.196], [0.98, 0.188], [1.08, 0.176], [1.20, 0.184], [1.32, 0.196], [1.395, 0.206], [1.42, 0.204], [1.44, 0.18], [1.465, 0.13], [1.50, 0.072]],
-  rz: [[0.76, 0.142], [0.86, 0.138], [0.98, 0.134], [1.08, 0.124], [1.20, 0.134], [1.32, 0.138], [1.40, 0.124], [1.445, 0.1], [1.475, 0.078], [1.50, 0.066]],
+  rx: [[0.76, 0.186], [0.86, 0.186], [0.98, 0.182], [1.08, 0.168], [1.20, 0.18], [1.29, 0.196], [1.355, 0.214], [1.395, 0.222], [1.425, 0.205], [1.45, 0.168], [1.475, 0.118], [1.50, 0.072]],
+  rz: [[0.76, 0.14], [0.86, 0.136], [0.98, 0.132], [1.08, 0.122], [1.20, 0.134], [1.32, 0.139], [1.40, 0.126], [1.445, 0.104], [1.475, 0.08], [1.50, 0.066]],
   cz: [[0.76, -0.004], [0.98, -0.008], [1.08, 0.004], [1.25, 0.02], [1.36, 0.02], [1.45, 0.002], [1.50, -0.01]],
 });
 const SEAT = profile({ rx: [[0.77, 0.03], [0.785, 0.1], [0.82, 0.13], [0.85, 0.155], [0.90, 0.18], [0.98, 0.186], [1.06, 0.166]], rz: [[0.77, 0.03], [0.785, 0.06], [0.82, 0.074], [0.85, 0.084], [0.90, 0.1], [0.98, 0.114], [1.06, 0.106]], cz: [[0.77, 0.0], [0.85, -0.008], [0.9, -0.014], [1.06, -0.008]] });
 const LEG = profile({ rx: [[0.04, 0.034], [0.10, 0.036], [0.30, 0.05], [0.47, 0.056], [0.56, 0.052], [0.75, 0.072], [0.92, 0.086], [0.98, 0.09]], rz: [[0.04, 0.038], [0.10, 0.04], [0.30, 0.054], [0.47, 0.06], [0.56, 0.054], [0.75, 0.076], [0.92, 0.088], [0.98, 0.09]] });
-const PANT_BASE = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.064], [0.50, 0.068], [0.75, 0.086], [0.92, 0.1], [1.0, 0.104]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.75, 0.088], [0.92, 0.102], [1.0, 0.106]] });
+const PANT_BASE = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.063], [0.50, 0.066], [0.68, 0.078], [0.8, 0.086], [0.9, 0.088], [1.0, 0.086]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.68, 0.084], [0.8, 0.094], [0.9, 0.1], [1.0, 0.104]] });
 const ARM = profile({ rx: [[-0.62, 0.026], [-0.59, 0.03], [-0.45, 0.04], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.05], [0.0, 0.054], [0.03, 0.04]], rz: [[-0.62, 0.022], [-0.59, 0.026], [-0.45, 0.038], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.048], [0.0, 0.05], [0.03, 0.04]] });
-const SLEEVE_BASE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.01, 0.062], [0.025, 0.05]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.01, 0.06], [0.025, 0.048]] });
+const SLEEVE_BASE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.059], [-0.10, 0.065], [-0.02, 0.066], [0.012, 0.062], [0.03, 0.05], [0.042, 0.03]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.057], [-0.10, 0.063], [-0.02, 0.064], [0.012, 0.06], [0.03, 0.048], [0.042, 0.03]] });
 let EASE = 0, PEASE = 0, SEASE = 0; // fit: slim (negative) to loose (positive), in meters
 const clamp01 = v => Math.max(0, Math.min(1, v));
 const JACKET = y => {
   const p = JACKET_BASE(y), e = EASE * clamp01((1.42 - y) / 0.08);
   let rx = p.rx + e, rz = p.rz + e * 0.75;
-  if (y >= 0.8 && y <= 1.36) { const t = TORSO(y); rx = Math.max(rx, t.rx + 0.016); rz = Math.max(rz, t.rz + 0.014); }
-  if (y >= 0.77 && y <= 1.06) { const st = SEAT(y); rx = Math.max(rx, st.rx + 0.016); rz = Math.max(rz, st.rz + 0.016); }
-  if (y >= 0.74 && y <= 1.0) { const lg = PANT(y); rx = Math.max(rx, LEG_X(y) + lg.rx + 0.014); }
+  // stay outside the shirt, hips and legs, fading the rule in and out so there is no ridge
+  const push = (cur, need, w) => cur + Math.max(0, need - cur) * w;
+  const fade = (y, a, b, c, d) => clamp01((y - a) / (b - a)) * clamp01((d - y) / (d - c));
+  if (y >= 0.8 && y <= 1.38) { const t = TORSO(y), w = fade(y, 0.8, 0.84, 1.33, 1.38); rx = push(rx, t.rx + 0.016, w); rz = push(rz, t.rz + 0.014, w); }
+  if (y >= 0.74 && y <= 1.12) { const st = SEAT(Math.min(1.06, Math.max(0.77, y))), w = fade(y, 0.74, 0.78, 1.04, 1.12); rx = push(rx, st.rx + 0.016, w); rz = push(rz, st.rz + 0.016, w); }
+  if (y >= 0.72 && y <= 1.04) { const lg = PANT(y), w = fade(y, 0.72, 0.76, 0.97, 1.04); rx = push(rx, LEG_X(y) + lg.rx + 0.014, w); }
   return { rx, rz, cz: p.cz, cx: p.cx };
 };
 const PANT = y => { const p = PANT_BASE(y), e = PEASE * clamp01((0.98 - y) / 0.15); return { rx: p.rx + e, rz: p.rz + e, cz: p.cz, cx: p.cx }; };
@@ -66,7 +69,7 @@ export function jacketCfg(d) {
   return Object.assign({}, base, d.jacket || {});
 }
 const LEG_X = y => 0.094 + (0.98 - y) * 0.03; // legs spread a little toward the floor
-const SHOULDER = new THREE.Vector3(0.196, 1.4, 0.0);
+const SHOULDER = new THREE.Vector3(0.188, 1.392, 0.0);
 const ARM_TILT = 10 * DEG;
 const ELBOW = -0.3, BEND = 0.2; // forearm swings forward a little, like a relaxed arm
 const bendAt = y => BEND * clamp01((ELBOW - y) / 0.05);
@@ -704,7 +707,7 @@ export function createStudio(host) {
     // sleeves
     [-1, 1].forEach(s => {
       const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; arm.scale.x = s; arm.userData.arm = true; suit.add(arm);
-      put(rings(SLEEVE, -0.6, 0.022, full, 0, 72, 120, null, FOLD.sleeve), mat('sleeves'), 'sleeves', arm);
+      put(rings(SLEEVE, -0.6, 0.026, full, 0, 72, 130, null, FOLD.sleeve), mat('sleeves'), 'sleeves', arm);
       cord(t => on(SLEEVE, 0.012, t * Math.PI * 2, 0.0012), 64, seamMat, 0.0012, arm, true); // armhole seam
       cord(t => on(SLEEVE, -0.6 + 0.6 * t, Math.PI * 1.15, 0.0012, null, FOLD.sleeve), 50, seamMat, 0.0009, arm); // under-sleeve seam
       cord(t => on(SLEEVE, -0.6, t * Math.PI * 2, 0.0025), 64, mat('sleeves'), 0.0028, arm, true); // sleeve hem edge
