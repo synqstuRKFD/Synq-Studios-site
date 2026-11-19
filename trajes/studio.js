@@ -315,6 +315,14 @@ export function patternCanvas(name, baseHex, inkHex, N = 512) {
       for (let i = 0; i < len; i += 2) { const t = i / len; ang += bend + Math.sin(t * 6 + wob) * 0.018; px += Math.cos(ang) * 2; py += Math.sin(ang) * 2; pts.push([px, py, w0 * Math.pow(1 - t, 0.8) * (0.55 + 0.45 * Math.sin(Math.min(1, t * 6) * 1.57)) + 1]); }
       wrap(() => pts.forEach(([a, b2, w]) => { x.beginPath(); x.arc(a, b2, w / 2, 0, 6.28); x.fill(); }));
     }
+  } else if (name === 'salpicado') {
+    // paint splatter: big drops, small specks and a few drips
+    for (let k = 0; k < 140; k++) {
+      const cx = rnd() * N, cy = rnd() * N, r = Math.pow(rnd(), 3) * 14 + 1.2;
+      wrap(() => { x.beginPath(); x.arc(cx, cy, r, 0, 6.28); x.fill();
+        if (r > 6) for (let j = 0; j < 6; j++) { const a = rnd() * 6.28, d = r * (1.3 + rnd() * 1.6); x.beginPath(); x.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d, r * 0.18 * rnd() + 0.8, 0, 6.28); x.fill(); }
+        if (r > 8 && rnd() < 0.5) { x.lineWidth = r * 0.35; x.lineCap = 'round'; x.beginPath(); x.moveTo(cx, cy); x.lineTo(cx + (rnd() - 0.5) * 6, cy - r * (2 + rnd() * 3)); x.stroke(); } });
+    }
   } else if (name === 'zebra') {
     const nz = noise2(N, 6, 3), img = x.getImageData(0, 0, N, N), ink = parseInt(inkHex.slice(1), 16);
     for (let y = 0; y < N; y++) for (let i = 0; i < N; i++) { const v = Math.sin((i / N) * 6.28 * 7 + nz[y * N + i] * 9); if (v > 0.25) { const o = (y * N + i) * 4; img.data[o] = ink >> 16 & 255; img.data[o + 1] = ink >> 8 & 255; img.data[o + 2] = ink & 255; } }

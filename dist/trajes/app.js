@@ -8,7 +8,7 @@ const T = {
     fHolo: 'Holográfico', tStonesTab: 'Pedrería', gemColor: 'Color de las piedras', edges: 'Orillas con pedrería', eLapels: 'Orilla de las solapas', eFront: 'Orilla del frente', eCuffs: 'Puños', ePockets: 'Bolsas', eStripes: 'Franjas del pantalón', eHem: 'Bajo del saco',
     scatter: 'Piedras sueltas', scatterHelp: 'Piedras regadas por la tela, como en los trajes de gala.', sBody: 'En el saco', sSleeves: 'En las mangas', sPants: 'En el pantalón', gemSize: 'Tamaño de piedra',
     gCrystal: 'Cristal', gAb: 'Tornasol (AB)', gGold: 'Oro', gSilver: 'Plata', gJet: 'Negro azabache', gRed: 'Rojo', gBlue: 'Azul', gPink: 'Rosa', gGreen: 'Verde',
-    patterns: 'Diseños de estampado', patColor: 'Color del diseño', orLogo: 'O usa tu logo', patTribal: 'Tribal', patDamasco: 'Damasco', patLlamas: 'Llamas', patZebra: 'Cebra', patEstrellas: 'Estrellas',
+    patterns: 'Diseños de estampado', patColor: 'Color del diseño', orLogo: 'O usa tu logo', patTribal: 'Tribal', patDamasco: 'Damasco', patLlamas: 'Llamas', patZebra: 'Cebra', patEstrellas: 'Estrellas', patSalpicado: 'Salpicado',
     pPanel: 'Paneles', pPiping: 'Vivos', panels: 'Paneles de contraste', panelsHelp: 'Piezas de otra tela, como en los trajes estilo moto o de carrera.', panShoulders: 'Hombros', panSides: 'Franja lateral del saco', panLegs: 'Franja lateral del pantalón', stripeWidth: 'Ancho de la franja', quick: 'Ponlo rápido en', spBack: 'Espalda', spChestL: 'Pecho izq.', spChestR: 'Pecho der.', spArmL: 'Brazo izq.', spArmR: 'Brazo der.', spLegL: 'Pierna izq.', spLegR: 'Pierna der.', orTap: 'o toca el traje donde quieras', toJacket: 'Usar en todo el saco', toPants: 'Usar en el pantalón', topBottom: 'Arriba y abajo',
     piping: 'Vivos (cordón en las costuras)', pipOn: 'Ponerle vivos', pipSides: 'Costuras de los lados', pipRacing: 'Líneas curvas (estilo carrera)', pipLapels: 'Orilla de las solapas', pipFront: 'Orilla del cierre', pipPants: 'Pantalón', pipSleeves: 'Mangas', pipCuffs: 'Puños', pipSize: 'Grosor',
     fMetallic: 'Piel metálica', fCrushed: 'Terciopelo arrugado', fFoil: 'Foil espejo', fSnake: 'Piel de víbora', fQuilted: 'Acolchado',
@@ -24,8 +24,8 @@ const T = {
     front: 'Frente', back: 'Espalda', sideL: 'Lado', sideR: 'Otro lado', spin: 'Girar', dragHint: 'Arrastra para girar · pellizca para acercar', loading: 'Preparando el maniquí…',
     download: 'Descargar imagen', close: 'Cerrar', mineHelp: 'Se guardan en este teléfono o computadora.', madeBy: 'Hecho por SYNQ Studios · estudio de grabación en Rockford, IL', visit: 'Visita el estudio',
     tapToPlace: 'Toca el traje donde lo quieres', cancel: 'Cancelar',
-    tStyles: 'Estilos', tCut: 'Corte', tFabric: 'Tela y color', tLogos: 'Logos y fotos', tPrint: 'Estampado', tText: 'Letras', tBand: 'Grupo',
-    stylesHelp: 'Empieza con un estilo y cámbialo a tu gusto.',
+    tStyles: 'Plantillas', catBanda: 'Banda', catNorteno: 'Norteño y sierreño', catModerno: 'Corridos y moderno', catGala: 'Gala y clásico', tCut: 'Corte', tFabric: 'Tela y color', tLogos: 'Logos y fotos', tPrint: 'Estampado', tText: 'Letras', tBand: 'Grupo',
+    stylesHelp: 'Escoge una plantilla para tu grupo y cámbiala a tu gusto. Tus logos y fotos se quedan.',
     jacket: 'Saco', sBlazer: 'Saco', sBomber: 'Chamarra con cierre', sVarsity: 'Varsity (botones)', sWestern: 'Vaquero corto',
     lapel: 'Solapa', lNotch: 'Muesca', lPeak: 'Pico', lShawl: 'Chal', buttons: 'Botones', hardware: 'Cierre, botones y hebilla', gold: 'Oro', silver: 'Plata', black: 'Negro',
     yoke: 'Canesú (pieza de los hombros)', stripes: 'Franjas del pantalón', none: 'Ninguna', one: 'Una', two: 'Dos', sleeveStripes: 'Franjas en las mangas',
@@ -53,7 +53,7 @@ const T = {
     fHolo: 'Holographic', tStonesTab: 'Rhinestones', gemColor: 'Stone color', edges: 'Rhinestone edges', eLapels: 'Lapel edges', eFront: 'Front edges', eCuffs: 'Cuffs', ePockets: 'Pockets', eStripes: 'Pant stripes', eHem: 'Jacket hem',
     scatter: 'Sprinkled stones', scatterHelp: 'Single stones spread over the fabric, like on gala suits.', sBody: 'On the jacket', sSleeves: 'On the sleeves', sPants: 'On the pants', gemSize: 'Stone size',
     gCrystal: 'Crystal', gAb: 'Iridescent (AB)', gGold: 'Gold', gSilver: 'Silver', gJet: 'Jet black', gRed: 'Red', gBlue: 'Blue', gPink: 'Pink', gGreen: 'Green',
-    patterns: 'Print patterns', patColor: 'Pattern color', orLogo: 'Or use your logo', patTribal: 'Tribal', patDamasco: 'Damask', patLlamas: 'Flames', patZebra: 'Zebra', patEstrellas: 'Stars',
+    patterns: 'Print patterns', patColor: 'Pattern color', orLogo: 'Or use your logo', patTribal: 'Tribal', patDamasco: 'Damask', patLlamas: 'Flames', patZebra: 'Zebra', patEstrellas: 'Stars', patSalpicado: 'Splatter',
     pPanel: 'Panels', pPiping: 'Piping', panels: 'Contrast panels', panelsHelp: 'Pieces in a second fabric, like moto or racing-style suits.', panShoulders: 'Shoulders', panSides: 'Jacket side stripe', panLegs: 'Pant side stripe', stripeWidth: 'Stripe width', quick: 'Quick place on', spBack: 'Back', spChestL: 'Left chest', spChestR: 'Right chest', spArmL: 'Left arm', spArmR: 'Right arm', spLegL: 'Left leg', spLegR: 'Right leg', orTap: 'or tap the suit anywhere', toJacket: 'Use on the whole jacket', toPants: 'Use on the pants', topBottom: 'Top and bottom',
     piping: 'Piping (cord along the seams)', pipOn: 'Add piping', pipSides: 'Side seams', pipRacing: 'Curved lines (racing style)', pipLapels: 'Lapel edges', pipFront: 'Zipper edges', pipPants: 'Pants', pipSleeves: 'Sleeves', pipCuffs: 'Cuffs', pipSize: 'Thickness',
     fMetallic: 'Metallic leather', fCrushed: 'Crushed velvet', fFoil: 'Mirror foil', fSnake: 'Snakeskin', fQuilted: 'Quilted',
@@ -69,8 +69,8 @@ const T = {
     front: 'Front', back: 'Back', sideL: 'Side', sideR: 'Other side', spin: 'Spin', dragHint: 'Drag to spin · pinch to zoom', loading: 'Getting the mannequin ready…',
     download: 'Download image', close: 'Close', mineHelp: 'Saved on this phone or computer.', madeBy: 'Made by SYNQ Studios · recording studio in Rockford, IL', visit: 'Visit the studio',
     tapToPlace: 'Tap the suit where you want it', cancel: 'Cancel',
-    tStyles: 'Styles', tCut: 'Cut', tFabric: 'Fabric & color', tLogos: 'Logos & photos', tPrint: 'All-over print', tText: 'Lettering', tBand: 'Band',
-    stylesHelp: 'Start from a style and make it yours.',
+    tStyles: 'Templates', catBanda: 'Banda', catNorteno: 'Norteño & sierreño', catModerno: 'Corridos & modern', catGala: 'Gala & classic', tCut: 'Cut', tFabric: 'Fabric & color', tLogos: 'Logos & photos', tPrint: 'All-over print', tText: 'Lettering', tBand: 'Band',
+    stylesHelp: 'Pick a template for your group and make it yours. Your logos and photos stay.',
     jacket: 'Jacket', sBlazer: 'Blazer', sBomber: 'Zip-up bomber', sVarsity: 'Varsity (snaps)', sWestern: 'Short western',
     lapel: 'Lapel', lNotch: 'Notch', lPeak: 'Peak', lShawl: 'Shawl', buttons: 'Buttons', hardware: 'Zipper, buttons & buckle', gold: 'Gold', silver: 'Silver', black: 'Black',
     yoke: 'Western yoke (shoulder panel)', stripes: 'Pant stripes', none: 'None', one: 'One', two: 'Two', sleeveStripes: 'Sleeve stripes',
@@ -111,7 +111,7 @@ const GEMS = [['crystal', 'gCrystal', 'radial-gradient(circle at 35% 35%,#fff,#d
 // colors sampled from the reference suits you sent
 const REF_COLORS = [['#c8202e', 'Xclusivo rojo'], ['#0d0d0f', 'Xclusivo negro'], ['#1aa0dc', 'Azul satín'], ['#5a2bc4', 'Morado satín'], ['#6a3fc9', 'Los de la Lou morado'], ['#7b3fe0', 'Profugos morado'],
   ['#18a85a', 'Bandera Verde'], ['#d9a62e', 'Los Aliados oro'], ['#b3121f', 'Edición NM rojo'], ['#9da2a8', 'Mala Conducta plata'], ['#d9dde2', 'Viada gris'], ['#c9bfb4', 'Gamuza gris'], ['#efe9f2', 'Malicia tornasol'], ['#e3241b', 'Marca Alianza rojo']];
-const PATTERNS = [['tribal', 'patTribal'], ['damasco', 'patDamasco'], ['llamas', 'patLlamas'], ['zebra', 'patZebra'], ['estrellas', 'patEstrellas']];
+const PATTERNS = [['tribal', 'patTribal'], ['damasco', 'patDamasco'], ['llamas', 'patLlamas'], ['zebra', 'patZebra'], ['estrellas', 'patEstrellas'], ['salpicado', 'patSalpicado']];
 const PARTS = [['body', 'pBody'], ['sleeves', 'pSleeves'], ['panel', 'pPanel'], ['piping', 'pPiping'], ['collar', 'pCollar'], ['cuffs', 'pCuffs'], ['pants', 'pPants'], ['stripes', 'pStripes'], ['shirt', 'pShirt'], ['trim', 'pTrim'], ['hat', 'pHat'], ['shoes', 'pShoes']];
 const TECHS = [['print', 'tPrintT'], ['embroidery', 'tEmb'], ['stones', 'tStones'], ['patch', 'tPatch']];
 const FONTS = [['gothic', 'fGothic', '"UnifrakturMaguntia", serif'], ['western', 'fWestern', 'Rye, serif'], ['pirate', 'fPirate', '"Pirata One", serif'], ['script', 'fScript', '"Great Vibes", cursive'], ['block', 'fBlock', 'Anton, Impact, sans-serif']];
@@ -130,6 +130,9 @@ const BASE = {
 function look(name, over, parts) { const d = clone(BASE); Object.assign(d, over); Object.keys(parts || {}).forEach(k => { d.parts[k] = parts[k]; }); d.name = name; return d; }
 const all = (f, c) => ({ body: P(f, c), sleeves: P(f, c), pants: P(f, c) });
 const tid = spec => 't:' + btoa(unescape(encodeURIComponent(JSON.stringify(spec)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+const CATS = { 'Terciopelo vino': 'banda', 'Vino con filigrana': 'banda', 'Lentejuela negra': 'gala', 'Morado brillante': 'gala', 'Azul eléctrico': 'gala', 'Dos tonos azul y blanco': 'gala',
+  'Vaquero arena': 'norteno', 'Gamuza y piel': 'moderno', 'Satín negro y rojo': 'moderno', 'Terciopelo rojo': 'moderno', 'Holográfico tribal': 'moderno', 'Carrera rojo y negro': 'moderno',
+  'Terciopelo morado': 'moderno', 'Plata moto': 'moderno', 'Holográfico y morado': 'moderno', 'Víbora tornasol': 'moderno', 'Verde con franja negra': 'moderno', 'Terciopelo negro y rojo': 'moderno' };
 const PRESETS = [
   look('Terciopelo vino', {}, {}),
   look('Satín negro y rojo', { style: 'bomber', hat: true, stripes: 'one', sleeveStripes: true, hardware: 'silver' }, Object.assign(all('satin', '#111111'), { collar: P('wool', '#111111'), cuffs: P('wool', '#111111'), stripes: P('satin', '#c4121f'), hat: P('suede', '#f5f5f2') })),
@@ -174,6 +177,68 @@ const PRESETS = [
     Object.assign(all('crushed', '#1a1a1c'), { collar: P('crushed', '#1a1a1c'), cuffs: P('crushed', '#1a1a1c'), piping: P('satin', '#c4121f') })),
   look('Dos tonos azul y blanco', { style: 'blazer', lapel: 'notch', stripes: 'one', neckwear: 'none', hat: true, hardware: 'silver' },
     Object.assign(all('satin', '#1a8fd6'), { pants: P('satin', '#f5f5f2'), stripes: P('satin', '#1a8fd6'), collar: P('satin', '#f5f5f2'), cuffs: P('satin', '#1a8fd6'), shirt: P('satin', '#111111'), hat: P('suede', '#f5f5f2') })),
+  // ---- more templates, based on what groups wear on stage ----
+  look('Banda negro y oro', { cat: 'banda', style: 'blazer', lapel: 'peak', buttons: 2, stripes: 'one', neckwear: 'bow', hat: true, hardware: 'gold',
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: false, lapels: true, pants: false, cuffs: true }),
+    decals: [{ id: 'b1', imageId: 'm:arabesco:gold', tech: 'embroidery', point: [0.1, 1.24, 0.2], normal: [0.35, 0, 1], part: 'body', size: 0.14, rot: 0 },
+      { id: 'b2', imageId: 'm:arabesco:gold', tech: 'embroidery', point: [-0.1, 1.24, 0.2], normal: [-0.35, 0, 1], part: 'body', size: 0.14, rot: 0 },
+      { id: 'b3', imageId: 'm:filigrana:gold', tech: 'embroidery', point: [0, 1.25, -0.25], normal: [0, 0, -1], part: 'body', size: 0.3, rot: 0 }] },
+    Object.assign(all('wool', '#111111'), { collar: P('satin', '#111111'), cuffs: P('satin', '#111111'), stripes: P('metallic', '#d4a63c'), piping: P('satin', '#d4a63c'), trim: P('satin', '#d4a63c'), hat: P('suede', '#111111') })),
+  look('Banda blanco y plata', { cat: 'banda', style: 'blazer', lapel: 'shawl', buttons: 1, stripes: 'one', neckwear: 'bow', hat: true, hardware: 'silver',
+    stones: { color: 'crystal', size: 0.003, edges: { lapels: true, front: false, cuffs: true, pockets: false, stripes: true, hem: false }, scatter: { body: 0, sleeves: 0, pants: 0 } },
+    decals: [{ id: 'w1', imageId: 'm:filigrana:silver', tech: 'embroidery', point: [0.11, 1.12, 0.2], normal: [0.45, 0, 0.9], part: 'body', size: 0.3, rot: 0 },
+      { id: 'w2', imageId: 'm:filigrana:silver', tech: 'embroidery', point: [-0.11, 1.12, 0.2], normal: [-0.45, 0, 0.9], part: 'body', size: 0.3, rot: 0 }] },
+    Object.assign(all('satin', '#f5f5f2'), { collar: P('satin', '#c9ced6'), cuffs: P('satin', '#c9ced6'), stripes: P('metallic', '#c9ced6'), shirt: P('satin', '#111111'), trim: P('satin', '#c9ced6'), hat: P('suede', '#f5f5f2') })),
+  look('Banda azul marino y oro', { cat: 'banda', style: 'blazer', lapel: 'notch', buttons: 2, stripes: 'two', neckwear: 'tie', hat: true, hardware: 'gold',
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: false, lapels: true, pants: false, cuffs: false }) },
+    Object.assign(all('wool', '#14213d'), { collar: P('satin', '#14213d'), cuffs: P('wool', '#14213d'), stripes: P('satin', '#d4a63c'), piping: P('satin', '#d4a63c'), trim: P('satin', '#d4a63c'), hat: P('suede', '#e9dcc6') })),
+  look('Banda rojo bordado', { cat: 'banda', style: 'blazer', lapel: 'peak', buttons: 1, stripes: 'one', neckwear: 'bow', hat: false, hardware: 'gold',
+    decals: [{ id: 'r1', imageId: 'm:rosa:gold', tech: 'embroidery', point: [0.12, 1.32, 0.18], normal: [0.4, 0, 0.9], part: 'body', size: 0.12, rot: 0 },
+      { id: 'r2', imageId: 'm:rosa:gold', tech: 'embroidery', point: [-0.12, 1.32, 0.18], normal: [-0.4, 0, 0.9], part: 'body', size: 0.12, rot: 0 },
+      { id: 'r3', imageId: 'm:arabesco:gold', tech: 'embroidery', point: [0.12, 0.3, 0.1], normal: [0.3, 0, 1], part: 'pants', size: 0.12, rot: 90 },
+      { id: 'r4', imageId: 'm:arabesco:gold', tech: 'embroidery', point: [-0.12, 0.3, 0.1], normal: [-0.3, 0, 1], part: 'pants', size: 0.12, rot: 90 }] },
+    Object.assign(all('velvet', '#b0101e'), { collar: P('satin', '#111111'), cuffs: P('satin', '#111111'), stripes: P('metallic', '#d4a63c'), trim: P('satin', '#111111') })),
+  look('Norteño gamuza camel', { cat: 'norteno', style: 'western', yoke: true, stripes: 'none', hat: true, hardware: 'silver', shoes: 'boots',
+    decals: [{ id: 'g1', imageId: 'm:arabesco:silver', tech: 'embroidery', point: [0.1, 1.36, 0.18], normal: [0.35, 0, 1], part: 'body', size: 0.12, rot: 0 },
+      { id: 'g2', imageId: 'm:arabesco:silver', tech: 'embroidery', point: [-0.1, 1.36, 0.18], normal: [-0.35, 0, 1], part: 'body', size: 0.12, rot: 0 }] },
+    Object.assign(all('suede', '#a57a4e'), { collar: P('suede', '#4a2e1c'), cuffs: P('suede', '#4a2e1c'), hat: P('suede', '#e9dcc6'), shoes: P('leather', '#4a2e1c') })),
+  look('Sierreño negro y plata', { cat: 'norteno', style: 'western', yoke: true, stripes: 'none', hat: true, hardware: 'silver',
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: false, front: true, sleeves: false, cuffs: true, pants: false }),
+    decals: [{ id: 's1', imageId: 'm:herradura:silver', tech: 'embroidery', point: [0, 1.25, -0.25], normal: [0, 0, -1], part: 'body', size: 0.2, rot: 0 },
+      { id: 's2', imageId: 'm:estrella:silver', tech: 'stones', point: [0.1, 1.36, 0.18], normal: [0.35, 0, 1], part: 'body', size: 0.06, rot: 0 },
+      { id: 's3', imageId: 'm:estrella:silver', tech: 'stones', point: [-0.1, 1.36, 0.18], normal: [-0.35, 0, 1], part: 'body', size: 0.06, rot: 0 }] },
+    Object.assign(all('suede', '#151515'), { collar: P('leather', '#151515'), cuffs: P('leather', '#151515'), piping: P('satin', '#d9dde3'), hat: P('suede', '#f5f5f2') })),
+  look('Norteño tornasol azul', { cat: 'norteno', style: 'blazer', lapel: 'notch', buttons: 1, stripes: 'none', neckwear: 'none', hat: true, hardware: 'silver' },
+    Object.assign(all('holo', '#1e4fb3'), { pants: P('satin', '#111111'), collar: P('satin', '#111111'), cuffs: P('satin', '#111111'), shirt: P('satin', '#111111'), hat: P('suede', '#f5f5f2') })),
+  look('Bomber lentejuela roja', { cat: 'moderno', style: 'bomber', stripes: 'one', hat: false, hardware: 'silver' },
+    Object.assign(all('sequin', '#c4121f'), { sleeves: P('satin', '#111111'), pants: P('satin', '#111111'), stripes: P('sequin', '#c4121f'), collar: P('wool', '#111111'), cuffs: P('wool', '#111111') })),
+  look('Terciopelo negro y plata', { cat: 'moderno', style: 'bomber', stripes: 'none', hat: false, hardware: 'silver', shoes: 'sneakers',
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: true, sleeves: true, pants: true, cuffs: false }),
+    stones: { color: 'crystal', size: 0.003, edges: { lapels: false, front: false, cuffs: false, pockets: false, stripes: false, hem: false }, scatter: { body: 14, sleeves: 8, pants: 8 } },
+    decals: [{ id: 'k1', imageId: tid({ text: 'Tu Grupo', font: 'script', fill: '#e6e9ee', outline: 'none' }), tech: 'embroidery', point: [0.09, 1.3, 0.2], normal: [0.3, 0, 1], part: 'body', size: 0.16, rot: 0 },
+      { id: 'k2', imageId: tid({ text: 'Tu Grupo', font: 'script', fill: '#e6e9ee', outline: 'none' }), tech: 'embroidery', point: [-0.13, 0.7, 0.15], normal: [-0.35, 0, 1], part: 'pants', size: 0.16, rot: 0 }] },
+    Object.assign(all('crushed', '#141414'), { collar: P('crushed', '#141414'), cuffs: P('crushed', '#141414'), piping: P('satin', '#d9dde3'), shoes: P('leather', '#111111') })),
+  look('Logo por todo el traje', { cat: 'moderno', style: 'blazer', lapel: 'notch', buttons: 1, stripes: 'none', neckwear: 'none', hat: true, hardware: 'silver',
+    print: { imageId: tid({ text: 'X', font: 'gothic', fill: '#c8202e', outline: '#111111' }), parts: ['body', 'sleeves', 'pants'], size: 0.09, gap: 0.08, rotate: -8 },
+    decals: [{ id: 'x1', imageId: tid({ text: 'Tu Grupo', font: 'gothic', fill: '#c8202e', outline: '#111111' }), tech: 'embroidery', point: [0, 1.27, -0.25], normal: [0, 0, -1], part: 'body', size: 0.34, rot: 0 }] },
+    Object.assign(all('satin', '#f5f5f2'), { collar: P('satin', '#f5f5f2'), cuffs: P('satin', '#f5f5f2'), shirt: P('satin', '#111111'), hat: P('suede', '#f5f5f2') })),
+  look('Gris con salpicado', { cat: 'moderno', style: 'bomber', stripes: 'none', hat: false, hardware: 'silver',
+    print: { pattern: 'salpicado', color: '#111111', parts: ['body', 'sleeves', 'pants'], size: 0.4, rotate: 0 },
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: true, sleeves: true, pants: true }),
+    decals: [{ id: 'y1', imageId: tid({ text: 'GRUPO', font: 'block', fill: '#3a3a3a', outline: '#111111' }), tech: 'embroidery', point: [0, 1.33, -0.25], normal: [0, 0, -1], part: 'body', size: 0.24, rot: 0 }] },
+    Object.assign(all('satin', '#d9dde2'), { collar: P('satin', '#d9dde2'), cuffs: P('satin', '#d9dde2'), piping: P('satin', '#111111') })),
+  look('Negro y oro en relieve', { cat: 'moderno', style: 'blazer', lapel: 'notch', buttons: 1, stripes: 'none', neckwear: 'none', hat: true, hardware: 'gold',
+    stones: { color: 'gold', size: 0.003, edges: { lapels: false, front: false, cuffs: false, pockets: false, stripes: false, hem: false }, scatter: { body: 10, sleeves: 0, pants: 0 } },
+    decals: [{ id: 'a1', imageId: tid({ text: 'TU GRUPO', font: 'western', fill: '#d9a62e', outline: '#8a6414' }), tech: 'embroidery', point: [0, 1.27, -0.25], normal: [0, 0, -1], part: 'body', size: 0.34, rot: 0 }] },
+    Object.assign(all('glitter', '#111111'), { pants: P('satin', '#111111'), collar: P('satin', '#111111'), cuffs: P('glitter', '#111111'), shirt: P('satin', '#111111'), hat: P('suede', '#f5f5f2') })),
+  look('Blanco con pedrería negra', { cat: 'moderno', style: 'blazer', lapel: 'notch', buttons: 1, stripes: 'none', neckwear: 'none', hat: false, hardware: 'silver',
+    stones: { color: 'jet', size: 0.0034, edges: { lapels: false, front: false, cuffs: false, pockets: false, stripes: false, hem: false }, scatter: { body: 26, sleeves: 16, pants: 6 } },
+    decals: [{ id: 'm1', imageId: tid({ text: 'TU GRUPO', font: 'block', fill: '#c4121f', outline: '#111111' }), tech: 'stones', point: [0, 1.3, -0.25], normal: [0, 0, -1], part: 'body', size: 0.3, rot: 0 }] },
+    Object.assign(all('wool', '#f5f5f2'), { collar: P('wool', '#f5f5f2'), cuffs: P('wool', '#f5f5f2'), shirt: P('satin', '#111111') })),
+  look('Esmoquin negro', { cat: 'gala', style: 'blazer', lapel: 'shawl', buttons: 1, stripes: 'one', neckwear: 'bow', hat: false, hardware: 'black', shoes: 'dress' },
+    Object.assign(all('wool', '#111111'), { collar: P('satin', '#111111'), cuffs: P('wool', '#111111'), stripes: P('satin', '#111111'), shirt: P('satin', '#f5f5f2'), trim: P('satin', '#111111') })),
+  look('Esmoquin blanco', { cat: 'gala', style: 'blazer', lapel: 'peak', buttons: 1, stripes: 'one', neckwear: 'bow', hat: false, hardware: 'black', shoes: 'dress' },
+    Object.assign(all('wool', '#f5f2ea'), { pants: P('wool', '#111111'), collar: P('satin', '#111111'), cuffs: P('wool', '#f5f2ea'), stripes: P('satin', '#111111'), shirt: P('satin', '#f5f5f2'), trim: P('satin', '#111111') })),
   look('Vaquero arena', { style: 'western', yoke: true, stripes: 'none', hat: true, hardware: 'gold' }, Object.assign(all('suede', '#c9ab7c'), { collar: P('suede', '#4a2e1c'), cuffs: P('suede', '#4a2e1c'), hat: P('suede', '#e9dcc6'), shoes: P('suede', '#4a2e1c') })),
 ];
 
@@ -500,15 +565,20 @@ async function addFiles(files) {
 
 const PANES = {
   styles() {
-    const wrap = h('div', { class: 'opts' }, PRESETS.map(p => h('button', { type: 'button', class: 'opt', on: { click: () => {
+    const card = p => h('button', { type: 'button', class: 'tpl', on: { click: () => {
       // keep the person's own logos and print; drop anything that came from another starter look
       const mineDecals = D.decals.filter(dc => !dc.fromLook);
       const keep = { images: D.images, members: D.members, notes: D.notes, jacket: undefined, pantsCfg: undefined };
       D = Object.assign(clone(p), keep);
       D.decals = D.decals.map(dc => Object.assign(dc, { fromLook: true })).concat(mineDecals);
       if (!p.print && keep.images && D.print == null) { const old = JSON.parse(JSON.stringify(window.__lastUserPrint || null)); if (old) D.print = old; } $('#designName').value = D.name; rebuild(); toast(p.name);
-    } } }, [h('i', { style: `width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg, ${p.parts.body.color} 55%, ${p.parts.collar.color} 55%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)` }), p.name])));
-    return [group(t('tStyles'), [wrap], t('stylesHelp'))];
+    } } }, [h('span', { class: 'tpl__sw' }, [p.parts.body.color, p.parts.sleeves.color, p.parts.collar.color, p.parts.pants.color].map(c => h('i', { style: 'background:' + c }))),
+      h('b', {}, [p.name]), h('small', {}, [[t((FABRICS.find(f => f[0] === p.parts.body.fabric) || FABRICS[0])[1]), t({ blazer: 'sBlazer', bomber: 'sBomber', varsity: 'sVarsity', western: 'sWestern' }[p.style] || 'sBlazer')].join(' · ')])]);
+    const groups = [['banda', 'catBanda'], ['norteno', 'catNorteno'], ['moderno', 'catModerno'], ['gala', 'catGala']].map(([c, l]) => {
+      const list = PRESETS.filter(p => (p.cat || CATS[p.name] || 'moderno') === c);
+      return list.length ? group(t(l) + ' · ' + list.length, [h('div', { class: 'tpls' }, list.map(card))]) : null;
+    });
+    return [h('p', { class: 'hint' }, [t('stylesHelp')])].concat(groups);
   },
   cut() {
     const J = jacketCfg(D), setJ = (key, v) => shape(d => { d.jacket = Object.assign(jacketCfg(d), { [key]: v }); });

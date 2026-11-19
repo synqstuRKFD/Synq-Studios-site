@@ -334,3 +334,13 @@ button { cursor: pointer; }
   .views { top: 50%; bottom: auto; left: auto; right: 8px; transform: translateY(-50%); flex-direction: column; gap: 2px; padding: 4px; border-radius: 16px; max-height: calc(100% - 16px); }
   .views button { font-size: .72rem; padding: .55em .7em; border-radius: 12px; }
 }
+
+/* template cards */
+.tpls { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.tpl { text-align: left; border: 1px solid var(--line2); background: var(--panel2); border-radius: 14px; padding: 10px 12px 12px; display: grid; gap: 6px; color: var(--text); }
+.tpl:hover { border-color: var(--accent); }
+.tpl__sw { display: flex; }
+.tpl__sw i { width: 22px; height: 22px; border-radius: 50%; margin-right: -6px; box-shadow: 0 0 0 2px var(--panel2), inset 0 0 0 1px rgba(255,255,255,.25); }
+.tpl b { font-size: .92rem; line-height: 1.2; }
+.tpl small { color: var(--dim); font-size: .74rem; }
+@media (max-width: 900px) { .tpls { grid-template-columns: 1fr 1fr; } .tpl b { font-size: .98rem; } .tpl { min-height: 92px; } }
