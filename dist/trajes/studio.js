@@ -39,7 +39,7 @@ const JACKET_BASE = profile({ // the jacket body: torso plus ease, continuing do
 });
 const SEAT = profile({ rx: [[0.77, 0.03], [0.785, 0.1], [0.82, 0.13], [0.85, 0.155], [0.90, 0.18], [0.98, 0.186], [1.06, 0.166]], rz: [[0.77, 0.03], [0.785, 0.06], [0.82, 0.074], [0.85, 0.084], [0.90, 0.1], [0.98, 0.114], [1.06, 0.106]], cz: [[0.77, 0.0], [0.85, -0.008], [0.9, -0.014], [1.06, -0.008]] });
 const LEG = profile({ rx: [[0.04, 0.034], [0.10, 0.036], [0.30, 0.05], [0.47, 0.056], [0.56, 0.052], [0.75, 0.072], [0.92, 0.086], [0.98, 0.09]], rz: [[0.04, 0.038], [0.10, 0.04], [0.30, 0.054], [0.47, 0.06], [0.56, 0.054], [0.75, 0.076], [0.92, 0.088], [0.98, 0.09]] });
-const PANT_BASE = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.063], [0.50, 0.066], [0.68, 0.078], [0.8, 0.086], [0.9, 0.088], [1.0, 0.086]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.68, 0.084], [0.8, 0.094], [0.9, 0.1], [1.0, 0.104]] });
+const PANT_BASE = profile({ rx: [[0.035, 0.07], [0.12, 0.068], [0.30, 0.072], [0.48, 0.074], [0.66, 0.086], [0.8, 0.094], [0.9, 0.094], [1.0, 0.09]], rz: [[0.035, 0.076], [0.12, 0.074], [0.30, 0.078], [0.48, 0.078], [0.66, 0.09], [0.8, 0.1], [0.9, 0.104], [1.0, 0.106]] });
 const ARM = profile({ rx: [[-0.62, 0.026], [-0.59, 0.03], [-0.45, 0.04], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.05], [0.0, 0.054], [0.03, 0.04]], rz: [[-0.62, 0.022], [-0.59, 0.026], [-0.45, 0.038], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.048], [0.0, 0.05], [0.03, 0.04]] });
 const SLEEVE_BASE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.059], [-0.10, 0.065], [-0.02, 0.066], [0.012, 0.062], [0.03, 0.05], [0.042, 0.03]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.057], [-0.10, 0.063], [-0.02, 0.064], [0.012, 0.06], [0.03, 0.048], [0.042, 0.03]] });
 let EASE = 0, PEASE = 0, SEASE = 0; // fit: slim (negative) to loose (positive), in meters
@@ -433,13 +433,13 @@ export function createStudio(host) {
 
   // soft shadows where pieces meet (ambient occlusion); lighter setup on phones
   const PHONE = matchMedia('(pointer: coarse)').matches;
-  if (PHONE) renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
-  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: PHONE ? 0 : 4 });
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: 4 });
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
   const ao = new GTAOPass(scene, camera, 4, 4);
-  ao.updateGtaoMaterial({ radius: 0.12, distanceExponent: 1.4, thickness: 1, scale: 1.4, samples: PHONE ? 8 : 16 });
-  ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: PHONE ? 8 : 16 });
+  ao.updateGtaoMaterial({ radius: 0.12, distanceExponent: 1.4, thickness: 1, scale: 1.4, samples: PHONE ? 12 : 16 });
+  ao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: PHONE ? 12 : 16 });
   ao.blendIntensity = 0.9;
   composer.addPass(ao);
   composer.addPass(new OutputPass());
@@ -889,7 +889,7 @@ export function createStudio(host) {
   // ---------- views ----------
   // far enough back to see hat to boots; pulled further back on narrow (phone) screens
   const VIEWS = { front: [0, 1.1, 4.3], back: [0, 1.1, -4.3], left: [4.3, 1.1, 0], right: [-4.3, 1.1, 0], three: [1.9, 1.25, 3.9] };
-  const fit = () => { const a = camera.aspect; return a < 0.62 ? 1.25 : a < 0.8 ? 1.1 : 1; };
+  const fit = () => { const t = Math.tan(camera.fov * DEG / 2), dv = 1.0 / t, dh = 0.46 / (t * camera.aspect); return Math.max(dv, dh) * 1.06 / 4.3; };
   let anim = null;
   function view(name, instant) {
     const to = new THREE.Vector3(...(VIEWS[name] || VIEWS.three)).multiplyScalar(fit()), from = camera.position.clone();

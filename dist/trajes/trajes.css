@@ -323,3 +323,14 @@ button { cursor: pointer; }
   .placing { top: 8px; font-size: .9rem; }
 }
 @media (max-width: 900px) { [data-sheet="full"] .views, [data-sheet="full"] .hint3d { display: none; } }
+@media (max-width: 900px) {
+  /* view buttons up top so they never cover the feet; hint hidden on phones */
+  .views { top: 10px; bottom: auto; padding: 3px; }
+  .views button { font-size: .8rem; padding: .5em .8em; }
+  .hint3d { display: none; }
+  .placing { top: 56px; }
+}
+@media (max-width: 900px) {
+  .views { top: 50%; bottom: auto; left: auto; right: 8px; transform: translateY(-50%); flex-direction: column; gap: 2px; padding: 4px; border-radius: 16px; max-height: calc(100% - 16px); }
+  .views button { font-size: .72rem; padding: .55em .7em; border-radius: 12px; }
+}
