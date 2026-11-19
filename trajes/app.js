@@ -1,10 +1,14 @@
 // SYNQ Trajes: the 3D designer screen. Holds the design, builds the controls, lets people upload
 // their own logos/photos and place them on the suit, and handles save, share, image and tailor sheet.
-import { createStudio } from './studio.js';
+import { createStudio, patternCanvas } from './studio.js';
 
 // ---------- words ----------
 const T = {
   es: {
+    fHolo: 'Holográfico', tStonesTab: 'Pedrería', gemColor: 'Color de las piedras', edges: 'Orillas con pedrería', eLapels: 'Orilla de las solapas', eFront: 'Orilla del frente', eCuffs: 'Puños', ePockets: 'Bolsas', eStripes: 'Franjas del pantalón', eHem: 'Bajo del saco',
+    scatter: 'Piedras sueltas', scatterHelp: 'Piedras regadas por la tela, como en los trajes de gala.', sBody: 'En el saco', sSleeves: 'En las mangas', sPants: 'En el pantalón', gemSize: 'Tamaño de piedra',
+    gCrystal: 'Cristal', gAb: 'Tornasol (AB)', gGold: 'Oro', gSilver: 'Plata', gJet: 'Negro azabache', gRed: 'Rojo', gBlue: 'Azul', gPink: 'Rosa', gGreen: 'Verde',
+    patterns: 'Diseños de estampado', patColor: 'Color del diseño', orLogo: 'O usa tu logo', patTribal: 'Tribal', patDamasco: 'Damasco', patLlamas: 'Llamas', patZebra: 'Cebra', patEstrellas: 'Estrellas',
     title: 'Diseña tu traje', mine: 'Mis diseños', mineShort: 'Mis trajes', save: 'Guardar', share: 'Compartir', sheet: 'Hoja para el sastre', image: 'Imagen',
     front: 'Frente', back: 'Espalda', sideL: 'Lado', sideR: 'Otro lado', spin: 'Girar', dragHint: 'Arrastra para girar · pellizca para acercar', loading: 'Preparando el maniquí…',
     download: 'Descargar imagen', close: 'Cerrar', mineHelp: 'Se guardan en este teléfono o computadora.', madeBy: 'Hecho por SYNQ Studios · estudio de grabación en Rockford, IL', visit: 'Visita el estudio',
@@ -35,6 +39,10 @@ const T = {
     belowCollar: 'cm debajo del cuello', aboveHem: 'cm arriba del bajo', fromShoulder: 'cm debajo del hombro', centered: 'al centro', left: 'lado izquierdo', right: 'lado derecho',
   },
   en: {
+    fHolo: 'Holographic', tStonesTab: 'Rhinestones', gemColor: 'Stone color', edges: 'Rhinestone edges', eLapels: 'Lapel edges', eFront: 'Front edges', eCuffs: 'Cuffs', ePockets: 'Pockets', eStripes: 'Pant stripes', eHem: 'Jacket hem',
+    scatter: 'Sprinkled stones', scatterHelp: 'Single stones spread over the fabric, like on gala suits.', sBody: 'On the jacket', sSleeves: 'On the sleeves', sPants: 'On the pants', gemSize: 'Stone size',
+    gCrystal: 'Crystal', gAb: 'Iridescent (AB)', gGold: 'Gold', gSilver: 'Silver', gJet: 'Jet black', gRed: 'Red', gBlue: 'Blue', gPink: 'Pink', gGreen: 'Green',
+    patterns: 'Print patterns', patColor: 'Pattern color', orLogo: 'Or use your logo', patTribal: 'Tribal', patDamasco: 'Damask', patLlamas: 'Flames', patZebra: 'Zebra', patEstrellas: 'Stars',
     title: 'Design your suit', mine: 'My designs', mineShort: 'My suits', save: 'Save', share: 'Share', sheet: 'Tailor sheet', image: 'Image',
     front: 'Front', back: 'Back', sideL: 'Side', sideR: 'Other side', spin: 'Spin', dragHint: 'Drag to spin · pinch to zoom', loading: 'Getting the mannequin ready…',
     download: 'Download image', close: 'Close', mineHelp: 'Saved on this phone or computer.', madeBy: 'Made by SYNQ Studios · recording studio in Rockford, IL', visit: 'Visit the studio',
@@ -76,7 +84,9 @@ const COLORS = [
   ['#14213d', 'Azul marino', 'Navy'], ['#1e4fb3', 'Azul rey', 'Royal blue'], ['#1a8fd6', 'Azul eléctrico', 'Electric blue'], ['#8ec5ff', 'Celeste', 'Sky blue'], ['#14a3a3', 'Turquesa', 'Turquoise'], ['#0f6b43', 'Verde esmeralda', 'Emerald'],
   ['#9fe3c4', 'Verde menta', 'Mint'], ['#4a5a2a', 'Verde olivo', 'Olive'], ['#7a7f86', 'Gris', 'Gray'], ['#c9ced6', 'Plata', 'Silver'], ['#d4a63c', 'Oro', 'Gold'], ['#e0661b', 'Naranja', 'Orange'], ['#f2c230', 'Amarillo', 'Yellow'],
 ];
-const FABRICS = [['satin', 'fSatin'], ['velvet', 'fVelvet'], ['suede', 'fSuede'], ['sequin', 'fSequin'], ['glitter', 'fGlitter'], ['leather', 'fLeather'], ['wool', 'fWool']];
+const FABRICS = [['satin', 'fSatin'], ['velvet', 'fVelvet'], ['suede', 'fSuede'], ['sequin', 'fSequin'], ['glitter', 'fGlitter'], ['holo', 'fHolo'], ['leather', 'fLeather'], ['wool', 'fWool']];
+const GEMS = [['crystal', 'gCrystal', 'radial-gradient(circle at 35% 35%,#fff,#dfe9f5 45%,#8fa3bd)'], ['ab', 'gAb', 'radial-gradient(circle at 35% 35%,#fff,#cfe7ff 40%,#c79be8)'], ['gold', 'gGold', 'radial-gradient(circle at 35% 35%,#fff6c8,#e8c050 45%,#8c6512)'], ['silver', 'gSilver', 'radial-gradient(circle at 35% 35%,#fff,#c9ced6 45%,#6f7782)'], ['jet', 'gJet', 'radial-gradient(circle at 35% 35%,#9aa0a8,#2a2c31 45%,#050506)'], ['red', 'gRed', 'radial-gradient(circle at 35% 35%,#ffd2d2,#e0283a 45%,#6b0610)'], ['blue', 'gBlue', 'radial-gradient(circle at 35% 35%,#d6ecff,#2f7de0 45%,#0b2a63)'], ['pink', 'gPink', 'radial-gradient(circle at 35% 35%,#ffe1f0,#f06aa8 45%,#7a1446)'], ['green', 'gGreen', 'radial-gradient(circle at 35% 35%,#d9ffe6,#22b05e 45%,#063d1d)']];
+const PATTERNS = [['tribal', 'patTribal'], ['damasco', 'patDamasco'], ['llamas', 'patLlamas'], ['zebra', 'patZebra'], ['estrellas', 'patEstrellas']];
 const PARTS = [['body', 'pBody'], ['sleeves', 'pSleeves'], ['collar', 'pCollar'], ['cuffs', 'pCuffs'], ['pants', 'pPants'], ['stripes', 'pStripes'], ['shirt', 'pShirt'], ['trim', 'pTrim'], ['hat', 'pHat'], ['shoes', 'pShoes']];
 const TECHS = [['print', 'tPrintT'], ['embroidery', 'tEmb'], ['stones', 'tStones'], ['patch', 'tPatch']];
 const FONTS = [['gothic', 'fGothic', '"UnifrakturMaguntia", serif'], ['western', 'fWestern', 'Rye, serif'], ['pirate', 'fPirate', '"Pirata One", serif'], ['script', 'fScript', '"Great Vibes", cursive'], ['block', 'fBlock', 'Anton, Impact, sans-serif']];
@@ -88,6 +98,7 @@ const BASE = {
   parts: { body: P('velvet', '#5b0f1d'), sleeves: P('velvet', '#5b0f1d'), collar: P('satin', '#111111'), cuffs: P('satin', '#111111'), pants: P('velvet', '#5b0f1d'), stripes: P('satin', '#111111'),
     shirt: P('satin', '#f5f5f2'), trim: P('satin', '#111111'), hat: P('suede', '#e9dcc6'), shoes: P('leather', '#111111') },
   print: null, decals: [], images: {}, members: [], notes: '',
+  stones: { color: 'crystal', size: 0.0032, edges: { lapels: true, front: false, cuffs: false, pockets: false, stripes: false, hem: false }, scatter: { body: 0, sleeves: 0, pants: 0 } },
 };
 function look(name, over, parts) { const d = clone(BASE); Object.assign(d, over); Object.keys(parts || {}).forEach(k => { d.parts[k] = parts[k]; }); d.name = name; return d; }
 const all = (f, c) => ({ body: P(f, c), sleeves: P(f, c), pants: P(f, c) });
@@ -99,6 +110,17 @@ const PRESETS = [
   look('Gamuza y piel', { style: 'varsity', stripes: 'one', hat: true, hardware: 'silver' }, Object.assign(all('suede', '#c9b9a6'), { sleeves: P('leather', '#111111'), collar: P('wool', '#111111'), cuffs: P('wool', '#111111'), stripes: P('leather', '#111111'), hat: P('suede', '#f5f5f2') })),
   look('Lentejuela negra', { style: 'blazer', lapel: 'shawl', stripes: 'one', neckwear: 'bow', hat: false, hardware: 'silver' }, Object.assign(all('sequin', '#111111'), { pants: P('wool', '#111111'), collar: P('satin', '#111111'), cuffs: P('sequin', '#111111'), stripes: P('satin', '#111111') })),
   look('Morado brillante', { style: 'blazer', lapel: 'notch', stripes: 'none', neckwear: 'none', hat: true, hardware: 'silver' }, Object.assign(all('satin', '#4b2aa8'), { collar: P('satin', '#e9dcc6'), cuffs: P('satin', '#4b2aa8'), shirt: P('satin', '#111111'), hat: P('suede', '#e9dcc6') })),
+  look('Vino con filigrana', { style: 'blazer', lapel: 'notch', stripes: 'none', neckwear: 'none', hat: false, hardware: 'silver',
+    stones: { color: 'crystal', size: 0.003, edges: { lapels: true, front: true, cuffs: true, pockets: true, stripes: false, hem: false }, scatter: { body: 28, sleeves: 18, pants: 0 } },
+    decals: [{ id: 'f1', imageId: 'm:filigrana:silver', tech: 'embroidery', point: [0.11, 1.12, 0.11], normal: [0.45, 0, 0.9], part: 'body', size: 0.34, rot: 0 },
+      { id: 'f2', imageId: 'm:filigrana:silver', tech: 'embroidery', point: [-0.11, 1.12, 0.11], normal: [-0.45, 0, 0.9], part: 'body', size: 0.34, rot: 0 },
+      { id: 'f3', imageId: 'm:arabesco:silver', tech: 'embroidery', point: [0.12, 0.86, 0.12], normal: [0.4, 0, 0.9], part: 'body', size: 0.1, rot: 0 },
+      { id: 'f4', imageId: 'm:arabesco:silver', tech: 'embroidery', point: [-0.12, 0.86, 0.12], normal: [-0.4, 0, 0.9], part: 'body', size: 0.1, rot: 0 }] },
+    Object.assign(all('suede', '#6e1020'), { collar: P('suede', '#6e1020'), cuffs: P('suede', '#6e1020'), shirt: P('satin', '#f5f5f2') })),
+  look('Holográfico tribal', { style: 'blazer', lapel: 'notch', stripes: 'none', neckwear: 'none', hat: false, hardware: 'gold',
+    print: { pattern: 'tribal', color: '#d4a63c', parts: ['body'], size: 0.3, rotate: 0 },
+    decals: [{ id: 'h1', imageId: 't:' + btoa(unescape(encodeURIComponent(JSON.stringify({ text: 'Tu Grupo', font: 'pirate', fill: '#e0661b', outline: '#111111' })))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''), tech: 'embroidery', point: [0, 1.3, -0.2], normal: [0, 0, -1], part: 'body', size: 0.28, rot: 0 }] },
+    Object.assign(all('holo', '#111111'), { sleeves: P('satin', '#f5f5f2'), pants: P('satin', '#f5f5f2'), collar: P('satin', '#111111'), cuffs: P('satin', '#f5f5f2'), shirt: P('satin', '#111111') })),
   look('Vaquero arena', { style: 'western', yoke: true, stripes: 'none', hat: true, hardware: 'gold' }, Object.assign(all('suede', '#c9ab7c'), { collar: P('suede', '#4a2e1c'), cuffs: P('suede', '#4a2e1c'), hat: P('suede', '#e9dcc6'), shoes: P('suede', '#4a2e1c') })),
 ];
 
@@ -113,9 +135,10 @@ const MOTIFS = {
   aguila: 'M0 -30 C6 -30 10 -26 10 -20 L22 -26 C30 -30 40 -28 48 -20 C40 -18 34 -14 30 -8 C40 -10 46 -6 48 0 C38 0 30 2 24 8 C30 10 34 14 34 20 C24 18 16 16 10 20 L8 36 L0 30 L-8 36 L-10 20 C-16 16 -24 18 -34 20 C-34 14 -30 10 -24 8 C-30 2 -38 0 -48 0 C-46 -6 -40 -10 -30 -8 C-34 -14 -40 -18 -48 -20 C-40 -28 -30 -30 -22 -26 L-10 -20 C-10 -26 -6 -30 0 -30 Z',
   rayo: 'M8 -46 L-22 6 L-2 6 L-10 46 L24 -10 L4 -10 L14 -46 Z',
   corona: 'M-40 24 L-44 -16 L-22 4 L0 -30 L22 4 L44 -16 L40 24 Z M-40 30 L40 30 L40 38 L-40 38 Z',
+  filigrana: 'M0 -50 L0 50 M0 -50 C6 -44 6 -38 0 -34 M0 -30 C14 -40 26 -30 20 -20 C16 -13 8 -16 10 -22 M0 -8 C16 -16 30 -4 22 8 C16 14 8 10 10 4 M0 18 C12 12 22 20 18 30 C14 36 8 32 9 27 M0 40 C8 34 16 38 14 46 M20 -20 C28 -16 30 -8 26 -4 M22 8 C30 12 30 22 24 24',
   calavera: 'M0 -40 C-26 -40 -36 -20 -34 -2 C-33 10 -26 16 -22 18 L-22 32 L22 32 L22 18 C26 16 33 10 34 -2 C36 -20 26 -40 0 -40 Z M-20 -8 C-20 -16 -6 -16 -6 -6 C-6 2 -20 2 -20 -8 Z M20 -8 C20 -16 6 -16 6 -6 C6 2 20 2 20 -8 Z M0 4 L-5 14 L5 14 Z',
 };
-const MOTIF_NAMES = { arabesco: ['Arabesco', 'Scrollwork'], rosa: ['Rosa', 'Rose'], llamas: ['Llamas', 'Flames'], herradura: ['Herradura', 'Horseshoe'], estrella: ['Estrella', 'Star'], cruz: ['Cruz', 'Cross'], aguila: ['Águila', 'Eagle'], rayo: ['Rayo', 'Lightning'], corona: ['Corona', 'Crown'], calavera: ['Calavera', 'Skull'] };
+const MOTIF_NAMES = { arabesco: ['Arabesco', 'Scrollwork'], rosa: ['Rosa', 'Rose'], llamas: ['Llamas', 'Flames'], herradura: ['Herradura', 'Horseshoe'], estrella: ['Estrella', 'Star'], cruz: ['Cruz', 'Cross'], aguila: ['Águila', 'Eagle'], rayo: ['Rayo', 'Lightning'], filigrana: ['Filigrana', 'Filigree'], corona: ['Corona', 'Crown'], calavera: ['Calavera', 'Skull'] };
 const FILLED = { llamas: 1, herradura: 1, estrella: 1, cruz: 1, aguila: 1, rayo: 1, corona: 1, calavera: 1 };
 function motifImage(name, color) {
   const c = document.createElement('canvas'); c.width = c.height = 400; const x = c.getContext('2d');
@@ -125,9 +148,9 @@ function motifImage(name, color) {
   const cols = color === 'silver' ? ['#ffffff', '#c9ced6', '#7c838d'] : color === 'red' ? ['#ff8a8a', '#d0141f', '#6b0610'] : ['#fff2b0', '#e2b84a', '#8a6414'];
   g.addColorStop(0, cols[0]); g.addColorStop(0.5, cols[1]); g.addColorStop(1, cols[2]);
   x.lineJoin = x.lineCap = 'round';
-  if (FILLED[name]) { x.fillStyle = g; x.fill(p, 'evenodd'); x.strokeStyle = cols[2]; x.lineWidth = 1.2; x.stroke(p); }
-  else { x.strokeStyle = g; x.lineWidth = 5; x.stroke(p); }
-  return c.toDataURL('image/png');
+  const draw = () => { if (FILLED[name]) { x.fillStyle = g; x.fill(p, 'evenodd'); x.strokeStyle = cols[2]; x.lineWidth = 1.2; x.stroke(p); } else { x.strokeStyle = g; x.lineWidth = name === 'filigrana' ? 3.2 : 5; x.stroke(p); } };
+  draw(); if (name === 'filigrana') { x.scale(-1, 1); draw(); }
+  return trim(c).toDataURL('image/png');
 }
 
 // ---------- lettering as an image ----------
@@ -331,7 +354,7 @@ function markSelected() { document.querySelectorAll('.placed').forEach(c => c.se
 function faceDecal(dc) { const [nx, , nz] = dc.normal; studio.view(Math.abs(nz) >= Math.abs(nx) ? (nz > 0 ? 'front' : 'back') : (nx > 0 ? 'left' : 'right')); }
 
 // ---------- tabs and panes ----------
-const TABS = [['styles', 'tStyles'], ['cut', 'tCut'], ['fabric', 'tFabric'], ['logos', 'tLogos'], ['print', 'tPrint'], ['text', 'tText'], ['band', 'tBand']];
+const TABS = [['styles', 'tStyles'], ['cut', 'tCut'], ['fabric', 'tFabric'], ['stones', 'tStonesTab'], ['logos', 'tLogos'], ['print', 'tPrint'], ['text', 'tText'], ['band', 'tBand']];
 let current = store.get('synq-traje3d-tab') || 'styles', zone = 'body';
 const tabsEl = $('#tabs'), panes = $('#panes');
 function buildTabs() {
@@ -352,8 +375,12 @@ async function addFiles(files) {
 const PANES = {
   styles() {
     const wrap = h('div', { class: 'opts' }, PRESETS.map(p => h('button', { type: 'button', class: 'opt', on: { click: () => {
-      const keep = { decals: D.decals, images: D.images, members: D.members, notes: D.notes, print: D.print };
-      D = Object.assign(clone(p), keep); $('#designName').value = D.name; rebuild(); toast(p.name);
+      // keep the person's own logos and print; drop anything that came from another starter look
+      const mineDecals = D.decals.filter(dc => !dc.fromLook);
+      const keep = { images: D.images, members: D.members, notes: D.notes };
+      D = Object.assign(clone(p), keep);
+      D.decals = D.decals.map(dc => Object.assign(dc, { fromLook: true })).concat(mineDecals);
+      if (!p.print && keep.images && D.print == null) { const old = JSON.parse(JSON.stringify(window.__lastUserPrint || null)); if (old) D.print = old; } $('#designName').value = D.name; rebuild(); toast(p.name);
     } } }, [h('i', { style: `width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg, ${p.parts.body.color} 55%, ${p.parts.collar.color} 55%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25)` }), p.name])));
     return [group(t('tStyles'), [wrap], t('stylesHelp'))];
   },
@@ -379,6 +406,15 @@ const PANES = {
       group(t('fabric') + ' · ' + label, [opts(FABRICS.map(([f, l]) => [f, t(l)]), D.parts[zone].fabric, v => color(d => { d.parts[zone].fabric = v; }))]),
       group(t('color') + ' · ' + label, [swatches(D.parts[zone].color, v => color(d => { d.parts[zone].color = v; })), exact(D.parts[zone].color, (v, live) => color(d => { d.parts[zone].color = v; }, !live))]),
       ['body', 'sleeves', 'pants'].includes(zone) ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => color(d => { ['body', 'sleeves', 'pants'].forEach(k => { d.parts[k] = clone(d.parts[zone]); }); }) } }, [t('applyAll')]) : null];
+  },
+  stones() {
+    const st = D.stones, ch = (fn, live) => { fn(D.stones); studio.setStones(D); persist(); if (!live) buildPane('stones'); };
+    const edges = [['lapels', 'eLapels'], ['front', 'eFront'], ['cuffs', 'eCuffs'], ['pockets', 'ePockets'], ['stripes', 'eStripes'], ['hem', 'eHem']]
+      .filter(([k]) => !((k === 'lapels' || k === 'pockets') && D.style !== 'blazer') && !(k === 'stripes' && D.stripes === 'none'));
+    return [group(t('gemColor'), [h('div', { class: 'opts' }, GEMS.map(([k, l, bg]) => h('button', { type: 'button', class: 'opt', 'aria-pressed': String(st.color === k), on: { click: () => ch(x => { x.color = k; }) } }, [h('i', { style: `width:16px;height:16px;border-radius:50%;background:${bg}` }), t(l)]))),
+        slider(t('gemSize'), 3, 10, 0.5, +((st.size || 0.0032) * 2000).toFixed(1), v => v.toFixed(1) + ' mm', (v, live) => ch(x => { x.size = v / 2000; }, live))]),
+      group(t('edges'), edges.map(([k, l]) => toggle(t(l), st.edges[k], v => ch(x => { x.edges[k] = v; })))),
+      group(t('scatter'), [['body', 'sBody'], ['sleeves', 'sSleeves'], ['pants', 'sPants']].map(([k, l]) => slider(t(l), 0, 100, 1, st.scatter[k] || 0, v => v + '%', (v, live) => ch(x => { x.scatter[k] = v; }, live))), t('scatterHelp'))];
   },
   logos() {
     const drop = h('button', { type: 'button', class: 'drop', on: { click: () => fileInput.click() } }, [h('b', {}, [t('upload')]), t('uploadHelp')]);
@@ -425,17 +461,21 @@ const PANES = {
   },
   print() {
     const mine = Object.keys(D.images);
-    if (!mine.length) return [group(t('tPrint'), [h('button', { type: 'button', class: 'btn btn--sm', on: { click: () => { current = 'logos'; buildTabs(); buildPane('logos'); } } }, [t('tLogos')])], t('pickImage'))];
-    const pr = D.print || { imageId: null, parts: ['body', 'sleeves', 'pants'], size: 0.1, gap: 0.07, rotate: -8 };
-    const setPr = (fn, live) => { const p = D.print || clone(pr); fn(p); D.print = p; relook(); if (!live) buildPane('print'); };
-    return [group(t('printImage'), [h('div', { class: 'gallery' }, mine.map(id => thumb(id, pr.imageId === id, () => setPr(p => { p.imageId = id; }))))], t('printHelp')),
-      D.print && D.print.imageId ? group(t('printParts'), [h('div', { class: 'row' }, [['body', 'pBody'], ['sleeves', 'pSleeves'], ['pants', 'pPants'], ['collar', 'pCollar']].map(([k, l]) => {
+    const pr = D.print || { imageId: null, pattern: null, color: '#d4a63c', parts: ['body', 'sleeves', 'pants'], size: 0.1, gap: 0.07, rotate: 0 };
+    const setPr = (fn, live) => { const p = D.print || clone(pr); fn(p); D.print = p; window.__lastUserPrint = clone(p); relook(); if (!live) buildPane('print'); };
+    const patThumb = ([k, l]) => { const b = h('button', { type: 'button', class: 'thumb', title: t(l), 'aria-pressed': String(pr.pattern === k), on: { click: () => setPr(p => { p.pattern = k; p.imageId = null; p.size = p.size < 0.15 ? 0.28 : p.size; p.color = p.color || '#d4a63c'; }) } });
+      const c = patternCanvas(k, D.parts.body.color, pr.color || '#d4a63c', 128); c.style.cssText = 'width:100%;height:100%;border-radius:8px'; b.appendChild(c); return b; };
+    return [group(t('patterns'), [h('div', { class: 'gallery' }, PATTERNS.map(patThumb)),
+        pr.pattern ? h('div', {}, [h('div', { class: 'hint', style: 'margin:10px 0 4px' }, [t('patColor')]), swatches(pr.color, v => setPr(p => { p.color = v; }), true)]) : null], t('printHelp')),
+      group(t('orLogo'), mine.length ? [h('div', { class: 'gallery' }, mine.map(id => thumb(id, pr.imageId === id, () => setPr(p => { p.imageId = id; p.pattern = null; p.size = p.size > 0.2 ? 0.1 : p.size; }))))]
+        : [h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => { current = 'logos'; buildTabs(); buildPane('logos'); } } }, [t('tLogos')])]),
+      D.print && (D.print.imageId || D.print.pattern) ? group(t('printParts'), [h('div', { class: 'row' }, [['body', 'pBody'], ['sleeves', 'pSleeves'], ['pants', 'pPants'], ['collar', 'pCollar']].map(([k, l]) => {
         const c = h('input', { type: 'checkbox' }); c.checked = pr.parts.includes(k);
         c.addEventListener('change', () => setPr(p => { p.parts = c.checked ? [...new Set(p.parts.concat(k))] : p.parts.filter(x => x !== k); }));
         return h('label', { class: 'check' }, [c, t(l)]);
       })),
-      slider(t('size'), 3, 30, 1, Math.round(pr.size * 100), v => v + ' cm', (v, live) => setPr(p => { p.size = v / 100; }, live)),
-      slider(t('spacing'), 0, 25, 1, Math.round(pr.gap * 100), v => v + ' cm', (v, live) => setPr(p => { p.gap = v / 100; }, live)),
+      slider(t('size'), 3, 60, 1, Math.round(pr.size * 100), v => v + ' cm', (v, live) => setPr(p => { p.size = v / 100; }, live)),
+      pr.pattern ? null : slider(t('spacing'), 0, 25, 1, Math.round((pr.gap || 0.07) * 100), v => v + ' cm', (v, live) => setPr(p => { p.gap = v / 100; }, live)),
       slider(t('angle'), -45, 45, 1, pr.rotate || 0, v => v + '°', (v, live) => setPr(p => { p.rotate = v; }, live)),
       h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { D.print = null; relook(); buildPane('print'); } } }, [t('removePrint')])]) : null];
   },
@@ -583,7 +623,8 @@ $('#btnSheet').addEventListener('click', () => {
       <div><h2>${t('tFabric')}</h2><table><tr><th>${t('part')}</th><th>${t('fabric')}</th><th>${t('color')}</th></tr>${fabricRows}</table></div>
     </div>
     ${D.decals.length ? `<h2>${t('tLogos')}</h2><table><tr><th></th><th>${t('placement')}</th><th>${t('size')}</th><th>${t('technique')}</th></tr>${decalRows}</table>` : ''}
-    ${D.print && D.print.imageId ? `<h2>${t('tPrint')}</h2><table>${row(t('printImage'), IMG[D.print.imageId] ? `<img src="${IMG[D.print.imageId].src}" style="max-height:40px">` : '')}${row(t('printParts'), D.print.parts.map(p => lab(PARTS, p)).join(', '))}${row(t('size'), Math.round(D.print.size * 100) + ' cm')}${row(t('spacing'), Math.round(D.print.gap * 100) + ' cm')}${row(t('angle'), (D.print.rotate || 0) + '°')}</table>` : ''}
+    <h2>${t('tStonesTab')}</h2><table>${row(t('gemColor'), lab(GEMS, D.stones.color) + ' · ' + ((D.stones.size || 0.0032) * 2000).toFixed(1) + ' mm')}${row(t('edges'), [['lapels', 'eLapels'], ['front', 'eFront'], ['cuffs', 'eCuffs'], ['pockets', 'ePockets'], ['stripes', 'eStripes'], ['hem', 'eHem']].filter(([k]) => D.stones.edges[k]).map(([, l]) => t(l)).join(', ') || t('no'))}${row(t('scatter'), [['body', 'sBody'], ['sleeves', 'sSleeves'], ['pants', 'sPants']].filter(([k]) => D.stones.scatter[k] > 0).map(([k, l]) => t(l) + ' ' + D.stones.scatter[k] + '%').join(', ') || t('no'))}</table>
+    ${D.print && (D.print.imageId || D.print.pattern) ? `<h2>${t('tPrint')}</h2><table>${row(t('printImage'), D.print.pattern ? lab(PATTERNS, D.print.pattern) + ' · ' + sw(D.print.color) : IMG[D.print.imageId] ? `<img src="${IMG[D.print.imageId].src}" style="max-height:40px">` : '')}${row(t('printParts'), D.print.parts.map(p => lab(PARTS, p)).join(', '))}${row(t('size'), Math.round(D.print.size * 100) + ' cm')}${D.print.pattern ? '' : row(t('spacing'), Math.round((D.print.gap || 0) * 100) + ' cm')}${row(t('angle'), (D.print.rotate || 0) + '°')}</table>` : ''}
     ${members.length ? `<h2>${t('members')}</h2><table><tr><th>${t('mName')}</th><th>${t('mSize')}</th><th>${t('mChest')}</th><th>${t('mWaist')}</th><th>${t('mSleeve')}</th><th>${t('mInseam')}</th></tr>
       ${members.map(m => `<tr><td>${esc(m.name)}</td><td>${esc(m.size)}</td><td>${esc(m.chest)}</td><td>${esc(m.waist)}</td><td>${esc(m.sleeve)}</td><td>${esc(m.inseam)}</td></tr>`).join('')}</table><div>${t('units')}</div>` : ''}
     ${D.notes ? `<h2>${t('notes')}</h2><div>${esc(D.notes).replace(/\n/g, '<br>')}</div>` : ''}`;

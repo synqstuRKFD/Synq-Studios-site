@@ -163,9 +163,10 @@ const FABRICS = {
   suede: { roughness: 0.95, metalness: 0, sheen: 0.35, sheenRoughness: 0.75, normalScale: 0.5, sheenLift: 0.1, env: 0.6 },
   sequin: { roughness: 0.18, metalness: 0.75, clearcoat: 0.6, clearcoatRoughness: 0.1, normalScale: 1 },
   glitter: { roughness: 0.3, metalness: 0.65, normalScale: 1 },
-  leather: { roughness: 0.38, metalness: 0, clearcoat: 0.7, clearcoatRoughness: 0.28, normalScale: 0.5 },
+  leather: { roughness: 0.45, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.35, normalScale: 0.5, env: 0.55 },
   wool: { roughness: 0.82, metalness: 0, sheen: 0.2, sheenRoughness: 0.8, normalScale: 0.5, sheenLift: 0.08, env: 0.7 },
   metal: { roughness: 0.22, metalness: 1 },
+  holo: { roughness: 0.16, metalness: 0.9, iridescence: 1, normalScale: 0.9, maps: 'glitter' },
   skin: { roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.2 },
 };
 function fabric(kind, hex, printTex) {
@@ -177,9 +178,45 @@ function fabric(kind, hex, printTex) {
   if (f.env) m.envMapIntensity = f.env;
   if (f.clearcoat) { m.clearcoat = f.clearcoat; m.clearcoatRoughness = f.clearcoatRoughness; }
   if (f.anisotropy) m.anisotropy = f.anisotropy;
+  if (f.iridescence) { m.iridescence = f.iridescence; m.iridescenceIOR = 1.75; m.iridescenceThicknessRange = [150, 900]; }
   if (f.sheen) { m.sheen = f.sheen; m.sheenRoughness = f.sheenRoughness; m.sheenColor = col.clone().lerp(new THREE.Color(0xffffff), f.sheenLift || 0.3); }
-  if (kind !== 'metal' && kind !== 'skin') { const t = fabricMaps(kind); m.normalMap = t.normal; m.normalScale = new THREE.Vector2(f.normalScale, f.normalScale); }
+  if (kind !== 'metal' && kind !== 'skin') { const t = fabricMaps(f.maps || kind); m.normalMap = t.normal; m.normalScale = new THREE.Vector2(f.normalScale, f.normalScale); }
   return m;
+}
+
+// ---------- ready-made patterns (tile seamlessly) ----------
+const PAT_MOTIF = {
+  llamas: 'M-30 40 C-44 18 -38 -6 -28 -22 C-26 -6 -18 2 -14 6 C-16 -14 -10 -32 2 -46 C2 -26 12 -14 16 0 C20 -10 26 -16 32 -22 C40 -2 38 22 26 40 Z',
+  estrella: 'M0 -46 L11 -14 L45 -14 L18 6 L28 40 L0 20 L-28 40 L-18 6 L-45 -14 L-11 -14 Z',
+  arabesco: 'M-46 18 C-36 -26 -6 -30 0 0 C 6 30 36 26 46 -18 M-46 18 C-52 34 -32 40 -28 28 C-25 20 -34 16 -37 22 M46 -18 C52 -34 32 -40 28 -28 C25 -20 34 -16 37 -22 M-18 -14 C-10 -30 8 -34 14 -22 M18 14 C10 30 -8 34 -14 22',
+};
+export function patternCanvas(name, baseHex, inkHex, N = 512) {
+  const c = canvas(N), x = c.getContext('2d');
+  x.fillStyle = baseHex; x.fillRect(0, 0, N, N); x.fillStyle = x.strokeStyle = inkHex;
+  let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const wrap = fn => { for (const dx of [-N, 0, N]) for (const dy of [-N, 0, N]) { x.save(); x.translate(dx, dy); fn(); x.restore(); } };
+  if (name === 'tribal') {
+    // long flowing blades that taper to a point, like tribal flame art
+    for (let k = 0; k < 16; k++) {
+      let px = rnd() * N, py = rnd() * N, ang = rnd() * 6.28;
+      const len = 180 + rnd() * 260, w0 = 14 + rnd() * 20, bend = (rnd() - 0.5) * 0.06, wob = rnd() * 6.28;
+      const pts = [];
+      for (let i = 0; i < len; i += 2) { const t = i / len; ang += bend + Math.sin(t * 6 + wob) * 0.018; px += Math.cos(ang) * 2; py += Math.sin(ang) * 2; pts.push([px, py, w0 * Math.pow(1 - t, 0.8) * (0.55 + 0.45 * Math.sin(Math.min(1, t * 6) * 1.57)) + 1]); }
+      wrap(() => pts.forEach(([a, b2, w]) => { x.beginPath(); x.arc(a, b2, w / 2, 0, 6.28); x.fill(); }));
+    }
+  } else if (name === 'zebra') {
+    const nz = noise2(N, 6, 3), img = x.getImageData(0, 0, N, N), ink = parseInt(inkHex.slice(1), 16);
+    for (let y = 0; y < N; y++) for (let i = 0; i < N; i++) { const v = Math.sin((i / N) * 6.28 * 7 + nz[y * N + i] * 9); if (v > 0.25) { const o = (y * N + i) * 4; img.data[o] = ink >> 16 & 255; img.data[o + 1] = ink >> 8 & 255; img.data[o + 2] = ink & 255; } }
+    x.putImageData(img, 0, 0);
+  } else {
+    const path = new Path2D(PAT_MOTIF[{ damasco: 'arabesco', llamas: 'llamas', estrellas: 'estrella' }[name] || 'arabesco']);
+    const cells = name === 'estrellas' ? 4 : 3, st = N / cells;
+    for (let j = 0; j < cells; j++) for (let i = 0; i < cells; i++) {
+      const cx = (i + (j % 2) * 0.5) * st + st / 2, cy = j * st + st / 2;
+      wrap(() => { x.save(); x.translate(cx, cy); x.scale(st / 130, -st / 130); if (name === 'damasco') { x.lineWidth = 7; x.stroke(path); x.scale(-1, 1); x.stroke(path); } else x.fill(path); x.restore(); });
+    }
+  }
+  return c;
 }
 
 // ---------- all-over logo print ----------
@@ -296,14 +333,17 @@ export function createStudio(host) {
   function clear(g) { while (g.children.length) { const c = g.children.pop(); c.traverse(o => { if (o.geometry) o.geometry.dispose(); }); } }
 
   // ---------- build the suit from a design ----------
-  let D = null, images = {}, built = false;
+  let D = null, images = {}, built = false, lastGeo = null;
   const mats = {};
   function mat(part) { return mats[part]; }
   function makeMats(d) {
     const parts = ['body', 'sleeves', 'collar', 'cuffs', 'pants', 'stripes', 'shirt', 'shoes', 'hat', 'trim'];
     parts.forEach(p => {
       const spec = d.parts[p]; if (!spec) return;
-      const pr = d.print && d.print.imageId && d.print.parts && d.print.parts.includes(p) ? printTexture(images[d.print.imageId], spec.color, d.print.size || 0.12, d.print.gap || 0.06, d.print.rotate || 0) : null;
+      const onPart = d.print && d.print.parts && d.print.parts.includes(p);
+      let pr = null;
+      if (onPart && d.print.pattern) { pr = texture(patternCanvas(d.print.pattern, spec.color, d.print.color || '#d4a63c'), d.print.size || 0.25, true); pr.rotation = (d.print.rotate || 0) * DEG; }
+      else if (onPart && d.print.imageId) pr = printTexture(images[d.print.imageId], spec.color, d.print.size || 0.12, d.print.gap || 0.06, d.print.rotate || 0);
       const old = mats[p];
       mats[p] = fabric(spec.fabric, spec.color, pr);
       if (old) setTimeout(() => old.dispose(), 0);
@@ -319,6 +359,7 @@ export function createStudio(host) {
     makeMats(d);
     const put = (g, m, part, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; mesh.userData.part = part; mesh.userData.matKey = Object.keys(mats).find(k => mats[k] === m); (parent || suit).add(mesh); if (part) pickables.push(mesh); return mesh; };
     const style = d.style; // blazer | bomber | varsity | western
+    const lapelEdges = [];
     const hem = { blazer: 0.78, bomber: 0.93, varsity: 0.93, western: 0.97 }[style] || 0.8;
     const rib = style === 'bomber' || style === 'varsity';
     const open = style === 'blazer';
@@ -380,6 +421,7 @@ export function createStudio(host) {
         const inner = t => { const y = yAt(t); return pt(y, edge(y), 0.006); };
         const outer = t => { const y = yAt(t), p = JACKET(y), R = (p.rx + p.rz) / 2; return pt(y - cr(W, y) * 0.25, edge(y) + s * cr(W, y) / R, 0.008); };
         put(strip(inner, outer, 60), mat('collar'), 'body');
+        lapelEdges.push(outer, inner);
       });
       // back collar hugs the neck and meets the lapels at the front
       const COLLAR = profile({ rx: [[1.44, 0.15], [1.47, 0.105], [1.53, 0.078]], rz: [[1.44, 0.1], [1.47, 0.084], [1.53, 0.07]], cz: [[1.44, -0.004], [1.53, -0.014]] });
@@ -400,7 +442,7 @@ export function createStudio(host) {
 
     // sleeves
     [-1, 1].forEach(s => {
-      const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; arm.scale.x = s; suit.add(arm);
+      const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; arm.scale.x = s; arm.userData.arm = true; suit.add(arm);
       put(rings(SLEEVE, -0.6, 0.032, full, 0, 64, 50), mat('sleeves'), 'sleeves', arm);
       if (rib) put(rings(SLEEVE, -0.615, -0.55, full, 0.003, 48, 4), mats.rib, 'sleeves', arm);
       else put(rings(SLEEVE, -0.605, -0.53, full, 0.003, 48, 6), mat('cuffs'), 'sleeves', arm);
@@ -420,8 +462,57 @@ export function createStudio(host) {
       brim.computeVertexNormals(); put(brim, mat('hat'), null, hat).scale.set(1.08, 1, 0.94);
       const band = put(new THREE.CylinderGeometry(0.093, 0.095, 0.018, 48, 1, true), mat('trim'), null, hat); band.scale.set(1.12, 1, 1); band.position.y = 0.012;
     }
+    lastGeo = { hem, half, brk, open, lapelEdges };
+    buildStones(d, lastGeo);
     built = true;
     rebuildDecals();
+  }
+
+  // ---------- rhinestones (edges and sprinkled) ----------
+  const GEMS = { crystal: ['#f4f8ff', 0.05, 0], ab: ['#f4f8ff', 0.05, 1], gold: ['#e8c050', 0.9, 0], silver: ['#e6e9ee', 0.95, 0], jet: ['#0c0c0e', 0.2, 0], red: ['#e0283a', 0.15, 0], blue: ['#2f7de0', 0.15, 0], pink: ['#f06aa8', 0.15, 0], green: ['#22b05e', 0.15, 0] };
+  const gemGeo = new THREE.SphereGeometry(1, 10, 6);
+  function surf(prof, y, a, off, xAt) {
+    const p = prof(y), cx = (xAt ? xAt(y) : 0) + p.cx;
+    const pos = new THREE.Vector3(cx + (p.rx + off) * Math.cos(a), y, p.cz + (p.rz + off) * Math.sin(a));
+    const n = new THREE.Vector3(Math.cos(a) / (p.rx + off), 0, Math.sin(a) / (p.rz + off)).normalize();
+    return { pos, n };
+  }
+  function buildStones(d, g) {
+    const st = d.stones; if (!st) return;
+    const gem = GEMS[st.color] || GEMS.crystal;
+    const m = new THREE.MeshPhysicalMaterial({ color: gem[0], metalness: gem[1], roughness: 0.04, clearcoat: 1, clearcoatRoughness: 0, envMapIntensity: 3.2, iridescence: gem[2], iridescenceIOR: 1.9, specularIntensity: 1 });
+    const R = st.size || 0.0032;
+    const sets = new Map(); // parent group -> list of {pos, n}
+    const add = (parent, list) => { if (!sets.has(parent)) sets.set(parent, []); sets.get(parent).push(...list); };
+    const along = (fn, gap) => { // even spacing along a curve fn(t) -> Vector3 (or {pos,n})
+      const pts = [], steps = 400; let prev = null, acc = gap;
+      for (let i = 0; i <= steps; i++) { const r = fn(i / steps), p = r.pos || r; if (prev) acc += p.distanceTo(prev); if (acc >= gap) { pts.push(r.pos ? r : { pos: p, n: null }); acc = 0; } prev = p; }
+      return pts;
+    };
+    const E = st.edges || {}, gap = R * 2.6;
+    if (E.lapels && g.open) g.lapelEdges.forEach((fn, i) => { if (i % 2 === 0) add(suit, along(fn, gap)); });
+    if (E.front) [-1, 1].forEach(s => {
+      if (g.open) add(suit, along(t => { const y = g.hem + 0.004 + (1.47 - g.hem) * t; return surf(JACKET, y, FRONT + s * (g.half(y) + 0.012), 0.008); }, gap));
+      else add(suit, along(t => { const y = g.hem + 0.06 + (1.46 - g.hem - 0.06) * t; return surf(JACKET, y, FRONT + s * 0.03, 0.006); }, gap));
+    });
+    if (E.hem) add(suit, along(t => surf(JACKET, g.hem + 0.01, FRONT + (g.half(g.hem) + 0.02) + t * (2 * Math.PI - 2 * (g.half(g.hem) + 0.02)), 0.006), gap));
+    if (E.pockets && g.open) [-1, 1].forEach(s => { const a = FRONT + s * 0.75; add(suit, along(t => surf(JACKET, g.hem + 0.168, a - 0.32 + 0.64 * t, 0.008), gap)); });
+    if (E.stripes && d.stripes !== 'none') [-1, 1].forEach(s => { const outer = s > 0 ? 0 : Math.PI; [-1, 1].forEach(e => add(suit, along(t => surf(PANT, 0.06 + 0.9 * t, outer + e * (d.stripes === 'two' ? 0.32 : 0.17), 0.006, y => s * LEG_X(y)), gap * 1.2))); });
+    // sprinkled stones, spread evenly with a fixed pattern (so they don't jump around)
+    let sd = 99; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const S = st.scatter || {};
+    if (S.body > 0) { const n = Math.round(S.body * 4); for (let i = 0; i < n; i++) { const y = g.hem + 0.03 + rnd() * (1.43 - g.hem - 0.03), a = FRONT + (g.half(y) + 0.05) + rnd() * (2 * Math.PI - 2 * (g.half(y) + 0.05)); add(suit, [surf(JACKET, y, a, 0.006)]); } }
+    if (S.pants > 0) [-1, 1].forEach(s => { const n = Math.round(S.pants * 2.5); for (let i = 0; i < n; i++) add(suit, [surf(PANT, 0.06 + rnd() * 0.9, rnd() * 6.283, 0.005, y => s * LEG_X(y))]); });
+    suit.children.filter(o => o.userData.arm).forEach(arm => {
+      if (E.cuffs) add(arm, along(t => surf(SLEEVE, -0.53, t * 6.283, 0.008), gap));
+      if (S.sleeves > 0) { const n = Math.round(S.sleeves * 1.6); for (let i = 0; i < n; i++) add(arm, [surf(SLEEVE, -0.5 + rnd() * 0.48, rnd() * 6.283, 0.006)]); }
+    });
+    const q = new THREE.Quaternion(), Z = new THREE.Vector3(0, 0, 1), mtx = new THREE.Matrix4(), sc = new THREE.Vector3(R, R, R * 0.55);
+    sets.forEach((list, parent) => {
+      const inst = new THREE.InstancedMesh(gemGeo, m, list.length);
+      list.forEach((it, i) => { const n = it.n || new THREE.Vector3(0, 0, 1); q.setFromUnitVectors(Z, n); mtx.compose(it.pos.clone().addScaledVector(n, R * 0.3), q, sc); inst.setMatrixAt(i, mtx); });
+      inst.userData.stones = true; parent.add(inst);
+    });
   }
 
   // ---------- decals ----------
@@ -551,6 +642,10 @@ export function createStudio(host) {
       suit.traverse(o => { if (o.isMesh && o.userData.matKey && mats[o.userData.matKey]) o.material = mats[o.userData.matKey]; });
     },
     setImages(imgs) { images = imgs; },
+    setStones(d) {
+      D = d; const old = []; suit.traverse(o => { if (o.userData.stones) old.push(o); }); old.forEach(o => { o.parent.remove(o); o.dispose && o.dispose(); });
+      buildStones(d, lastGeo);
+    },
     refreshDecals() { rebuildDecals(); },
     updateDecal(dc) { updateDecal(dc); },
     clearDecalCache() { texCache.clear(); },
