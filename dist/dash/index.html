@@ -280,6 +280,24 @@ function render() {
   const money = x => (x == null ? '—' : Number(x).toLocaleString('en-US', { style: 'currency', currency: cur, maximumFractionDigits: Number(x) % 1 ? 2 : 0 }));
   const dfmt = (iso, opt) => new Date(iso).toLocaleString('en-US', opt);
   const shortDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); };
+  const dur = m => m == null ? '' : m >= 60 ? +(m / 60).toFixed(1) + ' hr' : m + ' min';
+  // One line per Square service; options like "2 hours … 12 hours" become a range
+  const groupServices = list => {
+    const groups = [];
+    list.forEach(s => {
+      const key = s.item || s.name;
+      let g = groups.find(x => x.key === key);
+      if (!g) groups.push(g = { key, rows: [] });
+      g.rows.push(s);
+    });
+    return groups.map(g => {
+      const prices = g.rows.filter(r => !r.variable).map(r => r.price), mins = g.rows.map(r => r.minutes).filter(x => x != null);
+      const lo = Math.min(...prices), hi = Math.max(...prices), mlo = Math.min(...mins), mhi = Math.max(...mins);
+      const price = !prices.length ? 'Varies' : lo === hi ? money(lo) : money(lo) + ' – ' + money(hi);
+      const detail = (mins.length ? (mlo === mhi ? dur(mlo) : dur(mlo) + ' to ' + dur(mhi)) : '') + (g.rows.length > 1 ? ' · ' + g.rows.length + ' options' : '');
+      return { name: g.key, detail, price, sortBy: prices.length ? lo : 1e9 };
+    }).sort((a, b) => a.sortBy - b.sortBy);
+  };
   const ext = (href, label, cls) => '<a class="' + (cls || 'btn') + '" href="' + esc(href) + '" target="_blank" rel="noopener">' + label + '</a>';
 
   const h = new Date().getHours();
@@ -410,7 +428,7 @@ function render() {
   const st = S && S.ok ? S.studio || {} : {};
   html += '<section class="section" id="studio"><div class="section__head"><h2>Studio</h2><small>' + esc(st.address || '4040 Charles St · Rockford, IL · 61108') + '</small></div><div class="g2">';
   html += '<div class="panel"><h3>Your services on Square ' + ext('https://squareup.com/appointments/services', 'Edit ↗', 'plain') + '</h3>' +
-    (st.services && st.services.length ? '<ul class="list">' + st.services.map(s => '<li><div class="main"><b>' + esc(s.name) + '</b><small>' + (s.minutes ? (s.minutes >= 60 ? +(s.minutes / 60).toFixed(1) + ' hr' : s.minutes + ' min') : '') + '</small></div><span class="val">' + (s.variable ? 'Varies' : money(s.price)) + '</span></li>').join('') + '</ul>'
+    (st.services && st.services.length ? '<ul class="list">' + groupServices(st.services).map(g => '<li><div class="main"><b>' + esc(g.name) + '</b><small>' + esc(g.detail) + '</small></div><span class="val">' + g.price + '</span></li>').join('') + '</ul>'
       : '<p class="empty">' + (S && S.ok ? 'No appointment services found in Square.' : 'Connect Square to see your services and prices.') + '</p>') + '</div>';
   const today = new Date().toLocaleDateString('en-US', { weekday: 'short' });
   html += '<div style="display:grid;gap:12px">';

@@ -227,6 +227,7 @@ function square() {
           const d = v.item_variation_data || {};
           const price = d.price_money ? d.price_money.amount / 100 : null;
           serviceList.push({
+            item: o.item_data.name, option: /^regular$/i.test(d.name || '') ? '' : (d.name || ''),
             name: o.item_data.name + (d.name && !/^regular$/i.test(d.name) && (o.item_data.variations || []).length > 1 ? ' · ' + d.name : ''),
             price, variable: d.pricing_type === 'VARIABLE_PRICING' || price == null,
             minutes: d.service_duration ? Math.round(d.service_duration / 60000) : null,
@@ -360,6 +361,9 @@ function cryptoLibs() {
   if (LIBS) return LIBS;
   const g = (0, eval)('this');
   if (!g.self) g.self = g;
+  // The Mac's script runner has no timers; the libraries only mention them for async use
+  if (typeof g.setTimeout === 'undefined') g.setTimeout = f => f();
+  if (typeof g.setImmediate === 'undefined') g.setImmediate = f => f();
   ['nacl-fast.min.js', 'scrypt.js'].forEach(f => {
     const code = readFile(here() + '/vendor/' + f);
     if (!code) throw new Error('Missing ' + f + '. Re-run the installer.');
