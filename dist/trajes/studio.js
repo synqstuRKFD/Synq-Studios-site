@@ -44,7 +44,14 @@ const ARM = profile({ rx: [[-0.62, 0.026], [-0.59, 0.03], [-0.45, 0.04], [-0.30,
 const SLEEVE_BASE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.01, 0.062], [0.025, 0.05]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.01, 0.06], [0.025, 0.048]] });
 let EASE = 0, PEASE = 0, SEASE = 0; // fit: slim (negative) to loose (positive), in meters
 const clamp01 = v => Math.max(0, Math.min(1, v));
-const JACKET = y => { const p = JACKET_BASE(y), e = EASE * clamp01((1.42 - y) / 0.08); return { rx: p.rx + e, rz: p.rz + e * 0.75, cz: p.cz, cx: p.cx }; };
+const JACKET = y => {
+  const p = JACKET_BASE(y), e = EASE * clamp01((1.42 - y) / 0.08);
+  let rx = p.rx + e, rz = p.rz + e * 0.75;
+  if (y >= 0.8 && y <= 1.36) { const t = TORSO(y); rx = Math.max(rx, t.rx + 0.016); rz = Math.max(rz, t.rz + 0.014); }
+  if (y >= 0.77 && y <= 1.06) { const st = SEAT(y); rx = Math.max(rx, st.rx + 0.016); rz = Math.max(rz, st.rz + 0.016); }
+  if (y >= 0.74 && y <= 1.0) { const lg = PANT(y); rx = Math.max(rx, LEG_X(y) + lg.rx + 0.014); }
+  return { rx, rz, cz: p.cz, cx: p.cx };
+};
 const PANT = y => { const p = PANT_BASE(y), e = PEASE * clamp01((0.98 - y) / 0.15); return { rx: p.rx + e, rz: p.rz + e, cz: p.cz, cx: p.cx }; };
 const SLEEVE = y => { const p = SLEEVE_BASE(y), e = SEASE * clamp01((0.0 - y) / 0.1); return { rx: p.rx + e, rz: p.rz + e, cz: p.cz, cx: p.cx }; };
 // every piece of the jacket on its own; old designs (style/lapel/buttons/yoke) map onto these
@@ -60,7 +67,27 @@ export function jacketCfg(d) {
 }
 const LEG_X = y => 0.094 + (0.98 - y) * 0.03; // legs spread a little toward the floor
 const SHOULDER = new THREE.Vector3(0.196, 1.4, 0.0);
-const ARM_TILT = 9 * DEG;
+const ARM_TILT = 10 * DEG;
+const ELBOW = -0.3, BEND = 0.2; // forearm swings forward a little, like a relaxed arm
+const bendAt = y => BEND * clamp01((ELBOW - y) / 0.05);
+function bendPoint(v) { const a = bendAt(v.y); if (!a) return v; const y = v.y - ELBOW, z = v.z; v.y = ELBOW + y * Math.cos(a) + z * Math.sin(a); v.z = -y * Math.sin(a) + z * Math.cos(a); return v; }
+// bends everything inside an arm group once (geometry, placed pieces and instanced stones)
+function bendArm(arm) {
+  const tmp = new THREE.Vector3(), m = new THREE.Matrix4(), pos = new THREE.Vector3(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), rq = new THREE.Quaternion(), X = new THREE.Vector3(1, 0, 0);
+  arm.children.forEach(o => {
+    if (o.userData.bent) return; o.userData.bent = true;
+    if (o.isInstancedMesh) {
+      for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, m); m.decompose(pos, q, sc); const a = bendAt(pos.y); bendPoint(pos); rq.setFromAxisAngle(X, -a); q.premultiply(rq); m.compose(pos, q, sc); o.setMatrixAt(i, m); }
+      o.instanceMatrix.needsUpdate = true; return;
+    }
+    const identity = o.position.lengthSq() === 0 && o.rotation.x === 0 && o.rotation.y === 0 && o.rotation.z === 0 && o.scale.x === 1 && o.scale.y === 1 && o.scale.z === 1;
+    if (identity && o.geometry) {
+      const p = o.geometry.attributes.position;
+      for (let i = 0; i < p.count; i++) { tmp.fromBufferAttribute(p, i); bendPoint(tmp); p.setXYZ(i, tmp.x, tmp.y, tmp.z); }
+      p.needsUpdate = true; o.geometry.computeVertexNormals(); o.geometry.computeBoundingSphere(); o.geometry.computeBoundingBox && o.geometry.computeBoundingBox();
+    } else { const a = bendAt(o.position.y); bendPoint(o.position); o.rotation.x -= a; }
+  });
+}
 
 // ---------- surface builders ----------
 // Rings stacked along y; each ring spans the angles th(y) = [from, to] (radians, 0 = +x, 90° = front).
@@ -199,7 +226,7 @@ function fabricMaps(kind) {
   } else if (kind === 'foil') {
     // crinkled mirror foil: sharp ridges in every direction
     const r1 = noise2(n, 14, 41), r2 = noise2(n, 33, 43), h = r1.map((v, k) => 1 - Math.abs(v - 0.5) * 2 + 0.5 * (1 - Math.abs(r2[k] - 0.5) * 2));
-    normal = heightToNormal(h, n, 22); tone = toneCanvas(norm01(h), n, 0.75, 1); tile = 0.22;
+    normal = heightToNormal(h, n, 9); tone = toneCanvas(norm01(h), n, 0.85, 1); tile = 0.36;
   } else if (kind === 'snake') {
     // snakeskin: offset rows of rounded scales with darker edges
     const h = new Float32Array(n * n), t = new Float32Array(n * n), S = 32, nz = noise2(n, 8, 51);
@@ -243,7 +270,7 @@ const FABRICS = {
   metal: { roughness: 0.22, metalness: 1 },
   holo: { roughness: 0.28, metalness: 0.8, iridescence: 1, normalScale: 0.9, maps: 'glitter', env: 0.75 },
   crushed: { roughness: 0.6, metalness: 0, sheen: 1, sheenRoughness: 0.3, normalScale: 0.35, sheenLift: 0.35, lift: 1.25, env: 0.6 },
-  foil: { roughness: 0.2, metalness: 0.95, normalScale: 1, iridescence: 0.35, env: 0.85 },
+  foil: { roughness: 0.24, metalness: 0.92, normalScale: 0.55, iridescence: 0.35, env: 0.85 },
   snake: { roughness: 0.45, metalness: 0.25, iridescence: 0.8, normalScale: 0.9, lift: 1.1, env: 0.6 },
   metallic: { roughness: 0.42, metalness: 0.8, normalScale: 0.6, maps: 'leather', lift: 1.05, env: 0.7 },
   quilted: { roughness: 0.62, metalness: 0, normalScale: 1, env: 0.5 },
@@ -322,10 +349,11 @@ function decalCanvas(img, tech, opts) {
   const c = canvas(N), x = c.getContext('2d');
   const ox = (N - w) / 2, oy = (N - h) / 2;
   if (tech === 'patch') {
-    const pad = N * 0.08, r = N * 0.08;
+    const pad = Math.min(w, h) * 0.16, r = Math.min(w, h) * 0.22;
     x.fillStyle = opts.patchColor || '#111'; roundRect(x, ox + 4, oy + 4, w - 8, h - 8, r); x.fill();
     x.drawImage(img, ox + pad, oy + pad, w - pad * 2, h - pad * 2);
-    x.strokeStyle = opts.threadColor || '#d4a63c'; x.lineWidth = 6; x.setLineDash([14, 8]); roundRect(x, ox + 16, oy + 16, w - 32, h - 32, r * 0.8); x.stroke();
+    const inset = Math.min(w, h) * 0.06;
+    x.strokeStyle = opts.threadColor || '#d4a63c'; x.lineWidth = 6; x.setLineDash([14, 8]); roundRect(x, ox + inset, oy + inset, w - inset * 2, h - inset * 2, r * 0.8); x.stroke();
     return { map: c };
   }
   x.drawImage(img, ox, oy, w, h);
@@ -459,7 +487,7 @@ export function createStudio(host) {
       const inside = new THREE.MeshBasicMaterial({ color: 0x0d0b0a, side: THREE.DoubleSide });
       const nk = add(new THREE.CircleGeometry(1, 40), inside); nk.scale.set(0.066, 0.06, 1); nk.rotation.x = -Math.PI / 2; nk.position.set(0, 1.497, -0.006);
       [-1, 1].forEach(s => { const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
-        const c = add(new THREE.CircleGeometry(1, 32), inside, arm); c.scale.set(0.046, 0.044, 1); c.rotation.x = Math.PI / 2; c.position.set(0, -0.598, 0); });
+        const c = add(new THREE.CircleGeometry(1, 32), inside, arm); c.scale.set(0.046, 0.044, 1); c.rotation.x = Math.PI / 2; c.position.set(0, -0.598, 0); bendArm(arm); });
       return;
     }
     add(rings(TORSO, 1.36, 1.5, full, -0.004, 64, 12), skin);
@@ -484,7 +512,11 @@ export function createStudio(host) {
     [-1, 1].forEach(s => {
       const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
       add(rings(ARM, -0.62, -0.52, full, 0, 40, 10), skin, arm);
-      const hand = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); hand.scale.set(0.02, 0.074, 0.032); hand.position.set(0, -0.67, 0.01); hand.rotation.x = -0.12;
+      // hand: palm, softly curled fingers and a thumb, turned toward the leg
+      const palm = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); palm.scale.set(0.018, 0.048, 0.036); palm.position.set(0, -0.655, 0.004);
+      const fing = add(new THREE.CapsuleGeometry(1, 1.2, 8, 16), skin, arm); fing.scale.set(0.014, 0.024, 0.031); fing.position.set(-0.002, -0.71, 0.012); fing.rotation.x = -0.28;
+      const thumb = add(new THREE.CapsuleGeometry(1, 2.2, 6, 12), skin, arm); thumb.scale.set(0.0075, 0.0095, 0.0075); thumb.position.set(-0.012, -0.665, 0.03); thumb.rotation.set(-0.55, 0, 0.35);
+      arm.scale.x = s; bendArm(arm);
     });
   }
   buildMannequin('carved');
@@ -701,8 +733,8 @@ export function createStudio(host) {
       [0, Math.PI].forEach(c => put(patch(JACKET, c - 0.95, c + 0.95, () => [1.355, 1.5], 0.0016, 60, 16, null, FOLD.jacket), mat('panel'), 'body'));
       suit.children.filter(o => o.userData.arm).forEach(arm => put(rings(SLEEVE, -0.2, 0.032, full, 0.0016, 72, 40, null, FOLD.sleeve), mat('panel'), 'sleeves', arm));
     }
-    if (pan.sides && mat('panel')) [0, Math.PI].forEach(c => put(patch(JACKET, c - 0.38, c + 0.38, () => [hem + (rib ? 0.055 : 0.002), 1.34], 0.0016, 30, 80, null, FOLD.jacket), mat('panel'), 'body'));
-    if (pan.legs && mat('panel')) [-1, 1].forEach(s => { const outer = s > 0 ? 0 : Math.PI; put(patch(PANT, outer - 0.5, outer + 0.5, () => [0.04, 0.99], 0.0018, 30, 160, y => s * LEG_X(y), FOLD.pant), mat('panel'), 'pants'); });
+    if (pan.sides && mat('panel')) [0, Math.PI].forEach(c => put(patch(JACKET, c - (pan.sideWidth || 0.38), c + (pan.sideWidth || 0.38), () => [hem + (rib ? 0.055 : 0.002), 1.34], 0.0016, 30, 80, null, FOLD.jacket), mat('panel'), 'body'));
+    if (pan.legs && mat('panel')) [-1, 1].forEach(s => { const outer = s > 0 ? 0 : Math.PI; put(patch(PANT, outer - (pan.legWidth || 0.5), outer + (pan.legWidth || 0.5), () => [0.04, 0.99], 0.0018, 30, 160, y => s * LEG_X(y), FOLD.pant), mat('panel'), 'pants'); });
 
     // ---- piping: a thin raised cord along the seams
     const pp = d.piping;
@@ -729,6 +761,7 @@ export function createStudio(host) {
 
     lastGeo = { hem, half, brk, open, lapelEdges };
     buildStones(d, lastGeo);
+    suit.children.filter(o => o.userData.arm).forEach(bendArm);
     built = true;
     rebuildDecals();
   }
@@ -812,7 +845,8 @@ export function createStudio(host) {
     const n = hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize();
     const helper = new THREE.Object3D(); helper.position.copy(hit.point); helper.lookAt(hit.point.clone().add(n)); helper.rotateZ((dc.rot || 0) * DEG);
     const img = images[dc.imageId]; const ar = img ? img.width / img.height : 1;
-    const size = new THREE.Vector3(dc.size * (ar >= 1 ? 1 : ar), dc.size / (ar >= 1 ? ar : 1), Math.max(0.12, dc.size * 0.8));
+    // the decal picture is a square canvas with the logo centered, so project a square box
+    const size = new THREE.Vector3(dc.size, dc.size, Math.max(0.12, dc.size * 0.8));
     const m = decalMaterial(dc); if (!m) return null;
     const g = new DecalGeometry(hit.object, hit.point, helper.rotation, size);
     const mesh = new THREE.Mesh(g, m); mesh.renderOrder = 2; mesh.userData.decalId = dc.id; mesh.castShadow = false;
@@ -910,6 +944,7 @@ export function createStudio(host) {
     setStones(d) {
       D = d; const old = []; suit.traverse(o => { if (o.userData.stones) old.push(o); }); old.forEach(o => { o.parent.remove(o); o.dispose && o.dispose(); });
       buildStones(d, lastGeo);
+      suit.children.filter(o => o.userData.arm).forEach(bendArm);
     },
     refreshDecals() { rebuildDecals(); },
     updateDecal(dc) { updateDecal(dc); },

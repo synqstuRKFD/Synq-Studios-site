@@ -9,7 +9,7 @@ const T = {
     scatter: 'Piedras sueltas', scatterHelp: 'Piedras regadas por la tela, como en los trajes de gala.', sBody: 'En el saco', sSleeves: 'En las mangas', sPants: 'En el pantalón', gemSize: 'Tamaño de piedra',
     gCrystal: 'Cristal', gAb: 'Tornasol (AB)', gGold: 'Oro', gSilver: 'Plata', gJet: 'Negro azabache', gRed: 'Rojo', gBlue: 'Azul', gPink: 'Rosa', gGreen: 'Verde',
     patterns: 'Diseños de estampado', patColor: 'Color del diseño', orLogo: 'O usa tu logo', patTribal: 'Tribal', patDamasco: 'Damasco', patLlamas: 'Llamas', patZebra: 'Cebra', patEstrellas: 'Estrellas',
-    pPanel: 'Paneles', pPiping: 'Vivos', panels: 'Paneles de contraste', panelsHelp: 'Piezas de otra tela, como en los trajes estilo moto o de carrera.', panShoulders: 'Hombros', panSides: 'Costados del saco', panLegs: 'Costados del pantalón',
+    pPanel: 'Paneles', pPiping: 'Vivos', panels: 'Paneles de contraste', panelsHelp: 'Piezas de otra tela, como en los trajes estilo moto o de carrera.', panShoulders: 'Hombros', panSides: 'Franja lateral del saco', panLegs: 'Franja lateral del pantalón', stripeWidth: 'Ancho de la franja', quick: 'Ponlo rápido en', spBack: 'Espalda', spChestL: 'Pecho izq.', spChestR: 'Pecho der.', spArmL: 'Brazo izq.', spArmR: 'Brazo der.', spLegL: 'Pierna izq.', spLegR: 'Pierna der.', orTap: 'o toca el traje donde quieras', toJacket: 'Usar en todo el saco', toPants: 'Usar en el pantalón', topBottom: 'Arriba y abajo',
     piping: 'Vivos (cordón en las costuras)', pipOn: 'Ponerle vivos', pipSides: 'Costuras de los lados', pipRacing: 'Líneas curvas (estilo carrera)', pipLapels: 'Orilla de las solapas', pipFront: 'Orilla del cierre', pipPants: 'Pantalón', pipSleeves: 'Mangas', pipCuffs: 'Puños', pipSize: 'Grosor',
     fMetallic: 'Piel metálica', fCrushed: 'Terciopelo arrugado', fFoil: 'Foil espejo', fSnake: 'Piel de víbora', fQuilted: 'Acolchado',
     bright: 'Brillo', recent: 'Recientes', quick: 'Colores rápidos', pickScreen: 'Tomar color de la pantalla',
@@ -54,7 +54,7 @@ const T = {
     scatter: 'Sprinkled stones', scatterHelp: 'Single stones spread over the fabric, like on gala suits.', sBody: 'On the jacket', sSleeves: 'On the sleeves', sPants: 'On the pants', gemSize: 'Stone size',
     gCrystal: 'Crystal', gAb: 'Iridescent (AB)', gGold: 'Gold', gSilver: 'Silver', gJet: 'Jet black', gRed: 'Red', gBlue: 'Blue', gPink: 'Pink', gGreen: 'Green',
     patterns: 'Print patterns', patColor: 'Pattern color', orLogo: 'Or use your logo', patTribal: 'Tribal', patDamasco: 'Damask', patLlamas: 'Flames', patZebra: 'Zebra', patEstrellas: 'Stars',
-    pPanel: 'Panels', pPiping: 'Piping', panels: 'Contrast panels', panelsHelp: 'Pieces in a second fabric, like moto or racing-style suits.', panShoulders: 'Shoulders', panSides: 'Jacket sides', panLegs: 'Pant sides',
+    pPanel: 'Panels', pPiping: 'Piping', panels: 'Contrast panels', panelsHelp: 'Pieces in a second fabric, like moto or racing-style suits.', panShoulders: 'Shoulders', panSides: 'Jacket side stripe', panLegs: 'Pant side stripe', stripeWidth: 'Stripe width', quick: 'Quick place on', spBack: 'Back', spChestL: 'Left chest', spChestR: 'Right chest', spArmL: 'Left arm', spArmR: 'Right arm', spLegL: 'Left leg', spLegR: 'Right leg', orTap: 'or tap the suit anywhere', toJacket: 'Use on the whole jacket', toPants: 'Use on the pants', topBottom: 'Top and bottom',
     piping: 'Piping (cord along the seams)', pipOn: 'Add piping', pipSides: 'Side seams', pipRacing: 'Curved lines (racing style)', pipLapels: 'Lapel edges', pipFront: 'Zipper edges', pipPants: 'Pants', pipSleeves: 'Sleeves', pipCuffs: 'Cuffs', pipSize: 'Thickness',
     fMetallic: 'Metallic leather', fCrushed: 'Crushed velvet', fFoil: 'Mirror foil', fSnake: 'Snakeskin', fQuilted: 'Quilted',
     bright: 'Brightness', recent: 'Recent', quick: 'Quick colors', pickScreen: 'Pick a color from the screen',
@@ -129,6 +129,7 @@ const BASE = {
 };
 function look(name, over, parts) { const d = clone(BASE); Object.assign(d, over); Object.keys(parts || {}).forEach(k => { d.parts[k] = parts[k]; }); d.name = name; return d; }
 const all = (f, c) => ({ body: P(f, c), sleeves: P(f, c), pants: P(f, c) });
+const tid = spec => 't:' + btoa(unescape(encodeURIComponent(JSON.stringify(spec)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 const PRESETS = [
   look('Terciopelo vino', {}, {}),
   look('Satín negro y rojo', { style: 'bomber', hat: true, stripes: 'one', sleeveStripes: true, hardware: 'silver' }, Object.assign(all('satin', '#111111'), { collar: P('wool', '#111111'), cuffs: P('wool', '#111111'), stripes: P('satin', '#c4121f'), hat: P('suede', '#f5f5f2') })),
@@ -161,6 +162,18 @@ const PRESETS = [
     Object.assign(all('holo', '#141826'), { sleeves: P('sequin', '#6a2fd6'), collar: P('satin', '#111111'), cuffs: P('satin', '#111111'), hat: P('suede', '#111111') })),
   look('Víbora tornasol', { style: 'blazer', lapel: 'notch', stripes: 'none', neckwear: 'none', hat: false, hardware: 'silver' },
     Object.assign(all('snake', '#efe9f2'), { collar: P('snake', '#efe9f2'), cuffs: P('snake', '#efe9f2'), shirt: P('satin', '#111111') })),
+  look('Verde con franja negra', { style: 'bomber', stripes: 'none', hat: true, hardware: 'silver', panels: { shoulders: false, sides: true, legs: true, sideWidth: 0.5, legWidth: 0.45 },
+    decals: [{ id: 'v1', imageId: tid({ text: 'TU GRUPO', font: 'block', fill: '#18a85a', outline: '#111111' }), tech: 'patch', point: [0, 1.27, -0.25], normal: [0, 0, -1], part: 'body', size: 0.36, rot: 0, patchColor: '#f5f5f2', threadColor: '#111111' }] },
+    Object.assign(all('foil', '#18a85a'), { panel: P('wool', '#111111'), collar: P('wool', '#111111'), cuffs: P('wool', '#111111'), hat: P('suede', '#f5f5f2') })),
+  look('Terciopelo negro y rojo', { style: 'bomber', stripes: 'none', hat: false, hardware: 'gold',
+    piping: Object.assign(clone(BASE.piping), { on: true, sides: true, sleeves: true, pants: true }),
+    stones: { color: 'crystal', size: 0.003, edges: { lapels: false, front: false, cuffs: false, pockets: false, stripes: false, hem: false }, scatter: { body: 12, sleeves: 8, pants: 6 } },
+    decals: [{ id: 'n1', imageId: tid({ text: 'Tu Grupo', font: 'gothic', fill: '#c4121f', outline: 'none' }), tech: 'embroidery', point: [0.09, 1.3, 0.2], normal: [0.3, 0, 1], part: 'body', size: 0.16, rot: 0 },
+      { id: 'n2', imageId: tid({ text: 'Tu Grupo', font: 'gothic', fill: '#c4121f', outline: 'none' }), tech: 'embroidery', point: [-0.32, 1.23, 0], normal: [-1, 0, 0], part: 'sleeves', size: 0.14, rot: 90 },
+      { id: 'n3', imageId: tid({ text: 'Tu Grupo', font: 'gothic', fill: '#c4121f', outline: 'none' }), tech: 'embroidery', point: [0.13, 0.7, 0.15], normal: [0.35, 0, 1], part: 'pants', size: 0.16, rot: 0 }] },
+    Object.assign(all('crushed', '#1a1a1c'), { collar: P('crushed', '#1a1a1c'), cuffs: P('crushed', '#1a1a1c'), piping: P('satin', '#c4121f') })),
+  look('Dos tonos azul y blanco', { style: 'blazer', lapel: 'notch', stripes: 'one', neckwear: 'none', hat: true, hardware: 'silver' },
+    Object.assign(all('satin', '#1a8fd6'), { pants: P('satin', '#f5f5f2'), stripes: P('satin', '#1a8fd6'), collar: P('satin', '#f5f5f2'), cuffs: P('satin', '#1a8fd6'), shirt: P('satin', '#111111'), hat: P('suede', '#f5f5f2') })),
   look('Vaquero arena', { style: 'western', yoke: true, stripes: 'none', hat: true, hardware: 'gold' }, Object.assign(all('suede', '#c9ab7c'), { collar: P('suede', '#4a2e1c'), cuffs: P('suede', '#4a2e1c'), hat: P('suede', '#e9dcc6'), shoes: P('suede', '#4a2e1c') })),
 ];
 
@@ -269,7 +282,7 @@ let D;
 })();
 
 // images the suit can use: uploads (saved in the design), ready-made designs and lettering (made on the fly)
-const IMG = {};
+const IMG = {}; window.__IMG = IMG; // (handy for debugging)
 async function ensureImages() {
   const ids = new Set(Object.keys(D.images));
   D.decals.forEach(dc => ids.add(dc.imageId)); if (D.print && D.print.imageId) ids.add(D.print.imageId);
@@ -387,6 +400,27 @@ function thumb(id, pressed, onClick, onRemove) {
   if (onRemove) { const x = h('span', { class: 'x', role: 'button', 'aria-label': t('del'), on: { click: e => { e.stopPropagation(); onRemove(); } } }, ['×']); b.appendChild(x); }
   return b;
 }
+
+// ---------- quick spots (wearer's left = +x) ----------
+const SPOTS = [
+  ['back', 'spBack', [0, 1.27, -0.25], [0, 0, -1], 0.3, 'embroidery', 'body'],
+  ['chestL', 'spChestL', [0.09, 1.3, 0.2], [0.3, 0, 1], 0.1, 'patch', 'body'],
+  ['chestR', 'spChestR', [-0.09, 1.3, 0.2], [-0.3, 0, 1], 0.1, 'patch', 'body'],
+  ['armL', 'spArmL', [0.32, 1.23, 0.0], [1, 0, 0], 0.085, 'patch', 'sleeves'],
+  ['armR', 'spArmR', [-0.32, 1.23, 0.0], [-1, 0, 0], 0.085, 'patch', 'sleeves'],
+  ['legL', 'spLegL', [0.13, 0.7, 0.15], [0.35, 0, 1], 0.11, 'patch', 'pants'],
+  ['legR', 'spLegR', [-0.13, 0.7, 0.15], [-0.35, 0, 1], 0.11, 'patch', 'pants'],
+];
+function quickPlace(imageId, spot) {
+  const [, , point, normal, size, tech, part] = SPOTS.find(x => x[0] === spot);
+  const img = IMG[imageId], ar = img ? img.width / img.height : 1;
+  const dc = { id: uid(), imageId, tech: imageId.startsWith('m:') && tech === 'patch' ? 'embroidery' : tech, point, normal, part, size: ar > 2.5 ? Math.min(0.4, size * 1.6) : size, rot: spot.startsWith('arm') && ar > 2.5 ? 90 : 0, patchColor: '#111111', threadColor: '#d4a63c' };
+  D.decals.push(dc); selectedDecal = dc.id; studio.updateDecal(dc); persist();
+  studio.view(spot === 'back' ? 'back' : spot.endsWith('L') && spot.startsWith('arm') ? 'left' : spot.endsWith('R') && spot.startsWith('arm') ? 'right' : 'front');
+  buildPane('logos'); toast(t('placedOk')); count('trajes-place', 'Placed an image on the suit');
+}
+const spotButtons = id => h('div', {}, [h('div', { class: 'acc__label' }, [t('quick')]), h('div', { class: 'opts' }, SPOTS.map(([k, l]) => h('button', { type: 'button', class: 'opt', on: { click: () => quickPlace(id, k) } }, [t(l)]))),
+  h('div', { class: 'row' }, [h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => startPlacing(id) } }, ['✋ ' + t('orTap')])])]);
 
 // ---------- placing images on the suit ----------
 let selectedImage = null, selectedDecal = null, placing = false;
@@ -514,6 +548,8 @@ const PANES = {
       toggle(t('hatShow'), D.hat, v => shape(d => { d.hat = v; })),
     ]);
     const panels = sec(t('secPanels'), [h('p', { class: 'hint' }, [t('panelsHelp')])].concat([['shoulders', 'panShoulders'], ['sides', 'panSides'], ['legs', 'panLegs']].map(([key, l]) => toggle(t(l), D.panels[key], v => shape(d => { d.panels[key] = v; })))).concat([
+      D.panels.sides ? slider(t('stripeWidth') + ' · ' + t('secJacket'), 4, 30, 1, Math.round((D.panels.sideWidth || 0.38) * 38), x => x + ' cm', (x, live) => { if (!live) shape(d => { d.panels.sideWidth = x / 38; }); }) : null,
+      D.panels.legs ? slider(t('stripeWidth') + ' · ' + t('secPants'), 2, 16, 1, Math.round((D.panels.legWidth || 0.5) * 16), x => x + ' cm', (x, live) => { if (!live) shape(d => { d.panels.legWidth = x / 16; }); }) : null,
       h('button', { type: 'button', class: 'btn btn--ghost btn--sm', style: 'margin-top:8px', on: { click: () => { zone = 'panel'; current = 'fabric'; buildTabs(); buildPane('fabric'); } } }, [t('fabric') + ' / ' + t('color') + ' →'])]));
     const pp = D.piping, pipOpts = [['sides', 'pipSides'], ['racing', 'pipRacing'], ['lapels', 'pipLapels'], ['front', 'pipFront'], ['sleeves', 'pipSleeves'], ['cuffs', 'pipCuffs'], ['pants', 'pipPants']]
       .filter(([key]) => !(key === 'lapels' && !lapel) && !(key === 'front' && lapel));
@@ -535,6 +571,10 @@ const PANES = {
     return [group(t('part'), [zones]),
       group(t('fabric') + ' · ' + label, [opts(FABRICS.map(([f, l]) => [f, t(l)]), D.parts[zone].fabric, v => color(d => { d.parts[zone].fabric = v; }))]),
       group(t('color') + ' · ' + label, [colorWheel(D.parts[zone].color, (v, live) => color(d => { d.parts[zone].color = v; }, !live)), h('div', { class: 'hint', style: 'margin:12px 0 4px' }, [t('refColors')]), h('div', { class: 'mini' }, REF_COLORS.map(([c, n]) => h('button', { type: 'button', class: 'sw', title: n, 'aria-label': n, style: 'background:' + c, on: { click: () => { remember(c); color(d => { d.parts[zone].color = c; }); } } }))), h('div', { class: 'hint', style: 'margin:12px 0 4px' }, [t('quick')]), swatches(D.parts[zone].color, v => { remember(v); color(d => { d.parts[zone].color = v; }); }, true)]),
+      ['body', 'sleeves', 'pants', 'collar', 'cuffs', 'panel'].includes(zone) ? h('div', { class: 'acc__label' }, [t('topBottom')]) : null,
+      ['body', 'sleeves', 'pants', 'collar', 'cuffs', 'panel'].includes(zone) ? h('div', { class: 'row' }, [
+        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => color(d => { ['body', 'sleeves'].forEach(k => { d.parts[k] = clone(d.parts[zone]); }); }) } }, [t('toJacket')]),
+        h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => color(d => { d.parts.pants = clone(d.parts[zone]); }) } }, [t('toPants')])]) : null,
       ['body', 'sleeves', 'pants'].includes(zone) ? h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: () => color(d => { ['body', 'sleeves', 'pants'].forEach(k => { d.parts[k] = clone(d.parts[zone]); }); }) } }, [t('applyAll')]) : null];
   },
   stones() {
@@ -557,7 +597,7 @@ const PANES = {
       kids.push(group(t('yourImages'), [h('div', { class: 'gallery' }, mine.map(id => thumb(id, id === selectedImage, () => { selectedImage = id; buildPane('logos'); },
         () => { delete D.images[id]; delete IMG[id]; D.decals = D.decals.filter(dc => dc.imageId !== id); if (D.print && D.print.imageId === id) D.print = null; persist(); rebuild(); buildPane('logos'); }))),
         selectedImage && D.images[selectedImage] ? h('div', { class: 'row' }, [
-          h('button', { type: 'button', class: 'btn btn--sm', on: { click: () => startPlacing(selectedImage) } }, [t('placeIt')]),
+          spotButtons(selectedImage),
           h('button', { type: 'button', class: 'btn btn--ghost btn--sm', on: { click: async () => { const id = selectedImage; D.images[id] = await removeBackground(D.images[id]); IMG[id] = await loadImage(D.images[id]); studio.clearDecalCache(); rebuild(); buildPane('logos'); } } }, [t('removeBg')]),
         ]) : null]));
     }
@@ -566,8 +606,8 @@ const PANES = {
     Object.keys(MOTIFS).forEach(name => ['gold', 'silver'].forEach(col => ready.push('m:' + name + ':' + col)));
     kids.push(group(t('designs'), [h('div', { class: 'gallery' }, ready.map(id => {
       if (!IMG[id]) { const [, name, col] = id.split(':'); const i = new Image(); i.src = motifImage(name, col); IMG[id] = i; }
-      return thumb(id, id === selectedImage, () => { selectedImage = id; startPlacing(id); });
-    }))]));
+      return thumb(id, id === selectedImage, () => { selectedImage = id; buildPane('logos'); });
+    })), selectedImage && selectedImage.startsWith('m:') ? spotButtons(selectedImage) : null]));
     // what's on the suit
     const list = D.decals.map(dc => {
       const card = h('div', { class: 'placed', 'data-id': dc.id, 'aria-current': String(dc.id === selectedDecal), on: { click: e => { if (e.target.closest('button, input')) return; selectedDecal = dc.id; markSelected(); faceDecal(dc); } } });
