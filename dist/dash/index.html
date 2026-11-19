@@ -143,7 +143,9 @@
   .social__icon { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: .8rem; color: #fff; flex: 0 0 auto; }
   .social__head b { display: block; font-size: 1rem; }
   .social__head small { color: var(--dim); }
-  .social__nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .social__nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .social__nums div { min-width: 0; }
+  .social__nums small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .social__nums div { background: rgba(255, 255, 255, .03); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
   .social__nums b { display: block; font: 400 1.5rem/1.1 var(--display); }
   .social__nums small { color: var(--dim); font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
@@ -160,12 +162,15 @@
   .quick { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
 
   footer { margin-top: 46px; color: var(--dim); font-size: .8rem; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  .sm { display: none; }
+  @media (max-width: 380px) { .lg { display: none; } .sm { display: inline; } }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
   /* unlock screen (phone) */
-  .lock { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 24px; background: radial-gradient(600px 400px at 50% 20%, rgba(255, 59, 31, .22), transparent 70%), var(--bg); }
+  .lock { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom)); background: radial-gradient(600px 400px at 50% 20%, rgba(255, 59, 31, .22), transparent 70%), var(--bg); }
   .lock[hidden] { display: none; }
-  .lock__box { width: 100%; max-width: 360px; text-align: center; }
+  .lock__box { width: 100%; max-width: 360px; text-align: center; margin: auto; }
+  @media (max-height: 520px) { .lock__box .logo3d { display: none; } .lock__box h2 { margin-top: 0; } .lock__box p { margin-bottom: 12px; } }
   .lock__box .logo3d { margin: 0 auto 18px; width: 110px; height: 136px; }
   .lock__box h2 { font: 400 1.9rem/1 var(--display); text-transform: uppercase; margin: 0 0 6px; }
   .lock__box h2 span { color: var(--accent); }
@@ -186,7 +191,13 @@
   @media (max-width: 640px) {
     body { font-size: 14px; }
     .top__in { padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); gap: 10px; }
-    .top__mark, .clock, .dot span { display: none; }
+    .top__mark, .clock, .status { display: none; }
+    .tabs { -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-right: 24px; }
+    .section__head { flex-direction: column; gap: 4px; }
+    .social__nums { gap: 6px; }
+    .social__nums div { padding: 8px 9px; }
+    .social__nums small { font-size: .7rem; letter-spacing: 0; text-transform: none; }
+    .flag { display: block; margin: 2px 0 0; }
     .tabs { margin-left: 0; }
     .status { gap: 8px; }
     .wrap { padding: 0 14px calc(40px + env(safe-area-inset-bottom)); }
@@ -412,7 +423,7 @@ function render() {
 
   html += '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:#e3241b">▶</div><div><b>@SynqStudios</b><small>YouTube</small></div></div>';
   if (Y && Y.ok) {
-    html += '<div class="social__nums"><div><b>' + compact(Y.views) + '</b><small>Views</small></div><div><b>' + n(Y.subs) + '</b><small>Subscribers</small></div><div><b>' + n(Y.videoCount) + '</b><small>Videos</small></div></div>' +
+    html += '<div class="social__nums"><div><b>' + compact(Y.views) + '</b><small>Views</small></div><div><b>' + n(Y.subs) + '</b><small><span class="lg">Subscribers</span><span class="sm">Subs</span></small></div><div><b>' + n(Y.videoCount) + '</b><small>Videos</small></div></div>' +
       '<p class="empty">' + (Y.viewsWeek == null ? 'Weekly growth starts counting ' + shortDay(Y.since) + '.' : '+' + n(Y.viewsWeek) + ' views this week' + (Y.viewsMonth != null ? ' · +' + n(Y.viewsMonth) + ' in 30 days' : '') + '.') + '</p>';
     if (Y.videos.length) html += '<ul class="list">' + Y.videos.slice(0, 4).map(v => '<li><div class="main"><b><a href="' + esc(v.url) + '" style="text-decoration:none">' + esc(v.title) + '</a></b><small>' + dfmt(v.at, { month: 'short', day: 'numeric', year: 'numeric' }) + '</small></div><span class="val">' + n(v.views) + '</span></li>').join('') + '</ul>';
   } else html += '<p class="empty">' + (Y && Y.missing ? 'Add YOUTUBE_API_KEY to your .env file.' : esc(Y && Y.error)) + '</p>';
@@ -499,6 +510,12 @@ const spy = () => {
   ['overview', 'money', 'website', 'socials', 'studio', 'phone'].forEach(id => { const el = document.getElementById(id); if (el && el.getBoundingClientRect().top < 140) current = id; });
   if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) current = 'phone';
   links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + current));
+  // keep the highlighted tab visible in the swipeable tab row (phones)
+  const on = document.querySelector('.tabs a.on'), row = document.querySelector('.tabs');
+  if (on && row && row.scrollWidth > row.clientWidth) {
+    const l = on.offsetLeft - row.offsetLeft, r = l + on.offsetWidth;
+    if (l < row.scrollLeft || r > row.scrollLeft + row.clientWidth - 24) row.scrollTo({ left: Math.max(0, l - 12), behavior: 'smooth' });
+  }
 };
 addEventListener('scroll', spy, { passive: true });
 
