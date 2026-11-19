@@ -29,7 +29,7 @@ const TORSO = profile({
   cz: [[0.80, -0.01], [0.98, -0.012], [1.08, 0.0], [1.25, 0.016], [1.36, 0.016], [1.45, 0.0], [1.50, -0.01]],
 });
 const JACKET = profile({ // the jacket body: torso plus ease, continuing down over the hips
-  rx: [[0.76, 0.204], [0.86, 0.196], [0.98, 0.188], [1.08, 0.176], [1.20, 0.184], [1.32, 0.194], [1.39, 0.202], [1.43, 0.185], [1.465, 0.125], [1.50, 0.072]],
+  rx: [[0.76, 0.204], [0.86, 0.196], [0.98, 0.188], [1.08, 0.176], [1.20, 0.184], [1.32, 0.196], [1.395, 0.206], [1.42, 0.204], [1.44, 0.18], [1.465, 0.13], [1.50, 0.072]],
   rz: [[0.76, 0.142], [0.86, 0.138], [0.98, 0.134], [1.08, 0.124], [1.20, 0.134], [1.32, 0.138], [1.40, 0.124], [1.445, 0.1], [1.475, 0.078], [1.50, 0.066]],
   cz: [[0.76, -0.004], [0.98, -0.008], [1.08, 0.004], [1.25, 0.02], [1.36, 0.02], [1.45, 0.002], [1.50, -0.01]],
 });
@@ -37,9 +37,9 @@ const SEAT = profile({ rx: [[0.77, 0.03], [0.785, 0.1], [0.82, 0.13], [0.85, 0.1
 const LEG = profile({ rx: [[0.04, 0.034], [0.10, 0.036], [0.30, 0.05], [0.47, 0.056], [0.56, 0.052], [0.75, 0.072], [0.92, 0.086], [0.98, 0.09]], rz: [[0.04, 0.038], [0.10, 0.04], [0.30, 0.054], [0.47, 0.06], [0.56, 0.054], [0.75, 0.076], [0.92, 0.088], [0.98, 0.09]] });
 const PANT = profile({ rx: [[0.035, 0.066], [0.12, 0.062], [0.30, 0.064], [0.50, 0.068], [0.75, 0.086], [0.92, 0.1], [1.0, 0.104]], rz: [[0.035, 0.072], [0.12, 0.068], [0.30, 0.068], [0.50, 0.072], [0.75, 0.088], [0.92, 0.102], [1.0, 0.106]] });
 const ARM = profile({ rx: [[-0.62, 0.026], [-0.59, 0.03], [-0.45, 0.04], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.05], [0.0, 0.054], [0.03, 0.04]], rz: [[-0.62, 0.022], [-0.59, 0.026], [-0.45, 0.038], [-0.30, 0.04], [-0.27, 0.042], [-0.12, 0.048], [0.0, 0.05], [0.03, 0.04]] });
-const SLEEVE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.015, 0.052], [0.032, 0.025]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.015, 0.05], [0.032, 0.025]] });
+const SLEEVE = profile({ rx: [[-0.61, 0.05], [-0.45, 0.054], [-0.28, 0.06], [-0.10, 0.067], [-0.02, 0.066], [0.01, 0.062], [0.025, 0.05]], rz: [[-0.61, 0.048], [-0.45, 0.052], [-0.28, 0.058], [-0.10, 0.065], [-0.02, 0.064], [0.01, 0.06], [0.025, 0.048]] });
 const LEG_X = y => 0.094 + (0.98 - y) * 0.03; // legs spread a little toward the floor
-const SHOULDER = new THREE.Vector3(0.19, 1.395, 0.0);
+const SHOULDER = new THREE.Vector3(0.196, 1.4, 0.0);
 const ARM_TILT = 9 * DEG;
 
 // ---------- surface builders ----------
@@ -423,7 +423,7 @@ export function createStudio(host) {
     const put = (g, m, part, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; mesh.userData.part = part; mesh.userData.matKey = Object.keys(mats).find(k => mats[k] === m); (parent || suit).add(mesh); if (part) pickables.push(mesh); return mesh; };
     const style = d.style; // blazer | bomber | varsity | western
     const lapelEdges = [];
-    const hem = { blazer: 0.78, bomber: 0.93, varsity: 0.93, western: 0.97 }[style] || 0.8;
+    const hem = { blazer: 0.78, bomber: 0.86, varsity: 0.86, western: 0.9 }[style] || 0.8;
     const rib = style === 'bomber' || style === 'varsity';
     const open = style === 'blazer';
     const brk = d.lapel === 'shawl' ? 1.1 : 1.14;
@@ -432,25 +432,41 @@ export function createStudio(host) {
       y > brk ? 0.62 * Math.pow((y - brk) / (1.5 - brk), 0.85) : y < hem + 0.1 ? 0.22 * Math.pow((hem + 0.1 - y) / 0.1, 1.6) : 0.003;
     const th = y => [FRONT + half(y), FRONT + 2 * Math.PI - half(y)];
 
+    const on = (prof, y, a, off, xAt, fold) => { const p = prof(y), o = off + (fold ? fold(y, a) : 0), cx = (xAt ? xAt(y) : 0) + p.cx; return new THREE.Vector3(cx + (p.rx + o) * Math.cos(a), y, p.cz + (p.rz + o) * Math.sin(a)); };
+    const cord = (fn, steps, m, r, parent, closed) => { const pts = []; for (let i = 0; i <= steps; i++) pts.push(fn(i / steps)); put(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, !!closed), steps * 2, r, 8, !!closed), m, null, parent); };
+    // seam lines: a thin darker groove, so the suit reads as sewn panels
+    const seamMat = new THREE.MeshStandardMaterial({ color: 0x000000, transparent: true, opacity: 0.42, roughness: 1, depthWrite: false });
+
     // shirt + pants underneath
     put(rings(TORSO, 1.0, 1.5, full, 0.006, 64, 30), mat('shirt'), null);
     put(rings(SEAT, 0.77, 1.06, full, 0.006, 64, 26), mat('pants'), 'pants');
     [-1, 1].forEach(s => {
       put(rings(PANT, 0.035, 1.0, full, 0, 96, 160, y => s * LEG_X(y), FOLD.pant), mat('pants'), 'pants');
+      cord(t => on(PANT, 0.04 + 0.86 * t, FRONT, 0.0012, y => s * LEG_X(y), FOLD.pant), 80, seamMat, 0.0008); // front crease
+      cord(t => on(PANT, 0.036, t * Math.PI * 2, 0.002, y => s * LEG_X(y)), 64, mat('pants'), 0.003, null, true); // hem
       const outer = s > 0 ? 0 : Math.PI;
       if (d.stripes !== 'none') {
         const w = d.stripes === 'two' ? 0.006 : 0.012, offs = d.stripes === 'two' ? [-0.012, 0.012] : [0];
         offs.forEach(o => { const a = outer + o / 0.08; put(patch(PANT, a - w / 0.08, a + w / 0.08, () => [0.04, 0.99], 0.0025, 6, 160, y => s * LEG_X(y), FOLD.pant), mat('stripes'), 'pants'); });
       }
-      // boots
-      const boot = put(new THREE.SphereGeometry(1, 40, 24), mat('shoes'), null);
-      boot.scale.set(0.05, 0.045, 0.135); boot.position.set(s * LEG_X(0.04), 0.045, 0.045);
-      const heel = put(new THREE.BoxGeometry(0.06, 0.04, 0.06), mat('shoes'), null); heel.position.set(s * LEG_X(0.04), 0.02, -0.05);
+      // boots: shaped sole, upper and heel
+      const shoe = new THREE.Group(); shoe.position.set(s * LEG_X(0.04), 0, 0.012); suit.add(shoe);
+      const sole = new THREE.Shape(); sole.moveTo(-0.034, -0.085);
+      sole.bezierCurveTo(-0.044, -0.02, -0.046, 0.06, -0.022, 0.14); sole.quadraticCurveTo(0, 0.19, 0.022, 0.14);
+      sole.bezierCurveTo(0.046, 0.06, 0.044, -0.02, 0.034, -0.085); sole.quadraticCurveTo(0, -0.105, -0.034, -0.085);
+      const sg = new THREE.ExtrudeGeometry(sole, { depth: 0.012, bevelEnabled: true, bevelSize: 0.003, bevelThickness: 0.003, bevelSegments: 2, curveSegments: 24 });
+      sg.rotateX(Math.PI / 2); put(sg, fabric('leather', '#1a120d'), null, shoe).position.y = 0.016;
+      const up = new THREE.SphereGeometry(1, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2);
+      const upm = put(up, mat('shoes'), null, shoe); upm.scale.set(0.043, 0.07, 0.125); upm.position.set(0, 0.018, 0.03);
+      const toe = put(new THREE.SphereGeometry(1, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), mat('shoes'), null, shoe); toe.scale.set(0.03, 0.045, 0.06); toe.position.set(0, 0.018, 0.115);
+      const heel = put(new THREE.CylinderGeometry(0.026, 0.022, 0.035, 24), fabric('leather', '#1a120d'), null, shoe); heel.scale.z = 1.2; heel.position.set(0, 0.012, -0.06);
     });
     // belt shows under short jackets
     if (hem > 0.9) {
       put(rings(SEAT, 1.0, 1.035, full, 0.011, 64, 3), fabric('leather', '#1a120d'), null);
-      const buckle = put(new THREE.BoxGeometry(0.07, 0.05, 0.01), mat('metal'), null); buckle.position.set(0, 1.017, 0.128);
+      const bk = new THREE.Shape(); bk.absarc(0, 0, 1, 0, Math.PI * 2);
+      const bkg = new THREE.ExtrudeGeometry(bk, { depth: 0.2, bevelEnabled: true, bevelSize: 0.12, bevelThickness: 0.12, bevelSegments: 4, curveSegments: 32 });
+      const buckle = put(bkg, mat('metal'), null); buckle.scale.set(0.034, 0.024, 0.02); buckle.position.set(0, 1.017, 0.112);
     }
 
     // jacket body
@@ -461,6 +477,17 @@ export function createStudio(host) {
       const yb = a => { const da = Math.abs(((a - FRONT + Math.PI * 3) % (Math.PI * 2)) - Math.PI); const front = Math.max(0, 1 - Math.abs(da - 0.62) / 0.5); return 1.33 - front * 0.06 + (da > 1.6 ? -0.02 : 0); };
       put(patch(JACKET, FRONT + 0.01, FRONT + 2 * Math.PI - 0.01, a => [yb(a), 1.5], 0.003, 160, 20), mat('collar'), 'body');
     }
+    // rolled edges: the jacket has thickness where it ends
+    const edgeR = 0.0032, bodyM = mat('body');
+    if (!rib) cord(t => on(JACKET, hem + 0.002, FRONT + (half(hem) + 0.006) + t * (2 * Math.PI - 2 * (half(hem) + 0.006)), 0.001, null, FOLD.jacket), 140, bodyM, edgeR);
+    if (open) [-1, 1].forEach(s => cord(t => { const y = hem + 0.002 + (brk - hem - 0.002) * t; return on(JACKET, y, FRONT + s * (half(y) + 0.004), 0.001, null, FOLD.jacket); }, 60, bodyM, edgeR));
+    else [-1, 1].forEach(s => cord(t => on(JACKET, hem + 0.004 + (1.46 - hem) * t, FRONT + s * 0.012, 0.002, null, FOLD.jacket), 60, bodyM, edgeR));
+    // seams
+    [0, Math.PI].forEach(a => cord(t => on(JACKET, hem + 0.01 + (1.36 - hem - 0.01) * t, a, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0011));
+    [0, Math.PI].forEach(a => cord(t => on(JACKET, 1.42 + (1.49 - 1.42) * t, a + (a === 0 ? 0.08 : -0.08), 0.0012, null, FOLD.jacket), 20, seamMat, 0.0011));
+    if (style === 'blazer') cord(t => on(JACKET, hem + 0.01 + (1.46 - hem) * t, FRONT + Math.PI, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0011);
+    [-1, 1].forEach(s => { const ox = s * 0.105; cord(t => on(JACKET, hem + 0.02 + (1.33 - hem) * t, FRONT + Math.PI + s * 0.62, 0.0012, null, FOLD.jacket), 60, seamMat, 0.0009); });
+
     // closure: zipper / snaps / buttons
     if (style === 'bomber') put(patch(JACKET, FRONT - 0.012, FRONT + 0.012, () => [hem + 0.01, 1.49], 0.004, 2, 40), mat('metal'), null);
     const dots = (ys, r) => ys.forEach(y => { const p = JACKET(y); const b = put(new THREE.SphereGeometry(r, 16, 10), mat('metal'), null); b.position.set(0, y, p.cz + p.rz + 0.004); b.scale.z = 0.5; });
@@ -506,7 +533,10 @@ export function createStudio(host) {
     // sleeves
     [-1, 1].forEach(s => {
       const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; arm.scale.x = s; arm.userData.arm = true; suit.add(arm);
-      put(rings(SLEEVE, -0.6, 0.032, full, 0, 72, 120, null, FOLD.sleeve), mat('sleeves'), 'sleeves', arm);
+      put(rings(SLEEVE, -0.6, 0.022, full, 0, 72, 120, null, FOLD.sleeve), mat('sleeves'), 'sleeves', arm);
+      cord(t => on(SLEEVE, 0.012, t * Math.PI * 2, 0.0012), 64, seamMat, 0.0012, arm, true); // armhole seam
+      cord(t => on(SLEEVE, -0.6 + 0.6 * t, Math.PI * 1.15, 0.0012, null, FOLD.sleeve), 50, seamMat, 0.0009, arm); // under-sleeve seam
+      cord(t => on(SLEEVE, -0.6, t * Math.PI * 2, 0.0025), 64, mat('sleeves'), 0.0028, arm, true); // sleeve hem edge
       if (rib) put(rings(SLEEVE, -0.615, -0.55, full, 0.003, 48, 4), mats.rib, 'sleeves', arm);
       else put(rings(SLEEVE, -0.605, -0.53, full, 0.003, 48, 6), mat('cuffs'), 'sleeves', arm);
       if (d.sleeveStripes) [-0.012, 0.012].forEach(o => put(patch(SLEEVE, -0.04 + o / 0.06, 0.04 + o / 0.06 - 0.05, () => [-0.5, 0.0], 0.004, 3, 40), mat('stripes'), 'sleeves', arm));
@@ -541,7 +571,6 @@ export function createStudio(host) {
         const pts = []; for (let i = 0; i <= steps; i++) pts.push(fn(i / steps));
         put(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), steps * 2, pp.size || 0.0022, 8, false), mat('piping'), null, parent);
       };
-      const on = (prof, y, a, off, xAt, fold) => { const p = prof(y), o = off + (fold ? fold(y, a) : 0), cx = (xAt ? xAt(y) : 0) + p.cx; return new THREE.Vector3(cx + (p.rx + o) * Math.cos(a), y, p.cz + (p.rz + o) * Math.sin(a)); };
       const top = 1.495, bot = hem + (rib ? 0.055 : 0.004);
       if (pp.sides) [0, Math.PI].forEach(a => tube(t => on(JACKET, bot + (top - bot) * t, a, 0.0035, null, FOLD.jacket), 60));
       if (pp.racing) [-1, 1].forEach(side => [1, -1].forEach(face => {
