@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diseña tu traje | SYNQ Studios</title>
+<meta name="description" content="Diseña el traje de tu grupo: gamuza, terciopelo, glitter, bordado y pedrería. Mira exactamente cómo va a quedar y mándale la hoja a tu sastre.">
+<meta name="theme-color" content="#0a0606">
+<meta property="og:title" content="Diseña tu traje | SYNQ Studios">
+<meta property="og:description" content="Diseña el traje de tu grupo y mira exactamente cómo va a quedar antes de mandarlo al sastre.">
+<meta property="og:image" content="https://synqstudios815.com/images/og-share.jpg">
+<link rel="canonical" href="https://synqstudios815.com/trajes/">
+<link rel="icon" href="/images/synq-mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=Rye&family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="trajes.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/" aria-label="SYNQ Studios"><img src="/images/synq-mark.png" alt="" width="22" height="26"><span>SYNQ</span></a>
+  <h1 class="bar__title"><span data-t="title">Diseña tu traje</span></h1>
+  <div class="bar__actions">
+    <button class="btn btn--ghost" id="btnMine" type="button" data-t="mine">Mis diseños</button>
+    <button class="btn btn--ghost" id="btnSave" type="button" data-t="save">Guardar</button>
+    <button class="btn btn--ghost" id="btnShare" type="button" data-t="share">Compartir</button>
+    <button class="btn" id="btnSheet" type="button" data-t="sheet">Hoja para el sastre</button>
+    <div class="lang" role="group" aria-label="Idioma / Language"><button type="button" data-lang="es" aria-pressed="true">ES</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
+  </div>
+</header>
+
+<main class="app">
+  <section class="stage" aria-label="Vista del traje">
+    <div class="stage__views" role="tablist">
+      <button type="button" data-view="front" class="on" data-t="front">Frente</button>
+      <button type="button" data-view="back" data-t="back">Espalda</button>
+      <button type="button" data-view="both" data-t="both">Ambos</button>
+    </div>
+    <div class="stage__paper" id="paper" title="Toca para ver en grande">
+      <svg id="svgFront" class="suit" role="img" aria-label="Frente del traje"></svg>
+      <svg id="svgBack" class="suit" role="img" aria-label="Espalda del traje"></svg>
+    </div>
+    <div class="stage__foot">
+      <input class="name" id="designName" maxlength="40" aria-label="Nombre del diseño">
+      <button class="btn btn--ghost btn--sm" id="btnDownload" type="button" data-t="download">Descargar imagen</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="Opciones">
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+    <div class="panes" id="panes"></div>
+  </section>
+</main>
+
+<nav class="mobilebar" aria-label="Acciones">
+  <button type="button" data-act="btnSave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5z M8 3v6h8V3 M8 21v-7h8v7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-t="save">Guardar</span></button>
+  <button type="button" data-act="btnShare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12 M7 8l5-5 5 5 M5 13v8h14v-8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span data-t="share">Compartir</span></button>
+  <button type="button" data-act="btnDownload"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12 M7 10l5 5 5-5 M5 21h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span data-t="image">Imagen</span></button>
+  <button type="button" data-act="btnMine"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z M4 9h16 M9 9v10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span data-t="mineShort">Mis trajes</span></button>
+</nav>
+
+<dialog class="dlg dlg--zoom" id="dlgZoom">
+  <form method="dialog"><button class="zoom__close" value="close" aria-label="Cerrar">✕</button></form>
+  <div class="zoom__wrap" id="zoomWrap"></div>
+  <p class="zoom__hint" data-t="zoomHint">Pellizca para acercar.</p>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<dialog class="dlg" id="dlgMine">
+  <form method="dialog">
+    <h2 data-t="mine">Mis diseños</h2>
+    <p class="muted" data-t="mineHelp">Se guardan en este teléfono o computadora.</p>
+    <ul class="mine" id="mineList"></ul>
+    <div class="dlg__row"><button class="btn" value="close" data-t="close">Cerrar</button></div>
+  </form>
+</dialog>
+
+<!-- Printable sheet for the tailor -->
+<section class="sheet" id="sheet" aria-hidden="true"></section>
+
+<footer class="foot">
+  <span data-t="madeBy">Hecho por SYNQ Studios · estudio de grabación en Rockford, IL</span>
+  <a href="/" data-t="visit">Visita el estudio</a>
+</footer>
+
+<script src="suit.js"></script>
+<script src="app.js"></script>
+<script data-goatcounter="https://synqstudiosrkfd.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+</body>
+</html>

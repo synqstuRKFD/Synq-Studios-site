@@ -581,8 +581,17 @@ if SITE_URL:
             f'<xhtml:link rel="alternate" hreflang="en" href="{u}/"/>'
             f'<xhtml:link rel="alternate" hreflang="es" href="{u}/es.html"/></url>\n'
             for path in ("", "es.html"))
+        + f'  <url><loc>{u}/trajes/</loc></url>\n'
         + "</urlset>\n")
 (DIST / "robots.txt").write_text(robots)
+# Suit designer at /trajes/
+TRAJES = DIST / "trajes"
+TRAJES.mkdir(parents=True, exist_ok=True)
+for f in ["index.html", "trajes.css", "suit.js", "app.js"]:
+    shutil.copy2(ROOT / "trajes" / f, TRAJES / f)
+(DIST / "images").mkdir(exist_ok=True)
+shutil.copy2(ROOT / "images" / "synq-mark.png", DIST / "images" / "synq-mark.png")
+
 # Phone dashboard at /dash/ (the page code only; your numbers stay locked with your passcode)
 DASH = DIST / "dash"
 (DASH / "vendor").mkdir(parents=True, exist_ok=True)
