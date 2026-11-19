@@ -213,21 +213,21 @@ function fabricMaps(kind) {
   return TEX[kind];
 }
 const FABRICS = {
-  satin: { roughness: 0.28, metalness: 0.05, clearcoat: 0.35, clearcoatRoughness: 0.25, anisotropy: 0.6, normalScale: 0.6 },
+  satin: { roughness: 0.46, metalness: 0.02, anisotropy: 0.4, normalScale: 0.5, env: 0.55 },
   velvet: { roughness: 0.86, metalness: 0, sheen: 0.38, sheenRoughness: 0.45, normalScale: 0.32, sheenLift: 0.06, darken: 0.12, env: 0.45 },
   suede: { roughness: 0.95, metalness: 0, sheen: 0.35, sheenRoughness: 0.75, normalScale: 0.5, sheenLift: 0.1, env: 0.6 },
-  sequin: { roughness: 0.18, metalness: 0.75, clearcoat: 0.6, clearcoatRoughness: 0.1, normalScale: 1 },
-  glitter: { roughness: 0.3, metalness: 0.65, normalScale: 1 },
-  leather: { roughness: 0.45, metalness: 0, clearcoat: 0.4, clearcoatRoughness: 0.35, normalScale: 0.5, env: 0.55 },
+  sequin: { roughness: 0.26, metalness: 0.7, normalScale: 1, env: 0.75 },
+  glitter: { roughness: 0.38, metalness: 0.6, normalScale: 1, env: 0.7 },
+  leather: { roughness: 0.55, metalness: 0, normalScale: 0.5, env: 0.45 },
   wool: { roughness: 0.82, metalness: 0, sheen: 0.2, sheenRoughness: 0.8, normalScale: 0.5, sheenLift: 0.08, env: 0.7 },
   metal: { roughness: 0.22, metalness: 1 },
-  holo: { roughness: 0.16, metalness: 0.9, iridescence: 1, normalScale: 0.9, maps: 'glitter' },
+  holo: { roughness: 0.28, metalness: 0.8, iridescence: 1, normalScale: 0.9, maps: 'glitter', env: 0.75 },
   crushed: { roughness: 0.6, metalness: 0, sheen: 1, sheenRoughness: 0.3, normalScale: 0.35, sheenLift: 0.35, lift: 1.25, env: 0.6 },
-  foil: { roughness: 0.08, metalness: 1, normalScale: 1, iridescence: 0.35, env: 1.2 },
-  snake: { roughness: 0.32, metalness: 0.35, clearcoat: 0.8, clearcoatRoughness: 0.15, iridescence: 1, normalScale: 0.9, lift: 1.1 },
-  metallic: { roughness: 0.32, metalness: 0.85, clearcoat: 0.5, clearcoatRoughness: 0.2, normalScale: 0.6, maps: 'leather', lift: 1.05 },
-  quilted: { roughness: 0.5, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.3, normalScale: 1, env: 0.7 },
-  skin: { roughness: 0.35, metalness: 0, clearcoat: 0.6, clearcoatRoughness: 0.2 },
+  foil: { roughness: 0.2, metalness: 0.95, normalScale: 1, iridescence: 0.35, env: 0.85 },
+  snake: { roughness: 0.45, metalness: 0.25, iridescence: 0.8, normalScale: 0.9, lift: 1.1, env: 0.6 },
+  metallic: { roughness: 0.42, metalness: 0.8, normalScale: 0.6, maps: 'leather', lift: 1.05, env: 0.7 },
+  quilted: { roughness: 0.62, metalness: 0, normalScale: 1, env: 0.5 },
+  skin: { roughness: 0.78, metalness: 0, env: 0.5 },
 };
 function fabric(kind, hex, printTex) {
   const f = FABRICS[kind] || FABRICS.wool;
@@ -236,7 +236,7 @@ function fabric(kind, hex, printTex) {
   if (f.lift) { col.multiplyScalar(f.lift); col.r = Math.min(1, col.r); col.g = Math.min(1, col.g); col.b = Math.min(1, col.b); } // tone maps darken, so start a bit brighter
   const m = new THREE.MeshPhysicalMaterial({ color: printTex ? 0xffffff : col, roughness: f.roughness, metalness: f.metalness, side: THREE.DoubleSide });
   if (printTex) m.map = printTex;
-  if (f.env) m.envMapIntensity = f.env;
+  m.envMapIntensity = f.env != null ? f.env : 0.6; // softer room reflections overall
   if (f.clearcoat) { m.clearcoat = f.clearcoat; m.clearcoatRoughness = f.clearcoatRoughness; }
   if (f.anisotropy) m.anisotropy = f.anisotropy;
   if (f.iridescence) { m.iridescence = f.iridescence; m.iridescenceIOR = 1.75; m.iridescenceThicknessRange = [150, 900]; }
@@ -344,7 +344,7 @@ function shade(rgb, amt) { const m = rgb.match(/\d+/g).map(Number); return `rgb(
 export function createStudio(host) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.12;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   host.appendChild(renderer.domElement);
@@ -376,17 +376,34 @@ export function createStudio(host) {
   shadowDisc.rotation.x = -Math.PI / 2; shadowDisc.position.y = 0.002; scene.add(shadowDisc);
 
   // the mannequin (stays the same)
-  const skin = fabric('skin', '#efece6');
+  const skin = fabric('skin', '#cfc8bd');
   const mannequin = new THREE.Group(); scene.add(mannequin);
   const add = (g, m, parent) => { const mesh = new THREE.Mesh(g, m); mesh.castShadow = mesh.receiveShadow = true; (parent || mannequin).add(mesh); return mesh; };
   // only the head, neck and hands ever show; the suit covers the rest
   add(rings(TORSO, 1.36, 1.5, full, -0.004, 64, 12), skin);
-  add(new THREE.CylinderGeometry(0.05, 0.056, 0.14, 32), skin).position.set(0, 1.55, -0.012);
-  const head = add(new THREE.SphereGeometry(1, 48, 32), skin); head.scale.set(0.083, 0.112, 0.098); head.position.set(0, 1.695, 0.0);
+  add(new THREE.CylinderGeometry(0.046, 0.054, 0.15, 40), skin).position.set(0, 1.56, -0.01);
+  const hg = new THREE.SphereGeometry(1, 96, 64), hp = hg.attributes.position;
+  const G = (x, y, cx, cy, sx, sy) => Math.exp(-(((x - cx) / sx) ** 2) - (((y - cy) / sy) ** 2));
+  for (let i = 0; i < hp.count; i++) {
+    let x = hp.getX(i), y = hp.getY(i), z = hp.getZ(i);
+    if (y < -0.1) { const k = 1 - 0.22 * Math.min(1, (-0.1 - y) / 0.8); x *= k; if (z < 0) z *= 1 - 0.25 * Math.min(1, (-0.1 - y) / 0.8); } // narrower jaw
+    if (z < 0 && y > -0.1) z *= 1.08; // fuller back of the skull
+    if (z > 0) {
+      z += 0.16 * G(x, y, 0, -0.08, 0.1, 0.22) * z;          // nose
+      z += 0.07 * G(x, y, 0, 0.22, 0.55, 0.08) * z;          // brow
+      z -= 0.07 * (G(x, y, -0.33, 0.1, 0.17, 0.11) + G(x, y, 0.33, 0.1, 0.17, 0.11)) * z; // eye sockets
+      z += 0.08 * G(x, y, 0, -0.72, 0.3, 0.14) * z;          // chin
+      z -= 0.03 * G(x, y, 0, -0.42, 0.25, 0.06) * z;         // under the lip
+    }
+    x *= 1 + 0.06 * (G(x, y, -0.95, 0.05, 0.15, 0.2) + G(x, y, 0.95, 0.05, 0.15, 0.2)); // ears
+    hp.setXYZ(i, x, y, z);
+  }
+  hg.computeVertexNormals();
+  const head = add(hg, skin); head.scale.set(0.078, 0.105, 0.095); head.position.set(0, 1.69, 0.004);
   [-1, 1].forEach(s => {
     const arm = new THREE.Group(); arm.position.copy(SHOULDER).multiply(new THREE.Vector3(s, 1, 1)); arm.rotation.z = s * ARM_TILT; mannequin.add(arm);
     add(rings(ARM, -0.62, -0.52, full, 0, 40, 10), skin, arm);
-    const hand = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); hand.scale.set(0.024, 0.085, 0.045); hand.position.set(0, -0.68, 0.005);
+    const hand = add(new THREE.SphereGeometry(1, 32, 20), skin, arm); hand.scale.set(0.02, 0.074, 0.032); hand.position.set(0, -0.67, 0.01); hand.rotation.x = -0.12;
   });
 
   const suit = new THREE.Group(); scene.add(suit);
