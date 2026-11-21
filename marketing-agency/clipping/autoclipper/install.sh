@@ -5,7 +5,7 @@ BASE="https://raw.githubusercontent.com/synqsturkfd/synq-studios-site/claude/mag
 DIR="$HOME/SYNQ-AutoClipper"
 mkdir -p "$DIR/campaigns"
 cd "$DIR"
-for f in clipper.py clip setup_mac.sh README.md campaigns/dylan_page.json; do
+for f in clipper.py clip setup_mac.sh README.md CLAUDE.md campaigns/dylan_page.json; do
   curl -fsSL "$BASE/$f" -o "$f"
 done
 chmod +x clip setup_mac.sh
