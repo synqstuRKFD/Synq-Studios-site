@@ -1,0 +1,4 @@
+#!/bin/bash
+# Shortcut: runs clipper.py inside the project's Python environment.
+cd "$(dirname "$0")"
+exec ./.venv/bin/python clipper.py "$@"
