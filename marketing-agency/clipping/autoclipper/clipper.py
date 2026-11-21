@@ -169,7 +169,11 @@ def get_source(source, start, end, workdir):
         return str(Path(source).expanduser()), start
     need("yt-dlp")
     out = str(Path(workdir) / "src.%(ext)s")
-    run(["yt-dlp", "-f", "bv*[height<=1080]+ba/b[height<=1080]/b", "--download-sections",
+    extra = []
+    certs = os.environ.get("SSL_CERT_FILE")
+    if certs:
+        extra = ["--downloader-args", f"ffmpeg_i:-ca_file {certs}"]
+    run(["yt-dlp", *extra, "-f", "bv*[height<=1080]+ba/b[height<=1080]/b", "--download-sections",
          f"*{start}-{end}", "--force-keyframes-at-cuts", "--merge-output-format", "mp4", "-o", out, source],
         quiet=False)
     files = list(Path(workdir).glob("src.*"))
