@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SYNQ Marketing | AI Marketing for Rockford Businesses</title>
+  <meta name="description" content="Social media, Google profile, reviews and websites for Rockford, IL businesses. AI does the heavy lifting, a real person reviews everything. Month to month, from $300.">
+  <meta property="og:title" content="SYNQ Marketing | AI Marketing for Rockford Businesses">
+  <meta property="og:description" content="Consistent posts, a sharp Google profile and more customers, without hiring a full-time marketer. Month to month, from $300.">
+  <meta property="og:type" content="website">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0b0d; --bg2: #141418; --card: #1a1a20; --line: #2a2a33;
+      --ink: #f4f1ec; --muted: #a3a0a8; --accent: #ff5a1f; --accent2: #ffb020; --onaccent: #140700;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 Inter, system-ui, sans-serif; }
+    a { color: inherit; }
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3 { font-family: Anton, Impact, sans-serif; font-weight: 400; letter-spacing: .01em; line-height: 1.05; margin: 0 0 16px; text-transform: uppercase; }
+    h1 { font-size: clamp(42px, 9vw, 88px); }
+    h2 { font-size: clamp(32px, 6vw, 54px); }
+    h3 { font-size: 24px; }
+    p { margin: 0 0 14px; }
+    .muted { color: var(--muted); }
+    .grad { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+    header.top { position: sticky; top: 0; z-index: 10; background: rgba(11,11,13,.86); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+    header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 12px; }
+    .brand { font-family: Anton, sans-serif; font-size: 22px; text-decoration: none; letter-spacing: .04em; }
+    .brand span { color: var(--accent); }
+    nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 14px; margin-left: 18px; }
+    nav a:hover { color: var(--ink); }
+    .btn { display: inline-block; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: var(--onaccent); font-weight: 800; text-decoration: none; padding: 14px 24px; border-radius: 999px; border: 0; font-size: 16px; cursor: pointer; }
+    .btn--ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+    .btn--sm { padding: 9px 16px; font-size: 14px; }
+
+    section { padding: 80px 0; border-bottom: 1px solid var(--line); }
+    .hero { padding: 90px 0 80px; background: radial-gradient(800px 400px at 80% 0%, rgba(255,90,31,.18), transparent 70%); }
+    .eyebrow { display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 18px; }
+    .hero p.lead { font-size: clamp(18px, 2.4vw, 21px); max-width: 640px; color: #d8d4dc; }
+    .hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+    .hero .note { margin-top: 18px; font-size: 14px; color: var(--muted); }
+
+    .grid { display: grid; gap: 16px; }
+    .g3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .g4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 24px; }
+    .card h3 { margin-bottom: 10px; }
+    .num { font-family: Anton, sans-serif; font-size: 40px; color: var(--accent); line-height: 1; margin-bottom: 10px; }
+
+    .price { display: flex; flex-direction: column; }
+    .price .amt { font-family: Anton, sans-serif; font-size: 52px; line-height: 1; margin: 6px 0 4px; }
+    .price .amt small { font-family: Inter, sans-serif; font-size: 16px; color: var(--muted); }
+    .price ul { list-style: none; padding: 0; margin: 16px 0 22px; flex: 1; }
+    .price li { padding: 7px 0 7px 26px; position: relative; border-top: 1px solid var(--line); font-size: 15px; }
+    .price li::before { content: ""; position: absolute; left: 4px; top: 15px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+    .price--hot { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 20px 60px -30px rgba(255,90,31,.6); }
+    .tag { align-self: flex-start; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; background: var(--accent); color: var(--onaccent); padding: 4px 10px; border-radius: 999px; margin-bottom: 10px; }
+
+    .offer { background: linear-gradient(135deg, rgba(255,90,31,.16), rgba(255,176,32,.08)); border: 1px solid rgba(255,90,31,.5); border-radius: 20px; padding: 32px; display: grid; gap: 20px; grid-template-columns: 1fr auto; align-items: center; }
+    @media (max-width: 720px) { .offer { grid-template-columns: 1fr; } nav .hide-sm { display: none; } }
+
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; margin-bottom: 10px; }
+    summary { font-weight: 700; cursor: pointer; }
+    details p { margin: 12px 0 0; color: #d8d4dc; }
+
+    form { display: grid; gap: 12px; }
+    label { font-size: 14px; font-weight: 600; display: grid; gap: 6px; }
+    input, select, textarea { width: 100%; background: var(--bg2); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 13px 14px; font: inherit; }
+    input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
+    .two { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    @media (max-width: 560px) { .two { grid-template-columns: 1fr; } }
+    .contact { display: grid; gap: 40px; grid-template-columns: 1fr 1.2fr; }
+    @media (max-width: 820px) { .contact { grid-template-columns: 1fr; } }
+    .formmsg { font-weight: 600; color: var(--accent2); min-height: 1.4em; }
+
+    footer { padding: 36px 0 50px; color: var(--muted); font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a href="#" class="brand">SYNQ <span>MARKETING</span></a>
+      <nav>
+        <a href="#how" class="hide-sm">How it works</a>
+        <a href="#pricing" class="hide-sm">Pricing</a>
+        <a href="#contact" class="btn btn--sm">Free audit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Rockford, Illinois · Hablamos español</span>
+        <h1>Your business, <span class="grad">posting every week.</span> Without you doing it.</h1>
+        <p class="lead">We run your social media, Google profile and online marketing. AI does the heavy lifting so it costs a fraction of a full-time marketer, and a real person from Rockford reviews everything before it goes out.</p>
+        <div class="ctas">
+          <a href="#contact" class="btn">Get a free marketing audit</a>
+          <a href="#pricing" class="btn btn--ghost">See pricing</a>
+        </div>
+        <p class="note">Month to month. No contracts. You approve everything before it posts.</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <h2>Sound familiar?</h2>
+        <div class="grid g3">
+          <div class="card"><h3>You never have time to post</h3><p class="muted">Your last Instagram post was months ago, and customers notice when a page looks abandoned.</p></div>
+          <div class="card"><h3>Agencies cost too much</h3><p class="muted">Most marketing agencies start around $1,500 a month. That's hard to justify for a local business.</p></div>
+          <div class="card"><h3>Google is where people find you</h3><p class="muted">Customers search "near me" before they visit. An empty Google profile with unanswered reviews sends them elsewhere.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="wrap">
+        <h2>What we handle</h2>
+        <div class="grid g4">
+          <div class="card"><h3>Social posts</h3><p class="muted">Graphics, captions and short-video ideas for Instagram, Facebook and TikTok, planned a month ahead.</p></div>
+          <div class="card"><h3>Google profile</h3><p class="muted">Photos, hours, weekly updates and replies to every review, good or bad.</p></div>
+          <div class="card"><h3>Promotions</h3><p class="muted">Email and text promos for slow days, holidays and specials, written to bring people in.</p></div>
+          <div class="card"><h3>Websites &amp; ads</h3><p class="muted">A fast, mobile-friendly website and Facebook/Instagram ad campaigns when you're ready to grow.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <div class="grid g4">
+          <div class="card"><div class="num">01</div><h3>Free audit</h3><p class="muted">We look at your social pages, Google profile and website and show you what's costing you customers.</p></div>
+          <div class="card"><div class="num">02</div><h3>We plan your month</h3><p class="muted">You get a full content calendar built around your business, your specials and Rockford events.</p></div>
+          <div class="card"><div class="num">03</div><h3>You approve</h3><p class="muted">Review the posts from your phone. Change anything you don't like. Nothing goes out without your OK.</p></div>
+          <div class="card"><div class="num">04</div><h3>We post &amp; report</h3><p class="muted">We publish on schedule and send a simple monthly report: what went out and how it performed.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing">
+      <div class="wrap">
+        <h2>Simple pricing</h2>
+        <p class="muted" style="margin-bottom:28px">Month to month. Cancel any time with 30 days' notice. Ad spend, if any, is paid by you directly to Meta or Google.</p>
+        <div class="grid g3">
+          <div class="card price">
+            <h3>Starter</h3>
+            <div class="amt">$300<small>/mo</small></div>
+            <ul>
+              <li>12 posts a month (graphics + captions)</li>
+              <li>Instagram + Facebook</li>
+              <li>Profile cleanup and bio rewrite</li>
+              <li>Monthly content calendar</li>
+            </ul>
+            <a href="#contact" class="btn btn--ghost">Start with Starter</a>
+          </div>
+          <div class="card price price--hot">
+            <span class="tag">Most popular</span>
+            <h3>Growth</h3>
+            <div class="amt">$600<small>/mo</small></div>
+            <ul>
+              <li>Everything in Starter</li>
+              <li>16 posts + 4 short-video scripts</li>
+              <li>Google Business profile managed</li>
+              <li>Replies to all your reviews</li>
+              <li>1 email or text promo a month</li>
+              <li>Monthly results report</li>
+            </ul>
+            <a href="#contact" class="btn">Start with Growth</a>
+          </div>
+          <div class="card price">
+            <h3>Pro</h3>
+            <div class="amt">$1,000<small>/mo+</small></div>
+            <ul>
+              <li>Everything in Growth</li>
+              <li>Website or landing page (built + hosted)</li>
+              <li>Facebook &amp; Instagram ads managed</li>
+              <li>Weekly promos</li>
+              <li>Monthly strategy call</li>
+            </ul>
+            <a href="#contact" class="btn btn--ghost">Talk about Pro</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="wrap">
+        <div class="offer">
+          <div>
+            <span class="eyebrow">Founding clients</span>
+            <h2 style="margin-bottom:10px">First month half off</h2>
+            <p class="muted" style="margin:0">We're taking on our first Rockford clients. The first three businesses to sign up get 50% off their first month in exchange for honest feedback and, if you're happy, a review.</p>
+          </div>
+          <a href="#contact" class="btn">Claim a spot</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq">
+      <div class="wrap">
+        <h2>Questions</h2>
+        <details><summary>Is it all done by AI?</summary><p>AI drafts the content so it's fast and affordable. A person reviews every post, then you approve it before anything is published. Nothing goes out automatically without a human looking at it.</p></details>
+        <details><summary>How much of my time does it take?</summary><p>About 15 minutes a month to approve your calendar, plus sending us photos or videos when you have them. We can also stop by to take photos.</p></details>
+        <details><summary>Is there a contract?</summary><p>No long-term contract. It's month to month, and you can cancel with 30 days' notice.</p></details>
+        <details><summary>Do you guarantee more sales?</summary><p>No honest marketer can guarantee sales. What we guarantee is consistent, professional marketing every month and a clear report so you can see what's working.</p></details>
+        <details><summary>¿Atienden en español?</summary><p>Sí. Podemos hacer tus publicaciones en español, inglés o los dos.</p></details>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="wrap contact">
+        <div>
+          <h2>Get your free marketing audit</h2>
+          <p class="muted">Tell us about your business. Within two business days we'll send you a short review of your social pages, Google profile and website, with the three changes we'd make first. No obligation.</p>
+        </div>
+        <form id="lead" method="POST" action="https://api.web3forms.com/submit">
+          <input type="hidden" name="access_key" value="27ca1c93-1469-46f4-a1f9-621038316430">
+          <input type="hidden" name="subject" value="New SYNQ Marketing lead">
+          <input type="hidden" name="from_name" value="SYNQ Marketing website">
+          <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
+          <div class="two">
+            <label>Your name<input name="name" required autocomplete="name"></label>
+            <label>Business name<input name="business" required></label>
+          </div>
+          <div class="two">
+            <label>Phone<input name="phone" type="tel" autocomplete="tel"></label>
+            <label>Email<input name="email" type="email" required autocomplete="email"></label>
+          </div>
+          <label>Instagram, Facebook or website (optional)<input name="links" placeholder="@yourbusiness"></label>
+          <label>What do you need most?
+            <select name="need">
+              <option>Regular social media posts</option>
+              <option>Google profile and reviews</option>
+              <option>A website</option>
+              <option>Ads to get more customers</option>
+              <option>Not sure yet</option>
+            </select>
+          </label>
+          <button class="btn" type="submit">Send me my free audit</button>
+          <p class="formmsg" id="formmsg" role="status"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">SYNQ Marketing · Rockford, IL · A SYNQ Studios company</div>
+  </footer>
+
+  <script>
+    document.getElementById('lead').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var msg = document.getElementById('formmsg');
+      if (!this.checkValidity()) { this.reportValidity(); return; }
+      msg.textContent = 'Sending…';
+      try {
+        var res = await fetch(this.action, { method: 'POST', headers: { Accept: 'application/json' }, body: new FormData(this) });
+        var data = await res.json();
+        if (data.success) { this.reset(); msg.textContent = 'Got it! We’ll send your audit within two business days.'; }
+        else { msg.textContent = 'Something went wrong. Please try again.'; }
+      } catch (err) { msg.textContent = 'Could not send. Check your connection and try again.'; }
+    });
+  </script>
+</body>
+</html>
