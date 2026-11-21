@@ -18,7 +18,7 @@ All free: yt-dlp (download), Whisper (captions), ffmpeg (editing). You still rev
    ```
    ./setup_mac.sh
    ```
-   It installs Homebrew (asks for your Mac password), ffmpeg, yt-dlp, deno, Python and Whisper.
+   It downloads ffmpeg, yt-dlp, deno, Python and Whisper **into this folder only**. No admin password needed.
 
 ## 2. Find the best moments in a stream
 
