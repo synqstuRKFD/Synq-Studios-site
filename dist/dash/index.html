@@ -429,6 +429,12 @@ function render() {
   } else html += '<p class="empty">' + (Y && Y.missing ? 'Add YOUTUBE_API_KEY to your .env file.' : esc(Y && Y.error)) + '</p>';
   html += '<div style="display:flex;gap:8px;flex-wrap:wrap">' + ext('https://studio.youtube.com', 'YouTube Studio ↗') + ext('https://www.youtube.com/@SynqStudios', 'Channel ↗') + '</div></div></div>';
 
+  // ---------- Clip queue (SYNQ AutoClipper)
+  const CQ = D.clips || {}, cqc = CQ.counts || {}, cqUrl = CQ.page || 'https://claude.ai/artifact/5UJG6KWUedGpVqZJq6MyZ6';
+  html += '<div class="panel social" style="margin-top:12px"><div class="social__head"><div class="social__icon" style="background:var(--accent)">▶</div><div><b>GTA clip queue</b><small>@gta6.moments.dailyclips · YouTube + TikTok</small></div></div>' +
+    (CQ.ok ? '<div class="social__nums"><div><b>' + n(cqc.pending || 0) + '</b><small>To review</small></div><div><b>' + n(cqc.due || 0) + '</b><small>Post now</small></div><div><b>' + n(cqc.posted || 0) + '</b><small>Posted</small></div></div>' : '') +
+    '<p class="empty">Watch clips, tap Post it or Skip, ask for more, and chat with Claude.</p>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap">' + ext(cqUrl, 'Review clips ↗') + '</div></div>';
   html += '<div class="g3">' +
     '<div class="panel social"><div class="social__head"><div class="social__icon" style="background:linear-gradient(45deg,#f9a13a,#e1306c,#833ab4)">IG</div><div><b>@synq.studios</b><small>Instagram</small></div></div><p class="empty">Instagram doesn’t share numbers with outside apps. Check Insights in the Instagram app.</p>' + ext('https://www.instagram.com/synq.studios/', 'Open Instagram ↗') + '</div>' +
     '<div class="panel social"><div class="ep"><img src="https://synqstudios815.com/images/los-serenos-ep.jpg" alt="Los Serenos EP cover"><div><b>Desde SYNQ Studios</b><br><small class="empty">Los Serenos · Live EP · 6 songs</small></div></div>' + ext('https://music.apple.com/us/album/desde-synq-studios-rockford-illinois-live-ep/6819910931', 'Apple Music ↗') + '</div>' +
@@ -449,7 +455,7 @@ function render() {
   html += '<div class="panel"><h3>Clients</h3><div class="tile" style="padding:0"><div class="num">' + (st.clients != null ? n(st.clients) : '—') + '</div><div class="sub">people saved in your Square customer list</div></div></div>';
   html += '</div></div>';
   html += '<div class="panel" style="margin-top:12px"><h3>Quick links</h3><div class="quick">' +
-    ext('https://squareup.com/appointments/book/L6PTGPVMKXW8A', 'Your booking page ↗') + ext('https://squareup.com/dashboard', 'Square dashboard ↗') +
+    ext('https://claude.ai/artifact/5UJG6KWUedGpVqZJq6MyZ6', 'Review clips ↗') + ext('https://squareup.com/appointments/book/L6PTGPVMKXW8A', 'Your booking page ↗') + ext('https://squareup.com/dashboard', 'Square dashboard ↗') +
     ext('https://squareup.com/appointments/calendar', 'Appointments ↗') + ext('https://synqstudiosrkfd.goatcounter.com', 'Website stats ↗') +
     ext('https://studio.youtube.com', 'YouTube Studio ↗') + ext('https://www.tiktok.com/tiktokstudio', 'TikTok Studio ↗') +
     ext('https://www.instagram.com/synq.studios/', 'Instagram ↗') + ext('https://www.google.com/maps/search/?api=1&query=4040+Charles+St%2C+Rockford%2C+IL+61108', 'Google Maps ↗') +

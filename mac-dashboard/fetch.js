@@ -447,6 +447,18 @@ function test() {
   return out.join('\n');
 }
 
+// ---------- SYNQ AutoClipper: clip queue counts (local folders only, nothing secret) ----------
+function clipQueue() {
+  return safe('clips', () => {
+    const base = sh('echo "$HOME/SYNQ-AutoClipper/queue"').trim();
+    const counts = {};
+    ['pending', 'approved', 'due', 'posted', 'rejected'].forEach(st => {
+      counts[st] = Number(sh('ls ' + q(base + '/' + st) + ' 2>/dev/null | grep -c "\\.json$" || true').trim() || 0);
+    });
+    return { counts, page: 'https://claude.ai/artifact/5UJG6KWUedGpVqZJq6MyZ6' };
+  });
+}
+
 // ---------- main ----------
 function run(argv) {
   if ((argv || []).indexOf('--test') !== -1) return test();
@@ -457,6 +469,7 @@ function run(argv) {
     site: goat(),
     youtube: youtube(dir + '/youtube-history.json'),
     tiktok: tiktok(dir + '/tiktok-history.json'),
+    clips: clipQueue(),
   };
   data.phone = phone(data, dir);
   writeFile(dir + '/data.js', 'window.SYNQ = ' + JSON.stringify(data) + ';\n');
