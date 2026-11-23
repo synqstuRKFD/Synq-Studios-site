@@ -1,0 +1,11 @@
+#!/bin/bash
+# Shortcut: runs clipper.py with the tools installed by setup_mac.sh (no admin needed).
+cd "$(dirname "$0")"
+export PATH="$(pwd)/bin:$(pwd)/.venv/bin:$PATH"
+if [ ! -x .venv/bin/python ]; then
+  echo "✖ Not set up yet. Run ./setup_mac.sh first."; exit 1
+fi
+# Trusted-certificate list for the bundled ffmpeg (fixes "certificate verify failed").
+CERTS="$(./.venv/bin/python -c 'import certifi; print(certifi.where())' 2>/dev/null)"
+[ -n "$CERTS" ] && export SSL_CERT_FILE="$CERTS"
+exec ./.venv/bin/python clipper.py "$@"
