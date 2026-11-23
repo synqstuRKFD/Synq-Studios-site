@@ -16,12 +16,12 @@ Accounts: YouTube + TikTok `@gta6.moments.dailyclips` (both linked to Content Re
 ## Your workflow
 1. Run `find` on the newest approved stream. Read the moments file.
 2. Pick the best 3–6 moments yourself: tighten start/end to 15–45 s, start on the first strong line. For each kept row fill in:
-   - `hook`: 4–8 words on screen for the first 3 s, no emojis, creates curiosity ("Dylan pulled off the craziest escape").
+   - `hook`: 4–8 words on screen for the first 3 s, no emojis, creates curiosity ("He escaped a 5-star chase with no car").
    - `title`: YouTube Shorts title, under 70 characters, specific and true to the clip (#shorts is added automatically).
    - `caption`: 1–2 lively sentences that set up the moment without spoiling the payoff; 1–2 emojis OK. Never misleading.
-   - `hashtags`: 1–3 extra tags specific to the moment (e.g. `["#GTA6Online", "#police"]`); #DylanPage and the campaign pool are added automatically (max 6 total).
+   - `hashtags`: 1–3 extra tags specific to the moment (e.g. `["#GTA6Online", "#police"]`); the campaign's required tags and hashtag pool are added automatically (max 6 total).
    Set keep=false on the rest.
-3. Run `batch`. Check each clip yourself: extract 3 frames (`ffmpeg -ss T -i clip.mp4 -frames:v 1 f.png`) and confirm Dylan is the focus and captions are readable. Drop any that fail.
+3. Run `batch`. Check each clip yourself: extract 3 frames (`ffmpeg -ss T -i clip.mp4 -frames:v 1 f.png`) and confirm the clip meets the campaign's focus rule, the GTA action is clear and captions are readable. Drop any that fail.
 4. Post the clips with the "Posting" steps below. The owner approves each action from their phone; never work around a denied permission.
 
 ## Posting (Claude in Chrome, the owner's signed-in Chrome)
@@ -32,11 +32,20 @@ For each clip, in order:
    Title and description from `<name>.txt` (YOUTUBE section). Audience: "No, it's not made for kids". Upload thumbnail `<name>.jpg` if the page offers it.
    Visibility: Public → Publish. Copy the Shorts link (`https://youtube.com/shorts/<id>`).
 2. **TikTok** (account @gta6.moments.dailyclips) — open https://www.tiktok.com/tiktokstudio/upload → choose the .mp4 → caption from the TIKTOK section → cover from the .jpg if offered → Post. Copy the video link from the profile.
-3. **Content Rewards** — within 30 minutes of posting: open the Dylan Page campaign → Submit clip → paste each platform's link (one submission per link if required) → submit.
+3. **Content Rewards** — within 30 minutes of posting: open the current campaign → Submit clip → paste each platform's link (one submission per link if required) → submit.
 4. Append to `output/posted.json`: `{"clip": "<name>", "youtube": "<url>", "tiktok": "<url>", "submitted": true, "time": "<ISO time>"}`.
 Rules: stop and tell the owner if a site asks for a login, password, 2-step code or CAPTCHA, shows a warning or strike, or the campaign looks closed/full. Never type passwords. Never change account settings. Never post anything the owner hasn't had a chance to approve. If a step's button looks different from these notes, describe what you see instead of guessing.
 
-## Current campaign: Dylan Page GTA VI Marathon (ends when the marathon ends, around Nov 23, 2026)
+## Page focus: GTA ONLY
+The accounts are a GTA 6 page. Only clip campaigns where **the GTA game itself is the star** (gameplay, chases, heists, glitches, map secrets, funny NPCs). A streamer may be on screen, but skip campaigns whose rules require a person to be the main focus, and skip non-GTA content even if it pays well. Tell the owner about those instead.
+
+## Choosing and adding a campaign
+1. In Content Rewards (Chrome), list open campaigns. Keep only GTA-focused ones that are still open, with budget left and a payout per 1K views.
+2. For the one the owner picks, copy `campaigns/_template_gta.json` to `campaigns/<short_name>.json` and fill it from the campaign brief: exact name, required hashtags, rules in `checklist`, any banned topics in `skip_words`, streamer name in `focus_names` only if the brief requires them.
+3. Write the brief's rules into a "Current campaign" section of this file (replace the old one) with the approved source videos and allowed footage dates.
+4. Run every command with `--campaign <short_name>`.
+
+## Past campaign (ENDED around Nov 23, 2026, do not post): Dylan Page GTA VI Marathon
 Rules (from the brief):
 - Footage from the marathon starting **Nov 19, 2026** only (skip the Nov 18 "Day 1" stream).
 - 9:16 vertical. **Dylan must be the main focus the whole clip.**
