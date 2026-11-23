@@ -21,8 +21,20 @@ Accounts: YouTube + TikTok `@gta6.moments.dailyclips` (both linked to Content Re
    - `caption`: 1–2 lively sentences that set up the moment without spoiling the payoff; 1–2 emojis OK. Never misleading.
    - `hashtags`: 1–3 extra tags specific to the moment (e.g. `["#GTA6Online", "#police"]`); #DylanPage and the campaign pool are added automatically (max 6 total).
    Set keep=false on the rest.
-3. Run `batch`, then `open output` and tell the owner which clips are ready.
-4. The OWNER watches every clip, posts it, and submits the link in Content Rewards within 30 minutes. Never post or submit yourself.
+3. Run `batch`. Check each clip yourself: extract 3 frames (`ffmpeg -ss T -i clip.mp4 -frames:v 1 f.png`) and confirm Dylan is the focus and captions are readable. Drop any that fail.
+4. Post the clips with the "Posting" steps below. The owner approves each action from their phone; never work around a denied permission.
+
+## Posting (Claude in Chrome, the owner's signed-in Chrome)
+Daily target: up to the number the owner asks for (goal 10/day). Ramp a new account: 3–5/day the first week. Space posts at least 30–60 min apart, never all at once.
+Before posting, read `output/posted.json` (create it as `[]` if missing) and skip any clip already listed.
+For each clip, in order:
+1. **YouTube** — open https://studio.youtube.com → Create → Upload videos → choose `output/<name>.mp4`.
+   Title and description from `<name>.txt` (YOUTUBE section). Audience: "No, it's not made for kids". Upload thumbnail `<name>.jpg` if the page offers it.
+   Visibility: Public → Publish. Copy the Shorts link (`https://youtube.com/shorts/<id>`).
+2. **TikTok** (account @gta6.moments.dailyclips) — open https://www.tiktok.com/tiktokstudio/upload → choose the .mp4 → caption from the TIKTOK section → cover from the .jpg if offered → Post. Copy the video link from the profile.
+3. **Content Rewards** — within 30 minutes of posting: open the Dylan Page campaign → Submit clip → paste each platform's link (one submission per link if required) → submit.
+4. Append to `output/posted.json`: `{"clip": "<name>", "youtube": "<url>", "tiktok": "<url>", "submitted": true, "time": "<ISO time>"}`.
+Rules: stop and tell the owner if a site asks for a login, password, 2-step code or CAPTCHA, shows a warning or strike, or the campaign looks closed/full. Never type passwords. Never change account settings. Never post anything the owner hasn't had a chance to approve. If a step's button looks different from these notes, describe what you see instead of guessing.
 
 ## Current campaign: Dylan Page GTA VI Marathon (ends when the marathon ends, around Nov 23, 2026)
 Rules (from the brief):
